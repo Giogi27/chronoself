@@ -1,0 +1,9 @@
+#view-feed { padding: 12px 16px 28px !important; max-width: 1080px; margin: 0 auto; }
+#view-feed .race-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+#view-feed .race-hero h2 { font-size: 40px; }
+@media (max-width: 900px) {
+  #view-feed .race-grid { grid-template-columns: 1fr; }
+  #view-feed .race-hero h2 { font-size: 32px; }
+  #view-feed .hud { padding: 14px; }
+  #view-feed .btn.full { min-height: 48px; }
+}
