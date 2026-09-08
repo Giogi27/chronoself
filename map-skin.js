@@ -49,7 +49,12 @@ function restyleMap(target) {
   }
   ensureGps();
   ensureNight();
-  if (typeof addCityLabels === "function") addCityLabels(target);
+  if (target._labels && target._labels.length && document.querySelector(".map-lab[data-key]")) {
+    if (typeof refreshLabelText === "function") refreshLabelText();
+  } else {
+    target._labels = null;
+    if (typeof addCityLabels === "function") addCityLabels(target);
+  }
   if (!target._gps) {
     target._gps = true;
     target.on("mousemove", function (e) {
@@ -71,10 +76,10 @@ window.addTiles = function (target) {
   const prev = window.initMap;
   window.initMap = function () {
     if (typeof prev === "function") prev();
-    if (window.map) {
+    if (typeof map !== "undefined" && map) {
       restyleMap(map);
       setTimeout(function () { map.invalidateSize(); }, 120);
     }
   };
-  if (window.map) restyleMap(map);
+  if (typeof map !== "undefined" && map) restyleMap(map);
 })();
