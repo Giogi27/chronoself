@@ -53,36 +53,51 @@
     ja: ["店", "ビーチ", "街", "ミッション", "Easter egg"]
   };
   const VALUES = ["Locale", "Spiaggia", "Quartiere", "Missione", "Easter egg"];
+  let qi2 = 0, score2 = [0, 0, 0, 0];
 
-  function paintExtras(lang) {
-    lang = Q[lang] ? lang : "it";
-    if (window.questions) {
-      window.questions.length = 0;
-      Q[lang].forEach(function (x) { window.questions.push(x); });
-      if (typeof window.qi === "number") window.qi = 0;
-      if (typeof renderQuiz === "function") renderQuiz();
+  window.answerLang = function (i) {
+    score2[i]++;
+    qi2++;
+    drawQuiz();
+  };
+
+  function drawQuiz() {
+    const box = document.getElementById("quizBox");
+    if (!box) return;
+    const lang = localStorage.getItem("p72_lang") || "it";
+    const list = Q[lang] || Q.it;
+    if (qi2 >= list.length) {
+      box.innerHTML = '<div class="result"><h3>PRIME 72</h3><button class="btn primary" type="button" onclick="goConsoleOrPro()">Pro</button></div>';
+      return;
     }
+    const cur = list[qi2];
+    box.innerHTML = '<div class="quiz-q"><h3>' + (qi2 + 1) + ". " + cur.q +
+      '</h3><div class="opts">' +
+      cur.a.map(function (opt, i) {
+        return '<button type="button" onclick="answerLang(' + i + ')">' + opt + "</button>";
+      }).join("") + "</div></div>";
+  }
+
+  function paint(lang) {
+    lang = Q[lang] ? lang : "it";
+    qi2 = 0;
+    score2 = [0, 0, 0, 0];
+    drawQuiz();
     const sel = document.getElementById("pinType");
     if (sel) {
       const cur = sel.value;
       sel.innerHTML = TYPES[lang].map(function (label, i) {
-        return "<option value=\"" + VALUES[i] + "\">" + label + "</option>";
+        return '<option value="' + VALUES[i] + '">' + label + "</option>";
       }).join("");
-      sel.value = VALUES.indexOf(cur) >= 0 ? cur : VALUES[0];
-    }
-    const count = document.getElementById("radarCount");
-    if (count && /SEGNAL/i.test(count.textContent)) {
-      const n = count.textContent.replace(/\D/g, "") || "0";
-      const word = { it: "SEGNALI", en: "SIGNALS", es: "SEÑALES", fr: "SIGNAUX", de: "SIGNALE", pt: "SINAIS", ja: "シグナル" }[lang] || "SIGNALS";
-      count.textContent = n + " " + word;
+      if (VALUES.indexOf(cur) >= 0) sel.value = cur;
     }
   }
 
   const prev = window.setLang;
   window.setLang = function (lang) {
     if (typeof prev === "function") prev(lang);
-    paintExtras(lang || localStorage.getItem("p72_lang") || "it");
+    paint(lang || localStorage.getItem("p72_lang") || "it");
   };
-  paintExtras(localStorage.getItem("p72_lang") || "it");
-  setTimeout(function () { paintExtras(localStorage.getItem("p72_lang") || "it"); }, 120);
+  paint(localStorage.getItem("p72_lang") || "it");
+  setTimeout(function () { paint(localStorage.getItem("p72_lang") || "it"); }, 150);
 })();
