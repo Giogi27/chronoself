@@ -32,11 +32,14 @@ async function csPull() {
   if (data && data.payload) {
     const payload = csGrant(data.payload);
     localStorage.setItem(CS_KEY, JSON.stringify(payload));
+    if (typeof CS.applyPayload === "function") CS.applyPayload(payload);
     CS.status = "Dati scaricati dal cloud.";
   } else if (CS.isFounder()) {
-    const payload = csGrant({});
-    try { Object.assign(payload, JSON.parse(localStorage.getItem(CS_KEY) || "{}")); } catch (e) {}
-    localStorage.setItem(CS_KEY, JSON.stringify(csGrant(payload)));
+    let payload = {};
+    try { payload = JSON.parse(localStorage.getItem(CS_KEY) || "{}"); } catch (e) {}
+    payload = csGrant(payload);
+    localStorage.setItem(CS_KEY, JSON.stringify(payload));
+    if (typeof CS.applyPayload === "function") CS.applyPayload(payload);
     CS.status = "Piano 90 attivo.";
   }
 }
@@ -59,7 +62,7 @@ window.CS.renderAccount = function () {
   app.innerHTML = `<main class="step">
     <p class="meta">Account</p>
     <h1 class="q">${CS.user ? "Il tuo account." : "Entra per salvare i tuoi dati."}</h1>
-    <p class="lede">${CS.user ? mail : "Email e password. Ti arriva una mail di conferma, poi torni qui."}</p>
+    <p class="lede">${CS.user ? mail + ". Uscendo, questo dispositivo torna alla home. I tuoi dati restano nell'account." : "Email e password. Ti arriva una mail di conferma, poi torni qui."}</p>
     ${CS.user ? "" : `<label class="field">Email<input id="csEmail" type="email" /></label>
     <label class="field">Password (min 6)<input id="csPass" type="password" /></label>`}
     <p class="meta" id="csMsg">${CS.status || ""}</p>
@@ -77,7 +80,12 @@ window.CS.renderAccount = function () {
       const password = document.getElementById("csPass").value;
       const { error } = await CS.sb.auth.signInWithPassword({ email, password });
       if (error) return set(error.message);
-      await csRefresh(); await csPull(); location.href = CS_SITE + "/";
+      await csRefresh(); await csPull();
+      try {
+        const p = JSON.parse(localStorage.getItem(CS_KEY) || "{}");
+        sessionStorage.setItem("cs.land", p.pro ? "oggi" : p.sim ? "futuri" : "home");
+      } catch (e) { sessionStorage.setItem("cs.land", "home"); }
+      location.href = CS_SITE + "/";
     };
     document.getElementById("csUp").onclick = async () => {
       const email = document.getElementById("csEmail").value.trim();
@@ -93,7 +101,13 @@ window.CS.renderAccount = function () {
   } else {
     document.getElementById("csPush").onclick = async () => { await csPush(); set(CS.status); };
     document.getElementById("csPull").onclick = async () => { await csPull(); set(CS.status); location.reload(); };
-    document.getElementById("csOut").onclick = async () => { await CS.sb.auth.signOut(); location.reload(); };
+    document.getElementById("csOut").onclick = async () => {
+      try { await CS.sb.auth.signOut(); } catch (e) {}
+      CS.user = null;
+      try { localStorage.removeItem(CS_KEY); } catch (e) {}
+      try { sessionStorage.removeItem("cs.clock"); sessionStorage.removeItem("cs.land"); } catch (e) {}
+      location.href = CS_SITE + "/";
+    };
   }
 };
 
@@ -101,6 +115,14 @@ window.CS.renderAccount = function () {
   await csRefresh();
   if (CS.user) await csPull();
   if (typeof CS.applyFounder === "function") CS.applyFounder();
+  const land = sessionStorage.getItem("cs.land");
+  if (land) {
+    sessionStorage.removeItem("cs.land");
+    if (typeof go === "function") go(land);
+    else if (typeof render === "function") render();
+  } else if (CS.user && typeof render === "function") {
+    render();
+  }
   if (location.hash && location.hash.includes("access_token")) {
     CS.status = "Email confermata. Ora puoi accedere.";
     history.replaceState(null, "", location.pathname);

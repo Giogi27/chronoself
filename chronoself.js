@@ -175,11 +175,17 @@ function cal90(day,id,play,playId){
 }
 function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
 window.CS=window.CS||{};
+window.CS.applyPayload=function(p){
+  if(!p||typeof p!=="object") return;
+  ["profile","answers","sim","history","checks","journal","habits","habitLog","pro","planStart","quizI"].forEach(function(k){
+    if(k in p) db[k]=p[k];
+  });
+};
 window.CS.applyFounder=function(){
   if(!(window.CS.isFounder&&CS.isFounder())) return;
   const was=!!db.pro;
   unlockPro();
-  if(!was) render();
+  if(!was && typeof render==="function") render();
 };
 async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview){unlockPro(); go("oggi"); return;} alert(data.error||"Pagamento non disponibile.");}catch(e){alert("Pagamento non disponibile. Riprova.");}}
 function splitStory(t){
@@ -289,11 +295,14 @@ const app=document.getElementById("app");
 function chrome(){
   const nav=document.getElementById("nav");
   const dock=document.getElementById("dock");
+  const logged=!!(window.CS&&CS.user);
   const links=db.pro?[["oggi","Oggi"],["futuri","Futuri"]]:(db.sim?[["futuri","I tuoi futuri"]]:[["profilo","Simula"]]);
   const extra=db.pro?[]:[["prezzi","Piano 90"]];
-  const right=db.pro?`<button class="ghost" data-go="account">Account</button>`:`<button class="ghost" data-go="account">Accedi</button>${db.sim?"":`<button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`}`;
+  const right=logged
+    ?`<button class="ghost" data-go="account">Account</button>`
+    :`<button class="ghost" data-go="account">Accedi</button>${db.pro||db.sim?"":`<button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`}`;
   nav.innerHTML=`<button class="brand" data-go="home">${MARK} Chrono<em>Self</em></button><div class="navlinks">${[...links,...extra].map(([v,l])=>`<button class="ghost ${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("")}</div><div>${right}</div>`;
-  const dockItems=db.pro?[["oggi","Oggi"],["futuri","Futuri"],["account","Account"]]:[["home","Home"],[db.sim?"futuri":"profilo",db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
+  const dockItems=db.pro?[["oggi","Oggi"],["futuri","Futuri"],["account",logged?"Account":"Accedi"]]:[["home","Home"],[db.sim?"futuri":"profilo",db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
   dock.innerHTML=dockItems.map(([v,l])=>`<button class="${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("");
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   document.querySelector("footer").style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
