@@ -68,7 +68,7 @@ function chrome(){
   dock.style.display=state.view==="simula"?"none":"";
 }
 function go(v){
-  if(window.__csClock && v!=="home"){ clearInterval(window.__csClock); window.__csClock=null; }
+  if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
   if(v==="piano"||v==="diario"||v==="habits"){ v=db.pro?"oggi":"prezzi"; }
   if((v==="futuri"||v==="oggi") && !db.sim){ v="profilo"; }
@@ -76,6 +76,62 @@ function go(v){
 }
 function paywall(title,lede,leverText){
   return `<main class="step"><p class="meta">Piano 90</p><h1 class="q" style="font-size:40px">${title}</h1><p class="lede">${lede}</p>${leverText?`<p class="lock">${esc(leverText)}</p>`:""}<p class="lede">4,99 € al mese. Abitudini, diario, calendario a 90 giorni e i futuri a 5 e 10 anni.</p><div class="row"><button class="cta" id="pay">Attiva Piano 90</button><button class="btn" data-go="prezzi">Vedi i piani</button></div></main>`;
+}
+function clockPhase(h){ if(h<5) return "notte"; if(h<8) return "alba"; if(h<12) return "mattina"; if(h<17) return "pomeriggio"; if(h<21) return "sera"; return "notte"; }
+function polar(deg,r){ const a=(deg-90)*Math.PI/180; return [Math.round((160+Math.cos(a)*r)*10)/10, Math.round((160+Math.sin(a)*r)*10)/10]; }
+function clockTicks(n,r1,r2,w,op){
+  return Array.from({length:n},(_,i)=>{
+    const [x1,y1]=polar(i*(360/n),r1); const [x2,y2]=polar(i*(360/n),r2);
+    const major=n===60?i%5===0:n===24?i%6===0:true;
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="${major?w*1.35:w}" stroke-opacity="${major?op:op*0.4}"/>`;
+  }).join("");
+}
+function clockFace(){
+  return `<svg class="orbit-svg" id="orbit" viewBox="0 0 320 320" aria-hidden="true">
+    <circle cx="160" cy="160" r="152" fill="none" stroke="currentColor" stroke-opacity=".32" stroke-width="1"/>
+    <circle cx="160" cy="160" r="114" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width="1"/>
+    ${clockTicks(24,146,152,1.15,.55)}
+    ${clockTicks(12,100,114,1.7,.62)}
+    ${clockTicks(60,110,114,.75,.38)}
+    <circle id="dayFill" cx="160" cy="160" r="152" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-opacity=".5" transform="rotate(-90 160 160)"/>
+    <g id="sun"><circle cx="160" cy="8" r="5.6" fill="currentColor"/><circle cx="160" cy="8" r="10" fill="currentColor" opacity=".16"/></g>
+    <g id="hour"><line x1="160" y1="172" x2="160" y2="98" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></g>
+    <g id="minute"><line x1="160" y1="178" x2="160" y2="56" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="second">
+      <line x1="160" y1="188" x2="160" y2="40" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-opacity=".82"/>
+      <circle cx="160" cy="36" r="4.6" fill="currentColor"/>
+    </g>
+    <circle cx="160" cy="160" r="5.2" fill="currentColor"/>
+    <circle cx="160" cy="160" r="2.1" fill="#f3eee4"/>
+  </svg>
+  <div class="clock-chip" id="clock"><span class="time" id="clockTime"></span><span class="sub" id="clockSub"></span></div>`;
+}
+function startClock(){
+  if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const circ=2*Math.PI*152;
+  function frame(){
+    const now=new Date();
+    const ms=reduce?0:now.getMilliseconds();
+    const sec=now.getSeconds()+ms/1000;
+    const min=now.getMinutes()+sec/60;
+    const hr=(now.getHours()%12)+min/60;
+    const day=(now.getHours()*3600+now.getMinutes()*60+sec)/86400;
+    const h=document.getElementById("hour");
+    if(!h){ window.__csClock=null; return; }
+    h.setAttribute("transform",`rotate(${hr*30} 160 160)`);
+    document.getElementById("minute").setAttribute("transform",`rotate(${min*6} 160 160)`);
+    document.getElementById("second").setAttribute("transform",`rotate(${sec*6} 160 160)`);
+    document.getElementById("sun").setAttribute("transform",`rotate(${day*360} 160 160)`);
+    const fill=document.getElementById("dayFill");
+    if(fill) fill.setAttribute("stroke-dasharray",`${(day*circ).toFixed(1)} ${circ.toFixed(1)}`);
+    const t=document.getElementById("clockTime");
+    const sub=document.getElementById("clockSub");
+    if(t) t.textContent=now.toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    if(sub) sub.textContent=clockPhase(now.getHours())+" · ora locale";
+    window.__csClock=requestAnimationFrame(frame);
+  }
+  frame();
 }
 function render(){
   chrome();
@@ -93,13 +149,7 @@ function render(){
       </div>
       <div class="hero-photo">
         <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
-        <svg class="orbit-svg" id="orbit" viewBox="0 0 320 320" aria-hidden="true">
-          <circle cx="160" cy="160" r="142" fill="none" stroke="currentColor" stroke-opacity=".35"/>
-          <circle cx="160" cy="160" r="118" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-dasharray="3 9"/>
-          ${Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;const r=n=>Math.round(n*10)/10; const x1=r(160+Math.cos(a)*132),y1=r(160+Math.sin(a)*132),x2=r(160+Math.cos(a)*142),y2=r(160+Math.sin(a)*142); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-opacity=".45"/>`;}).join("")}
-          <g id="sun"><circle cx="160" cy="18" r="6" fill="currentColor"/></g>
-        </svg>
-        <div class="clock-chip" id="clock"></div>
+        ${clockFace()}
       </div>
     </section>
     <div class="bleed marquee"><div class="marquee-track">${marquee}${marquee}</div></div>
@@ -138,18 +188,7 @@ function render(){
     document.getElementById("start").onclick=goStart;
     document.getElementById("start2").onclick=goStart;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-    function tick(){
-      const now=new Date();
-      const s=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
-      const ang=Math.round((s/86400)*3600)/10;
-      const sun=document.getElementById("sun");
-      const chip=document.getElementById("clock");
-      if(sun) sun.setAttribute("transform",`rotate(${ang} 160 160)`);
-      if(chip) chip.textContent=now.toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})+" · ora locale";
-    }
-    tick();
-    if(window.__csClock) clearInterval(window.__csClock);
-    window.__csClock=setInterval(tick,1000);
+    startClock();
     return;
   }
   if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy</p><h1 class="q" style="font-size:40px">I dati restano tuoi.</h1><p class="lede">Simulazione, diario e abitudini stanno nel browser. I pagamenti passano da Stripe. Non è terapia.</p></main>`; return; }
