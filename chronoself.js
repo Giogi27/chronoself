@@ -3,24 +3,24 @@ function Q(id,axis,text,choices,hint){
   return {id,axis,text,hint,choices,min:choices[0],max:choices[4]};
 }
 const QUESTIONS=[
-  Q("sonno","salute","Quante ore dormi, in media, a notte?",["Meno di 5, e spezzate","5 o 6, spesso corte","A volte 7, a volte no","Quasi sempre 7","7-9 ore, stabili"]),
-  Q("movimento","salute","Quanti giorni a settimana ti muovi almeno mezz'ora?",["Mai","Uno, se va bene","Due o tre","Quattro","Cinque o più, di rito"]),
-  Q("energia","salute","Nelle giornate normali, l'energia com'è?",["Sempre stanco","Spesso giù","A giorni","Più su che giù","Stabile, buona"]),
-  Q("cibo","salute","I pasti: li decidi tu, o capitano?",["Quello che capita, in piedi","Qualche pasto vero, molti no","A metà","Spesso un pasto vero","Quasi sempre, da seduto"]),
-  Q("risparmio","soldi","Alla fine del mese, metti da parte?",["Niente. A volte in rosso","Qualche euro, quando avanza","Qualcosa, non ogni mese","Quasi ogni mese","Ogni mese, da solo"],"Basta una stima. Non i decimali."),
-  Q("debiti","soldi","Debiti, rate, spese fisse: quanto pesano?",["Mi soffocano","Occupano la testa","Ci sono, si pagano","Sotto controllo","Pochi o nessuno"]),
-  Q("cuscinetto","soldi","Se sparisse lo stipendio, per quanto terresti?",["Pochi giorni","Qualche settimana","Un mese o due","Tre-cinque mesi","Sei mesi o più"]),
-  Q("spese","soldi","Sai dove vanno i soldi, ogni mese?",["No","A grandi linee","Le voci grosse sì","Quasi tutto","Tutto, scritto"]),
-  Q("competenza","lavoro","Le cose che sai fare, stanno crescendo?",["Ferme da anni","Qualche pezzo, a caso","Un po', quando capita","Sì, quasi ogni mese","Ogni mese, di proposito"]),
-  Q("autonomia","lavoro","Orari, soldi, direzione: quanto decidi tu?",["Quasi niente","Poco","Qualche pezzo","Abbastanza","Molto"]),
-  Q("senso","lavoro","Il lavoro che fai, ha senso per te?",["Per niente","Raro","A tratti","Spesso sì","Sì, quasi sempre"]),
-  Q("retepro","lavoro","Hai persone con cui parlare di lavoro senza recitare?",["Nessuna","Una, forse","Due o tre","Diverse","Una rete vera"]),
-  Q("legami","relazioni","Quante persone vedi o senti davvero, ogni settimana?",["Quasi nessuno","Una, a volte","Due o tre","Un gruppetto","Una rete solida"]),
-  Q("conflitti","relazioni","Litigi o rapporti che fanno male: quanto spazio prendono?",["Occupano tutto","Troppo","Ci sono, si tengono","Poco","Quasi niente"]),
-  Q("cura","relazioni","C'è almeno una persona che ti vede per come stai?",["No","Qualche volta","Sì, a tratti","Sì, di solito","Sì, in modo stabile"]),
-  Q("schermo","abitudini","Ore al giorno su telefono e social, senza uno scopo?",["Quattro ore o più, perse","Un bel po'","A giorni","Poco","Poco, e lo scelgo"]),
-  Q("routine","abitudini","Hai un inizio o una fine della giornata che tieni?",["Mai","Qualche volta","A tratti","Spesso","Quasi sempre, gli stessi gesti"]),
-  Q("promesse","abitudini","Le promesse che fai a te: in un mese, quante ne tieni?",["Quasi nessuna","Poche","A metà","La maggior parte","Quasi tutte"])
+  Q("sonno","salute","Come finiscono le tue notti?",["Tardi, e mi alzo a pezzi","Dormo poco, spesso spezzato","A settimane sì, a settimane no","Di solito sto sulle sette","Dormo, e la mattina sono a posto"]),
+  Q("movimento","salute","Il corpo, in una settimana: quanto lo muovi per davvero?",["Quasi niente. Sto fermo","Un giorno, se va bene","Due o tre, quando capita","Quattro giorni, più o meno","Cinque o più, è un appuntamento"]),
+  Q("energia","salute","Quando ti alzi, com'è la giornata che ti aspetta?",["Sono già stanco","Spesso giù, senza un perché","Dipende dal giorno","Più su che giù","Stabile. Ce la faccio"]),
+  Q("cibo","salute","I pasti, da te: li fai, o capitano?",["Mangio in piedi, quello che capita","Qualche pasto lo faccio, molti no","Dipende dal giorno","Spesso cucino, non sempre","Mangio da seduto, quasi sempre"]),
+  Q("risparmio","soldi","A fine mese, i soldi che restano?",["Non resta niente. A volte sono in rosso","Qualche euro, se avanza","Qualcosa, non ogni mese","Quasi ogni mese metto da parte","Ogni mese, da solo, prima che li veda"],"Basta una stima. Non i decimali."),
+  Q("debiti","soldi","Rate, debiti, spese fisse: quanto spazio prendono in testa?",["Mi soffocano","Ci penso anche i giorni in cui non li pago","Ci sono, li pago, e basta","Li vedo. Non mi mangiano le sere","Pochi, o nessuno"]),
+  Q("cuscinetto","soldi","Se da lunedì non entra più uno stipendio, tu quanto tieni?",["Pochi giorni","Qualche settimana, poi sono in prestito","Un mese, forse due","Tre-cinque mesi","Sei mesi o più, senza drammi"]),
+  Q("spese","soldi","Sai dove sono andati i soldi, questo mese?",["No. Spariscono","A grandi linee, i buchi no","Le cose grosse sì, il resto no","Quasi tutto","Tutto. Lo scrivo"]),
+  Q("competenza","lavoro","Quello che sai fare: sta diventando di più, o è fermo?",["Fermo da anni","Qualche pezzo, a caso","Un po', quando capita","Quasi ogni mese imparo qualcosa","Ogni mese, di proposito, su una cosa sola"]),
+  Q("autonomia","lavoro","Orari, soldi, direzione: chi decide?",["Altri. Io eseguo","Poco io, molto altri","Qualche pezzo è mio","Abbastanza mio","Molto. Scelgo io"]),
+  Q("senso","lavoro","Quando chiudi il lavoro, ti resta qualcosa — o solo stanchezza?",["Solo stanchezza. Non vale","Raro che valga","A tratti ha senso","Spesso sì","Sì. Quasi sempre vale la fatica"]),
+  Q("retepro","lavoro","C'è qualcuno con cui puoi parlare di lavoro senza recitare?",["Nessuno","Uno, forse","Due o tre","Diverse persone","Sì. Una rete vera"]),
+  Q("legami","relazioni","Questa settimana, chi hai visto per davvero?",["Quasi nessuno","Uno, a volte","Due o tre","Un gruppetto che tengo","Gente che c'è, di rito"]),
+  Q("conflitti","relazioni","C'è qualcuno, o una chat, che ti svuota?",["Sì. Occupano tutto","Troppo spazio, ogni settimana","Ci sono, si tengono","Poco. Lo tengo a bada","Quasi niente"]),
+  Q("cura","relazioni","C'è almeno una persona che sa come stai, di questi tempi?",["No. Nessuno lo sa","Qualche volta, se chiedo","Sì, a tratti","Sì, di solito","Sì. Qualcuno c'è, stabile"]),
+  Q("schermo","abitudini","Il telefono: quante ore se ne va, senza che tu l'abbia deciso?",["Quattro ore o più, sparite","Un bel po'. Le sere soprattutto","A giorni. Quando sono stanco, sì","Poco","Poco, e lo scelgo io"]),
+  Q("routine","abitudini","La giornata ha un inizio e una fine, o parte da sola?",["Parte da sola. Sempre","Qualche volta ho un rito","A tratti","Spesso sì","Sì. Gli stessi gesti, quasi sempre"]),
+  Q("promesse","abitudini","Le cose che prometti a te: in un mese, quante ne tieni?",["Quasi nessuna","Poche. Il lunedì sì, il venerdì no","A metà","La maggior parte","Quasi tutte. Mi credo"])
 ];
 const AXES=["salute","soldi","lavoro","relazioni","abitudini"];
 const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relazioni",abitudini:"Abitudini"};
@@ -72,41 +72,42 @@ function diagnose(answers,picked,focusId){
 function readLife(answers,picked,focusId){
   const d=diagnose(answers,picked,focusId); const play=playFor(d.primary.id);
   const said=echoOf(d.primary.id,d.primary.score);
-  const also=d.secondary?`Subito dietro: ${playFor(d.secondary.id).label.toLowerCase()} — «${echoOf(d.secondary.id,d.secondary.score)}».`:null;
-  const holds=d.strengths.length?`Tiene: ${d.strengths.map(s=>playFor(s.id).label.toLowerCase()).join(", ")}.`:null;
+  const voice=VOICE[d.primary.id];
+  const also=d.secondary?echoOf(d.secondary.id,d.secondary.score):null;
+  const holds=d.strengths[0]?echoOf(d.strengths[0].id,d.strengths[0].score):null;
   const alts=[d.primary,...d.cluster].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,4).map(s=>{ const p=playFor(s.id); return {id:s.id,label:p.label,hole:p.hole}; });
   return {d,play,reading:{
-    title:d.vague?"La lettura è sottile.":`Il punto è ${play.hole}.`,
-    said:d.vague?"Hai lasciato troppe cose in mezzo. Il resoconto non inventa un buco.":`Hai detto: «${said}».`,
-    why:d.vague?"Tocca le risposte che senti davvero, e rifai. Altrimenti il punto è solo il più basso tra i mezzi.":play.why,
-    also,holds,action:play.action,vague:d.vague,alts
+    title:d.vague?"Hai lasciato troppe cose in mezzo.":said,
+    said:d.vague?"Il resoconto non può inventare una vita che non hai raccontato.":(voice?voice.now:play.why),
+    why:d.vague?"Tocca le risposte che senti, e rifai.":play.action,
+    also:also&&!d.vague?also:null,
+    holds:holds&&!d.vague?holds:null,
+    action:play.action,vague:d.vague,alts
   }};
 }
 function lever(axis){return {salute:PLAY.sonno.action,soldi:PLAY.risparmio.action,lavoro:PLAY.competenza.action,relazioni:PLAY.legami.action,abitudini:PLAY.schermo.action}[axis];}
 function leverFor(answers){return playFor(diagnose(answers).primary.id).action;}
-function opener(kind,year,y,profile,play){
-  const age=parseInt(profile.eta,10); const ageThen=(age>12&&age<90)?age+y:null;
-  const ageBit=ageThen?`, a ${ageThen} anni`:"";
-  const who=(profile.nome||"").trim();
-  if(kind==="deriva") return `Nel ${year}${ageBit} niente è crollato in un giorno. È scivolato, un po' alla volta.`;
-  if(kind==="inerzia") return who?`Nel ${year}${ageBit} ${who} è ancora riconoscibile. Stessi nodi, un po' più vecchi.`:`Nel ${year}${ageBit} la vita è riconoscibile. Stessi nodi, un po' più vecchi.`;
-  return `Nel ${year}${ageBit} non sei un'altra persona. Sei la stessa — con ${play.hole} tenuto, giorno dopo giorno.`;
+function opener(){ return ""; }
+function hook(kind,y,said){
+  const when=y===1?"un anno":y+" anni";
+  if(kind==="deriva") return said+". Dopo "+when+", è ancora così.";
+  if(kind==="inerzia") return said+". Dopo "+when+", quasi tutto è uguale.";
+  return said+". Dopo "+when+", quella cosa l'hai tenuta.";
 }
 function story(d,p,y,kind,profile){
-  const year=new Date().getFullYear()+y; const play=playFor(d.primary.id);
+  const play=playFor(d.primary.id);
   const said=echoOf(d.primary.id,d.primary.score);
-  const quoted=kind==="deriva"?` Partivi da «${said}». Non si è sistemato da solo.`:kind==="inerzia"?` Avevi detto: «${said}». È rimasto quello.`:` Partivi da «${said}». L'hai tenuto. Basta quello.`;
-  const later=y>=5?(kind==="deriva"?` A ${y} anni di distanza il conto si vede.`:kind==="miglioramento"?` ${y} anni di giorni tenuti si vedono senza raccontarli.`:` ${y} anni dopo, il tempo è passato comunque.`):"";
-  const extra=d.secondary?(kind==="deriva"?` Intanto ${playFor(d.secondary.id).hole} — «${echoOf(d.secondary.id,d.secondary.score)}» — non è stato toccato.`:kind==="inerzia"?` ${playFor(d.secondary.id).label} resta com'è.`:` E ${playFor(d.secondary.id).hole} ha seguito, un po'.`):(d.strengths[0]?(kind==="deriva"?` Quello che teneva — ${playFor(d.strengths[0].id).label.toLowerCase()} — alla lunga sente il peso.`:kind==="inerzia"?` Tiene ancora: ${playFor(d.strengths[0].id).label.toLowerCase()}.`:` Quello che già tenevi — ${playFor(d.strengths[0].id).label.toLowerCase()} — ha più spazio.`):"");
-  return `${opener(kind,year,y,profile,play)} ${play.futures[kind]}${quoted}${later}${extra}`.replace(/\s+/g," ").trim();
+  const body=(VOICE[d.primary.id]||play.futures)[kind];
+  const extra=d.secondary?` Accanto resta questo: ${echoOf(d.secondary.id,d.secondary.score).charAt(0).toLowerCase()+echoOf(d.secondary.id,d.secondary.score).slice(1)}.`:(d.strengths[0]?` Intanto tieni ancora: ${echoOf(d.strengths[0].id,d.strengths[0].score).charAt(0).toLowerCase()+echoOf(d.strengths[0].id,d.strengths[0].score).slice(1)}.`:"");
+  const later=y>=5?(kind==="deriva"?" Il conto, a questa distanza, si vede.":kind==="miglioramento"?" Gli anni tenuti si vedono. Non serve raccontarli.":" Il tempo è passato comunque."):"";
+  return (hook(kind,y,said)+" "+body+extra+later).replace(/\s+/g," ").trim();
 }
 function facts(p,d,kind){
   const play=playFor(d.primary.id);
   const rows=[[play.label, echoOf(d.primary.id,d.primary.score)]];
   if(d.secondary) rows.push([playFor(d.secondary.id).label, echoOf(d.secondary.id,d.secondary.score)]);
-  if(d.strengths[0]) rows.push([playFor(d.strengths[0].id).label,"tiene"]);
-  rows.push(["Se continua", kind==="deriva"?"si allarga":kind==="inerzia"?"resta uguale":"si chiude"]);
-  return rows.slice(0,4);
+  rows.push(["Tra un anno", kind==="deriva"?"resta così, e pesa":kind==="inerzia"?"resta com'è":"si allenta"]);
+  return rows.slice(0,3);
 }
 function project(score,y,kind,axis,weak,focusAxis){
   let delta={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind];
@@ -252,19 +253,20 @@ function letterOf(kind,y,profile){
   const when=then.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"});
   const place={citta:"dalla città",paese:"dal paese",estero:"da fuori"}[profile.contesto]||"";
   const age=parseInt(profile.eta,10); const ageThen=(age>12&&age<90)?age+y:null;
-  const who=(profile.nome||"").trim()||"Tu";
+  const who=(profile.nome||"").trim();
   const span=y===1?"un anno":y+" anni";
-  const greet=kind==="deriva"?`Ciao. Sono tu, tra ${span}.`:kind==="inerzia"?`Ciao. Sono tu, tra ${span}. Quasi tutto è uguale.`:`Ciao. Sono tu, tra ${span}. Non sono un altro.`;
-  return {dateline:place?`${when} · ${place}`:when,greet,sign:`— ${who}${ageThen?`, ${ageThen} anni`:""}`,span};
+  const greet=who?who+",":"";
+  return {dateline:place?`${when} · ${place}`:when,greet,sign:`— tu${ageThen?`, a ${ageThen} anni`:`, tra ${span}`}`,span};
 }
 function fromYouLine(answers,profile){
-  const play=playFor(diagnose(answers).primary.id);
+  const id=diagnose(answers).primary.id;
+  const voice=VOICE[id]||playFor(id).futures;
   const meta=letterOf("miglioramento",1,profile);
-  return {kicker:"Da te, tra un anno",line:play.futures.miglioramento,sign:meta.sign};
+  return {kicker:"Da te, tra un anno",line:voice.miglioramento,sign:meta.sign};
 }
 function letterCard(kind,pack,y,profile){
   const m=letterOf(kind,y,profile); const parts=splitStory(pack.narrative);
-  return `<article class="letter"><p class="dateline">${esc(m.dateline)}</p><p class="kind">${KIND_TITLE[kind]}</p><p class="greet">${esc(m.greet)}</p><p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<p class="sign">${esc(m.sign)}</p><ul class="facts">${pack.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;
+  return `<article class="letter"><p class="dateline">${esc(m.dateline)}</p><p class="kind">${KIND_TITLE[kind]}</p>${m.greet?`<p class="greet">${esc(m.greet)}</p>`:""}<p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<p class="sign">${esc(m.sign)}</p><ul class="facts">${pack.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;
 }
 function sealedLetter(y){
   const span=y===1?"un anno":y+" anni";
@@ -288,12 +290,10 @@ function diagnosisCard(answers){
   const {d,play,reading:r}=readLife(answers,db.picked,db.focusOverride);
   return `<section class="diag">
     <div>
-      <p class="meta">${r.vague?"Lettura sottile":d.balanced?"Il punto più basso":"Il punto"}</p>
-      <h2>${esc(play.label)}</h2>
-      <p class="said">«${esc(echoOf(d.primary.id,d.primary.score))}»</p>
-      <p class="lede">${esc(r.why)}</p>
-      ${r.also?`<p class="lede">${esc(r.also)}</p>`:""}
-      ${r.holds?`<p class="lede">${esc(r.holds)}</p>`:""}
+      <p class="meta">${esc(play.label)}</p>
+      <h2>${esc(r.title)}</h2>
+      <p class="lede">${esc(r.said)}</p>
+      ${r.also?`<p class="lede">Accanto: ${esc(r.also)}.</p>`:""}
       <div class="weights">
         <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le risposte che pesano</p>
         ${[d.primary,...d.lows].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,3).map(row=>`<div class="weight"><span>${esc(playFor(row.id).label)}</span><div class="bar ${tone(row.score)}"><span style="width:${row.score}%"></span></div><span class="num" style="width:auto;max-width:40%;text-align:right;font-size:12px">${esc(echoOf(row.id,row.score))}</span></div>`).join("")}
@@ -533,8 +533,8 @@ function render(){
     const who=(db.sim.profile||db.profile).nome||"Tu";
     const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
     const current=db.focusOverride||d.primary.id;
-    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Se il punto è un altro</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
-    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">${esc(r.title)}</h1><p class="said reveal" style="animation-delay:.35s">${esc(r.said)}</p><p class="lede reveal" style="animation-delay:.45s">${esc(r.why)}</p>${r.also?`<p class="lede reveal">${esc(r.also)}</p>`:""}${r.holds?`<p class="lede reveal">${esc(r.holds)}</p>`:""}<p class="lede reveal" style="animation-delay:.5s">${esc(r.action)}</p>${alts}<div class="row reveal" style="animation-delay:.55s;justify-content:center"><button class="cta" id="enter" data-go="futuri">Leggi chi diventi</button></div></main>`;
+    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Se non è questo</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
+    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">${esc(r.title)}</h1><p class="said reveal" style="animation-delay:.35s">${esc(r.said)}</p>${r.also?`<p class="lede reveal">Accanto: ${esc(r.also)}.</p>`:""}<p class="lede reveal" style="animation-delay:.5s">${esc(r.action)}</p>${alts}<div class="row reveal" style="animation-delay:.55s;justify-content:center"><button class="cta" id="enter" data-go="futuri">Leggi chi diventi</button></div></main>`;
     app.querySelectorAll("[data-focus]").forEach(b=>b.onclick=()=>{
       db.focusOverride=b.dataset.focus;
       db.sim=simulate(db.sim.answers||db.answers, db.sim.profile||db.profile, db.picked, db.focusOverride);

@@ -374,3 +374,114 @@ const ACTIONABLE = [
 
 
 function playFor(id){ return PLAY[id] || PLAY.routine; }
+
+const VOICE = {
+  sonno: {
+    now: "La notte se ne va. Poi la giornata costa il doppio: umore, cibo, pazienza.",
+    deriva: "Dormi poco, e ormai è normale. Di giorno la pazienza è corta, la fame strana, il lavoro più faticoso. Non è una crisi. È una fila di notti corte.",
+    inerzia: "Dormi come dormi adesso. I giorni tengono. Quando arriva un periodo brutto, non c'è riserva.",
+    miglioramento: "Stessa ora, ogni sera. All'inizio niente sonno. Poi sì. Di giorno tutto costa un po' meno, e non sai spiegare perché.",
+  },
+  movimento: {
+    now: "Il corpo sta fermo. Lo senti sulle scale, sul sonno, sull'umore.",
+    deriva: "Ti sei abituato a non muoverti. Le scale pesano. Il sonno peggiora. L'umore si accorcia.",
+    inerzia: "Qualche camminata, quando capita. Basta a non crollare. Non basta a stare meglio.",
+    miglioramento: "Mezz'ora, lo stesso orario, cinque giorni. Non è virtù. È un appuntamento. Il corpo risponde senza fare rumore.",
+  },
+  energia: {
+    now: "Ti alzi già stanco. La giornata la fai comunque, ma a metà.",
+    deriva: "I giorni si sono accorciati. Fai il minimo. La sera sei cotto, la mattina anche.",
+    inerzia: "Alcuni giorni tieni, altri no. Non è carattere. È un conto in rosso che non guardi.",
+    miglioramento: "L'energia non è esplosa. È tornata. Basta per fare quello che avevi detto.",
+  },
+  cibo: {
+    now: "I pasti capitano. In piedi, tardi, quello che c'è. Poi il corpo chiede altro.",
+    deriva: "Si mangia ancora in piedi, tardi, quello che capita. Il corpo e il conto se ne sono accorti. Non è successo niente di grave. È successo niente, e basta.",
+    inerzia: "Qualche pasto vero, molti no. Come adesso. Non stai male. Non stai bene. Il divano e il telefono restano il modo in cui finisce la giornata.",
+    miglioramento: "Un pasto al giorno, tuo, da seduto. Sembrava poco. Dopo un po' è l'unica cosa della giornata che non ti sfugge.",
+  },
+  risparmio: {
+    now: "A fine mese non resta niente, o resta poco, e sparisce.",
+    deriva: "I mesi si chiudono in pari, o sotto. Un imprevisto è un prestito. Ogni aumento sparisce prima di arrivarti.",
+    inerzia: "Metti da parte quando avanza. Avanza poco. Dormi, ma non del tutto.",
+    miglioramento: "Il giorno dello stipendio una fetta se ne va da sola. Piccola. Dopo un anno c'è un cuscino. Lo vedi, e dormi.",
+  },
+  debiti: {
+    now: "Le rate occupano la testa anche i giorni in cui non le paghi.",
+    deriva: "Le rate si mangiano il futuro. Ogni aumento sparisce prima. La testa è sempre lì, sul foglio.",
+    inerzia: "Paghi il dovuto, niente extra. Il peso resta uguale, solo più vecchio.",
+    miglioramento: "Una extra rata, la più piccola, tenuta. I debiti piccoli muoiono. La testa si libera prima del conto.",
+  },
+  cuscinetto: {
+    now: "Senza un cuscino, ogni imprevisto è un'emergenza. Anche uno piccolo.",
+    deriva: "Basta una spesa medica, o un mese senza stipendio, e sei in prestito. Lo sai già.",
+    inerzia: "Qualche settimana di margine. Dormi, ma non del tutto.",
+    miglioramento: "Mese dopo mese il cuscino diventa mesi, non giorni. Gli imprevisti smettono di essere drammi.",
+  },
+  spese: {
+    now: "I soldi escono e non sai dove. A fine mese la sorpresa è sempre la stessa.",
+    deriva: "Ancora non sai dove sono andati. La sorpresa, a fine mese, è identica. Solo più stanca.",
+    inerzia: "Sai a grandi linee. I buchi restano i buchi.",
+    miglioramento: "Due settimane a scrivere tutto. Poi una voce in meno, tenuta. Il mese smette di essere un mistero.",
+  },
+  competenza: {
+    now: "Quello che sai fare è fermo. Il lavoro di dopo, intanto, sceglie altri.",
+    deriva: "Le competenze stanno ferme. I colleghi no. Il ruolo pesa e non si muove.",
+    inerzia: "Impari a pezzi, quando capita. Basta a non restare indietro di un decennio. Non basta a scegliere tu.",
+    miglioramento: "Quattro ore a settimana, tenute, su una cosa sola. Dopo un anno il mestiere è più largo. Dopo cinque, hai un'altra strada.",
+  },
+  autonomia: {
+    now: "Orari e direzione sono di altri. Tu produci. Loro decidono.",
+    deriva: "Dipendi da un ruolo che non controlli. Quando cambia, cambi tu — di colpo.",
+    inerzia: "Lavori, produci, la direzione la decidono altri. I giorni passano.",
+    miglioramento: "Due ore tue, tenute. Non è libertà totale. È un margine. Il margine cambia le decisioni.",
+  },
+  senso: {
+    now: "Chiudi il lavoro e resta solo stanchezza. Non è un lusso: è energia che esce.",
+    deriva: "I giorni si somigliano e non lasciano niente. Stanchi, senza una fatica che vale.",
+    inerzia: "Qualche pezzo ha senso, molti no. Si tiene. Si paga in energia.",
+    miglioramento: "Hai spostato ore verso ciò che vale, o verso l'uscita. Il lavoro smette di essere solo un buco.",
+  },
+  retepro: {
+    now: "Da soli si resta fermi. Una conversazione vera sblocca più di un corso.",
+    deriva: "Il lavoro è un corridoio senza porte. Quando serve una mano, non c'è nessuno a cui chiedere.",
+    inerzia: "Qualche collega sì, una rete no. Le occasioni passano a chi ha a chi parlare.",
+    miglioramento: "Una conversazione a settimana, tenuta. Tra un anno hai gente a cui dire la verità sul lavoro.",
+  },
+  legami: {
+    now: "I rapporti che non si vedono si spengono senza un litigio. Solo silenzio.",
+    deriva: "I giorni pesanti li fai da solo. Le persone ci sono, da qualche parte, e non le chiami.",
+    inerzia: "Qualcuno c'è, quando capita. I rapporti vivono di inerzia, finché un giorno no.",
+    miglioramento: "Una chiamata a settimana, in agenda, come un lavoro. Tra un anno hai gente a cui dire la verità.",
+  },
+  conflitti: {
+    now: "C'è qualcuno, o una chat, che ti svuota. Occupano lo spazio di chi ti tiene.",
+    deriva: "Litigi e chat che fanno male occupano le sere. Il resto della vita sta in disparte.",
+    inerzia: "Il rapporto tossico è «gestito». Gestito vuole dire che è ancora lì, ogni settimana.",
+    miglioramento: "Meno tempo là. Più tempo qui. I rapporti che tengono hanno di nuovo aria.",
+  },
+  cura: {
+    now: "Nessuno sa come stai, di questi tempi. Quindi nessuno può stare vicino.",
+    deriva: "I giorni pesanti restano innominati. Nessuno lo sa.",
+    inerzia: "Qualcuno c'è, in teoria. In pratica resti solo con quello che conta.",
+    miglioramento: "Una persona sa. Poi due. Essere visti è un'abitudine, non un destino.",
+  },
+  schermo: {
+    now: "Il telefono si mangia le sere. Poi il sonno. Poi le persone davanti a te.",
+    deriva: "Le sere spariscono nel vetro. Il sonno arriva tardi. Le persone intorno sono una notifica.",
+    inerzia: "Alcune sere tieni, molte no. Il telefono resta il default quando sei stanco.",
+    miglioramento: "Alle 22 è in un'altra stanza. I primi venti minuti del mattino sono tuoi. Tra le 22 e il mattino c'è di nuovo una vita. Piccola, tua.",
+  },
+  routine: {
+    now: "La giornata parte da sola. La decide il telefono, gli altri, la fame.",
+    deriva: "Le giornate iniziano in ritardo e finiscono sullo schermo. Non ricordi le settimane.",
+    inerzia: "A tratti hai un rito. A tratti no. La vita resta un po' sfuggente.",
+    miglioramento: "Quindici minuti, sempre quelli, tre gesti. Il resto della giornata ha un bordo.",
+  },
+  promesse: {
+    now: "Dici cose il lunedì. Il venerdì non le ricordi. Poi non ti credi più.",
+    deriva: "Le promesse a te stesso si sono assottigliate. Ti conosci come uno che «vorrebbe».",
+    inerzia: "Qualche promessa sì, molte no. La fiducia in te resta lì, piccola.",
+    miglioramento: "Una a settimana, scritta, così piccola da sembrare stupida. Tenuta. Tra un anno ti credi di più — e tieni cose più grandi.",
+  },
+};
