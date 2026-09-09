@@ -125,18 +125,18 @@
     const note=document.getElementById("note");
     if(note && !note.value) note.placeholder=card.evening;
     const phaseNow=document.querySelector(".phase-now");
+    const wks=(typeof weeksOfPlan==="function")?weeksOfPlan(play, focusId):null;
+    const wk=wks && wks[card.week-1];
     if(phaseNow && tab==="percorso"){
-      phaseNow.innerHTML='<p class="meta">Oggi · settimana '+card.week+' di 12</p><h2>'+escT(card.title)+"</h2><p>"+escT(card.line)+"</p>";
+      phaseNow.innerHTML='<p class="meta">Oggi · settimana '+card.week+' di 12 · '+escT(card.pace||"")+"</p><h2>"+escT(card.title)+"</h2><p>"+escT(card.line)+"</p>";
     }
     if(phaseNow && tab==="oggi"){
-      const ph=play.weeks[card.phase]||play.weeks[0];
-      phaseNow.innerHTML='<p class="meta">Settimana '+card.week+' di 12 · '+escT(ph[0])+"</p><p>"+escT(ph[1])+"</p>";
+      phaseNow.innerHTML='<p class="meta">Settimana '+card.week+' di 12 · '+escT(card.pace||"")+"</p><p>"+escT(wk?wk.job:card.line)+"</p>";
     }
     const list=document.querySelector(".phase-list");
-    if(list && typeof weeksOfPlan==="function" && tab==="percorso"){
-      const wks=weeksOfPlan(play);
-      list.innerHTML=wks.map(function(wk){
-        return '<li class="'+(wk.week===card.week?"now":"")+'"><strong>'+escT(wk.title)+"</strong><span>"+escT(wk.span+". "+wk.job)+"</span></li>";
+    if(list && wks && tab==="percorso"){
+      list.innerHTML=wks.map(function(w){
+        return '<li class="'+(w.week===card.week?"now":"")+'"><strong>'+escT(w.title)+"</strong><span>"+escT(w.span+". "+w.job)+"</span></li>";
       }).join("");
     }
   }
