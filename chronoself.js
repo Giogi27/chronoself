@@ -23,7 +23,7 @@ const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relaz
 const KEY="chronoself.v2";
 const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
-function save(db){localStorage.setItem(KEY,JSON.stringify(db));}
+function save(db){localStorage.setItem(KEY,JSON.stringify(db)); if(window.CS&&CS.user&&CS.push) CS.push();}
 const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),sim:null,history:[],checks:{}}, load());
 function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTIONS.forEach(q=>{acc[q.axis].s+=(a[q.id]??50);acc[q.axis].n++;}); const out={}; AXES.forEach(x=>out[x]=Math.round(acc[x].s/acc[x].n)); return out;}
 function project(score,y,kind){const d={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind]; return clamp(score+d*y*(1+y*0.08));}
@@ -44,23 +44,23 @@ function simulate(answers,profile){
 function planItems(weak){return {focus:lever(weak),weeks:[["Settimana 1-2","Parte solo la leva più debole. Nient'altro."],["Settimana 3-4","Rendi automatica quella leva (allarme, bonifico, calendario)."],["Settimana 5-8","Tieni la leva e aggiungi un check domenicale di 10 minuti."],["Settimana 9-12","Rifai la simulazione. Se i numeri sono fermi, l'inerzia ha vinto."]]};}
 const state={view:"home",i:0,h:5}; const app=document.getElementById("app");
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-function go(v){state.view=v;render();}
+function go(v){ if(v==="account" && window.CS && CS.renderAccount){ CS.renderAccount(); return;} state.view=v;render();}
 function axisBars(scores){return AXES.map(a=>`<div class="axisbar"><span>${AXIS_LABEL[a]}</span><div class="bar"><span style="width:${scores[a]}%"></span></div><span>${scores[a]}</span></div>`).join("");}
 function render(){
   if(state.view==="home"){
     app.innerHTML=`<section class="hero"><h1>Chi diventi se continui così.</h1><p class="lede">Non un oracolo. Un modello di compounding su salute, soldi, lavoro, relazioni e abitudini. Poi un piano a 90 giorni.</p><button class="cta" id="start">${db.sim?"Apri la dashboard":"Inizia"}</button></section><section class="grid"><article class="card"><h3>18 domande</h3><p>Basta uno slider. Niente importi, niente diagnosi.</p></article><article class="card"><h3>Tre futuri</h3><p>Deriva, inerzia, miglioramento. A 1, 5 e 10 anni.</p></article><article class="card"><h3>Piano e storico</h3><p>Leve, check settimanali, confronto tra una simulazione e la successiva.</p></article></section>`;
     document.getElementById("start").onclick=()=>go(db.sim?"dash":"profilo"); return;
   }
-  if(state.view==="privacy"){ app.innerHTML=`<main class="step"><h1 class="q">Privacy</h1><p class="lede">Tutto resta nel browser. Nessun account, nessun server, nessuna vendita dati.</p></main>`; return; }
+  if(state.view==="privacy"){ app.innerHTML=`<main class="step"><h1 class="q">Privacy</h1><p class="lede">Tutto resta nel browser. Se accedi, una copia va sul tuo account.</p></main>`; return; }
   if(state.view==="profilo"){
     const p=db.profile;
     app.innerHTML=`<main class="step"><p class="meta">Passo 1 di 2</p><h1 class="q">Chi sta simulando.</h1><label class="field">Nome o come vuoi essere chiamato<input id="nome" value="${p.nome||""}" placeholder="Opzionale" /></label><label class="field">Età<input id="eta" type="number" min="16" max="90" value="${p.eta||""}" placeholder="Es. 29" /></label><label class="field">Contesto<select id="contesto"><option value="citta" ${p.contesto==="citta"?"selected":""}>Città</option><option value="paese" ${p.contesto==="paese"?"selected":""}>Paese / provincia</option><option value="estero" ${p.contesto==="estero"?"selected":""}>All'estero</option></select></label><div class="row"><button class="cta" id="next" style="margin-top:0">Alle domande</button></div></main>`;
     document.getElementById("next").onclick=()=>{db.profile={nome:document.getElementById("nome").value.trim(),eta:document.getElementById("eta").value,contesto:document.getElementById("contesto").value}; save(db); state.i=0; go("simula");}; return;
   }
   if(state.view==="simula"){
-    const q=QUESTIONS[state.i]; const pct=Math.round(((state.i+1)/QUESTIONS.length)*100);
-    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} / ${QUESTIONS.length} · ${pct}% · ${AXIS_LABEL[q.axis]}</p><h1 class="q">${q.text}</h1>${q.hint?`<p class="meta">${q.hint}</p>`:""}<input class="range" id="rng" type="range" min="0" max="100" value="${db.answers[q.id]}" /><div class="labels"><span>${q.min}</span><span>${q.max}</span></div><div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" style="margin-top:0">${state.i<QUESTIONS.length-1?"Avanti":"Genera i futuri"}</button></div></main>`;
-    document.getElementById("rng").oninput=e=>db.answers[q.id]=Number(e.target.value);
+    const q=QUESTIONS[state.i]; const pct=Math.round(((state.i+1)/QUESTIONS.length)*100); const val=db.answers[q.id];
+    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} / ${QUESTIONS.length} · ${pct}% · ${AXIS_LABEL[q.axis]}</p><h1 class="q">${q.text}</h1>${q.hint?`<p class="meta">${q.hint}</p>`:""}<p class="meta" id="valLabel">Punteggio: <strong>${val}</strong> / 100</p><input class="range" id="rng" type="range" min="0" max="100" step="1" value="${val}" /><div class="labels"><span>${q.min}</span><span>${q.max}</span></div><div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" style="margin-top:0">${state.i<QUESTIONS.length-1?"Avanti":"Genera i futuri"}</button></div></main>`;
+    document.getElementById("rng").oninput=e=>{ const n=Number(e.target.value); db.answers[q.id]=n; const el=document.getElementById("valLabel"); if(el) el.innerHTML="Punteggio: <strong>"+n+"</strong> / 100"; };
     document.getElementById("back").onclick=()=>{if(state.i>0){state.i--;render();}};
     document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++;render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak}); db.history=db.history.slice(0,12); db.checks={}; save(db); go("dash"); }; return;
   }
