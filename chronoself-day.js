@@ -88,6 +88,10 @@
   window.addEventListener("pageshow", onWake);
   if(!window.__csDayPulse) window.__csDayPulse=setInterval(function(){ if(!clockOverride) tickDay(); }, 30000);
   armDayTick();
+  document.addEventListener("click", function(e){
+    if(!clockOverride) return;
+    if(e.target && e.target.closest && e.target.closest("[data-h]")){ e.preventDefault(); e.stopPropagation(); }
+  }, true);
 
   const _render=render;
   render=function(){
