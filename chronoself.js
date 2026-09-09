@@ -20,8 +20,8 @@ const QUESTIONS=[
 ];
 const AXES=["salute","soldi","lavoro","relazioni","abitudini"];
 const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relazioni",abitudini:"Abitudini"};
-const KIND_TITLE={deriva:"Se scivoli",inerzia:"Se continui così",miglioramento:"Se muovi 2-3 leve"};
-const SUGGEST={salute:["Dormire prima delle 23:30","30 minuti di movimento"],soldi:["Bonifico / no spesa impulsiva","Annotare le uscite"],lavoro:["4 ore sulla competenza","Un blocco senza notifiche"],relazioni:["Una chiamata vera","Niente scroll durante i pasti"],abitudini:["Niente telefono i primi 20 min","Sera senza social dopo le 22"]};
+const KIND_TITLE={deriva:"Se lasci andare",inerzia:"Se resti così",miglioramento:"Se cambi un po'"};
+const SUGGEST={salute:["A letto prima delle 23:30","30 minuti di movimento"],soldi:["Bonifico automatico, anche 50€","Annotare le uscite"],lavoro:["4 ore a settimana a imparare","Un blocco senza notifiche"],relazioni:["Una chiamata vera a settimana","Niente telefono a tavola"],abitudini:["Niente telefono i primi 20 minuti","Niente social dopo le 22"]};
 const KEY="chronoself.v2";
 const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
 const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); return d.innerHTML;};
@@ -34,10 +34,10 @@ function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTION
 function project(score,y,kind){const d={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind]; return clamp(score+d*y*(1+y*0.08));}
 function weakest(base){return [...AXES].sort((a,b)=>base[a]-base[b])[0];}
 function lever(axis){return {salute:"Sonno fisso + 3 movimenti da 30 minuti a settimana.",soldi:"Bonifico automatico il giorno dello stipendio. Anche 50€.",lavoro:"4 ore a settimana su una competenza che il lavoro futuro chiede.",relazioni:"Una chiamata o cena vera a settimana, in agenda.",abitudini:"Togli 45 minuti di scroll serale."}[axis];}
-function story(p,y,kind){const avg=AXES.reduce((s,a)=>s+p[a],0)/5;const year=new Date().getFullYear()+y;const open={miglioramento:`Nel ${year} non sei un'altra persona. Sei la stessa, con due o tre leve tenute.`,deriva:`Nel ${year} niente è crollato in un giorno. È scivolato.`,inerzia:avg<50?`Nel ${year} la vita è riconoscibile: stessi problemi, un po' più stretti.`:`Nel ${year} è andato avanti da solo.`}[kind];const bits=[p.salute<45?"Il corpo ha poco margine.":p.salute<70?"L'energia tiene a singhiozzo.":"Salute con riserva.",p.soldi<45?"Un imprevisto ti mette in difficoltà in settimane.":p.soldi<70?"Tieni il passo, ma non composti.":"C'è un cuscinetto.",p.lavoro<45?"Dipendi da un ruolo che non controlli.":p.lavoro<70?"Produci, ma la direzione è di altri.":"Competenze in movimento.",p.relazioni<45?"I giorni pesanti li fai da solo.":p.relazioni<70?"I rapporti vivono di inerzia.":"Hai gente a cui dire la verità.",p.abitudini<45?"La giornata la decide lo schermo.":p.abitudini<70?"Routine a metà.":"Tieni abbastanza promesse da accumulare."];return [open,...bits].join(" ");}
-function facts(p,y){return [["Energia", p.salute>=70?"Buona":p.salute>=45?"Instabile":"Bassa"],["Cuscinetto", p.soldi>=75?(Math.max(6,y*3)+"+ mesi"):p.soldi>=50?(Math.max(1,Math.round(y*.8))+"–"+Math.max(2,y)+" mesi"):"Poche settimane"],["Competenze", p.lavoro>=70?"In crescita":p.lavoro>=45?"Stabili":"In ritardo"],["Rete", p.relazioni>=70?"Solida":p.relazioni>=45?"Sottile":"Isolamento"]];}
+function story(p,y,kind){const avg=AXES.reduce((s,a)=>s+p[a],0)/5;const year=new Date().getFullYear()+y;const open={miglioramento:`Nel ${year} non sei un'altra persona. Sei la stessa, con due o tre abitudini tenute ogni giorno.`,deriva:`Nel ${year} niente è crollato in un giorno. È scivolato, un po' alla volta.`,inerzia:avg<50?`Nel ${year} la vita è riconoscibile: gli stessi problemi, un po' più stretti.`:`Nel ${year} è andato avanti da solo, senza grandi scossoni.`}[kind];const bits=[p.salute<45?"Il corpo ha poco margine: fatica, sonno corto, poca energia.":p.salute<70?"L'energia va e viene. Alcuni giorni tieni, altri no.":"Stai bene: hai energia di riserva.",p.soldi<45?"Un imprevisto ti mette in difficoltà in poche settimane.":p.soldi<70?"Tieni il passo, ma metti da parte poco.":"Hai dei risparmi a cui appoggiarti.",p.lavoro<45?"Dipendi da un lavoro che non controlli.":p.lavoro<70?"Lavori, ma la direzione la decidono altri.":"Stai imparando cose che ti serviranno.",p.relazioni<45?"I giorni pesanti li fai da solo.":p.relazioni<70?"I rapporti vanno avanti da soli, senza davvero tenersi.":"Hai persone a cui puoi dire la verità.",p.abitudini<45?"La giornata la decide il telefono.":p.abitudini<70?"Tieni alcune routine, altre le perdi.":"Tieni abbastanza promesse da vedere i risultati."];return [open,...bits].join(" ");}
+function facts(p,y){return [["Energia", p.salute>=70?"Buona":p.salute>=45?"Alti e bassi":"Bassa"],["Risparmi", p.soldi>=75?(Math.max(6,y*3)+"+ mesi"):p.soldi>=50?(Math.max(1,Math.round(y*.8))+"–"+Math.max(2,y)+" mesi"):"Poche settimane"],["Lavoro", p.lavoro>=70?"In crescita":p.lavoro>=45?"Fermo":"In ritardo"],["Persone", p.relazioni>=70?"Ci sei":p.relazioni>=45?"Poche":"Quasi da solo"]];}
 function simulate(answers,profile){const base=scoresFrom(answers); const horizons={}; [1,5,10].forEach(y=>{ horizons[y]={}; ["deriva","inerzia","miglioramento"].forEach(k=>{ const p={}; AXES.forEach(a=>p[a]=project(base[a],y,k)); horizons[y][k]={title:KIND_TITLE[k],narrative:story(p,y,k),facts:facts(p,y),scores:p}; }); }); return {at:new Date().toISOString(),profile,answers,scores:base,weak:weakest(base),horizons};}
-function planItems(weak){return {focus:lever(weak),weeks:[["Settimane 1–2","Una sola leva. Nient'altro."],["Settimane 3–4","Rendi automatica quella leva."],["Settimane 5–8","Tieni + check domenicale."],["Settimane 9–12","Rifai la simulazione."]]};}
+function planItems(weak){return {focus:lever(weak),weeks:[["Settimane 1–2","Una sola abitudine. Nient'altro."],["Settimane 3–4","Rendila automatica: stesso orario, stesso posto."],["Settimane 5–8","Tienila. Una volta a settimana, guarda come sta andando."],["Settimane 9–12","Rifai le 18 domande. Vedi se qualcosa si è mosso."]]};}
 function dayN(){ if(!db.planStart) return 1; return Math.min(90, Math.max(1, Math.floor((Date.now()-new Date(db.planStart))/86400000)+1)); }
 function currentPhase(day){ if(day<=14) return 0; if(day<=28) return 1; if(day<=56) return 2; return 3; }
 function today(){return new Date().toISOString().slice(0,10);}
@@ -75,7 +75,7 @@ function go(v){
   state.view=v; render();
 }
 function paywall(title,lede,leverText){
-  return `<main class="step"><p class="meta">Piano 90</p><h1 class="q" style="font-size:40px">${title}</h1><p class="lede">${lede}</p>${leverText?`<p class="lock">${esc(leverText)}</p>`:""}<p class="lede">4,99 € al mese. Abitudini, diario, calendario a 90 giorni e i futuri a 5 e 10 anni.</p><div class="row"><button class="cta" id="pay">Attiva Piano 90</button><button class="btn" data-go="prezzi">Vedi i piani</button></div></main>`;
+  return `<main class="step"><p class="meta">Piano 90</p><h1 class="q" style="font-size:40px">${title}</h1><p class="lede">${lede}</p>${leverText?`<p class="lock">${esc(leverText)}</p>`:""}<p class="lede">4,99 € al mese. Un'abitudine da tenere, un diario la sera, e vedi anche chi diventi tra 5 e 10 anni.</p><div class="row"><button class="cta" id="pay">Attiva Piano 90</button><button class="btn" data-go="prezzi">Vedi i piani</button></div></main>`;
 }
 function clockPhase(h){ if(h<5) return "notte"; if(h<8) return "alba"; if(h<12) return "mattina"; if(h<17) return "pomeriggio"; if(h<21) return "sera"; return "notte"; }
 function polar(deg,r){ const a=(deg-90)*Math.PI/180; return [Math.round((160+Math.cos(a)*r)*10)/10, Math.round((160+Math.sin(a)*r)*10)/10]; }
@@ -136,16 +136,16 @@ function startClock(){
 function render(){
   chrome();
   if(state.view==="home"){
-    const cta=db.pro?"Apri oggi":db.sim?"Apri i tuoi futuri":"Fai la simulazione gratis";
+    const cta=db.pro?"Vai a oggi":db.sim?"Apri i tuoi futuri":"Inizia, è gratis";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
       <div>
-        <p class="meta">Simulatore di compounding personale</p>
+        <p class="meta">18 domande sulla tua vita</p>
         <h1>Chi diventi se continui così.</h1>
-        <p class="lede">Non un oracolo. Un modello su cinque assi — poi un piano a 90 giorni che si paga solo se lo vuoi tenere.</p>
+        <p class="lede">Rispondi su salute, soldi, lavoro, persone e abitudini. Vedi tre versioni di te tra un anno. Se vuoi, tieni un'abitudine per 90 giorni.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
-        <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>5</dt><dd>assi</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
+        <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>5</dt><dd>aree</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
       </div>
       <div class="hero-photo">
         <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
@@ -154,32 +154,32 @@ function render(){
     </section>
     <div class="bleed marquee"><div class="marquee-track">${marquee}${marquee}</div></div>
     <section class="grid three" style="padding-top:64px">
-      <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Slider onesti su salute, soldi, lavoro, relazioni e abitudini. Niente diagnosi, niente guru.</p></article>
-      <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre futuri</h3><p>Deriva, inerzia, miglioramento — scritti a 1, 5 e 10 anni, con i numeri che ne seguono.</p></article>
-      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Una leva</h3><p>Se tieni, il Piano 90 diventa il tuo giorno: una sola abitudine, un diario, novanta sere.</p></article>
+      <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Come stai, davvero, in cinque parti della vita. Niente diagnosi, niente guru.</p></article>
+      <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre futuri</h3><p>Cosa succede se lasci andare, se resti così, o se cambi un po'. Scritto a 1, 5 e 10 anni.</p></article>
+      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Un'abitudine</h3><p>Scegli una cosa da fare ogni giorno. La sera, due righe. Per 90 giorni.</p></article>
     </section>
     <section class="thesis">
       <img src="./brand/looking.jpg" alt="Una persona alla finestra, di spalle"/>
       <div>
-        <p class="meta">La tesi</p>
-        <blockquote>Il futuro non è un oracolo. È la somma di quello che ripeti.</blockquote>
-        <p class="lede">ChronoSelf non predice. Compone. Prende le tue risposte di oggi e le lascia correre — per vedere chi incontri tra un anno, cinque, dieci.</p>
+        <p class="meta">L'idea</p>
+        <blockquote>Il futuro non è magia. È la somma di quello che ripeti.</blockquote>
+        <p class="lede">ChronoSelf non indovina niente. Prende come stai oggi e lo porta avanti — a un anno, a cinque, a dieci.</p>
       </div>
     </section>
     <section>
-      <p class="meta">I tre rami</p>
+      <p class="meta">Tre strade</p>
       <h2 style="font-size:clamp(28px,4vw,44px);max-width:16ch;margin:12px 0 24px">Stessa vita. Tre direzioni.</h2>
       <div class="grid three" style="padding-top:0">
-        <article class="card"><p class="k">01</p><h3>Deriva</h3><p>Se lasci scivolare quello che già sai essere il punto debole.</p></article>
-        <article class="card"><p class="k">02</p><h3>Inerzia</h3><p>Se resti esattamente così. Né peggio, né meglio — il tempo comunque passa.</p></article>
-        <article class="card"><p class="k">03</p><h3>Miglioramento</h3><p>Se muovi due leve e basta. Compounding piccolo, tenuto ogni giorno.</p></article>
+        <article class="card"><p class="k">01</p><h3>Se lasci andare</h3><p>Il punto debole resta lì. Col tempo pesa di più.</p></article>
+        <article class="card"><p class="k">02</p><h3>Se resti così</h3><p>Niente crolla. Niente migliora. Il tempo passa lo stesso.</p></article>
+        <article class="card"><p class="k">03</p><h3>Se cambi un po'</h3><p>Due o tre abitudini, tenute ogni giorno. Basta quello.</p></article>
       </div>
     </section>
     <section class="cta-band">
       <div>
-        <p class="meta">Pronto</p>
-        <h2>Diciotto minuti. Poi vedi chi stai diventando.</h2>
-        <p>Gratis per un anno di futuri. Il Piano 90 apre il giorno per giorno — e i cinque, i dieci anni.</p>
+        <p class="meta">Inizia</p>
+        <h2>Diciotto minuti. Poi vedi dove stai andando.</h2>
+        <p>Gratis vedi i prossimi 12 mesi. Il Piano 90 apre 5 e 10 anni, e il giorno per giorno.</p>
         <div class="row"><button class="cta light" id="start2">${cta}</button>${db.pro?"":`<button class="cta ghosted" data-go="prezzi">Vedi i piani</button>`}</div>
       </div>
       <img src="./brand/loggia.jpg" alt="Tre archi, tre ore del giorno"/>
@@ -191,23 +191,23 @@ function render(){
     startClock();
     return;
   }
-  if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy</p><h1 class="q" style="font-size:40px">I dati restano tuoi.</h1><p class="lede">Simulazione, diario e abitudini stanno nel browser. I pagamenti passano da Stripe. Non è terapia.</p></main>`; return; }
+  if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy</p><h1 class="q" style="font-size:40px">I dati restano tuoi.</h1><p class="lede">Domande, diario e abitudini stanno sul tuo telefono. I pagamenti passano da Stripe. Non è un medico e non è terapia.</p></main>`; return; }
   if(state.view==="prezzi"){
-    app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Due livelli. Basta.</h1><p class="lede">La simulazione è gratis. Il Piano 90 è il posto in cui tieni la leva — non un altro menu pieno di cose.</p>
-      <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>Simulazione</h3><ul class="ok"><li>18 domande</li><li>I tuoi assi, oggi</li><li>Tre futuri a 1 anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
-      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Futuri a 5 e 10 anni</li><li>Schermata Oggi: una leva</li><li>Abitudini e streak</li><li>Diario serale</li></ul><div class="row"><button class="cta light" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
-      <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né consulenza finanziaria o medica. È un binario per 90 giorni.</p></article></section></main>`;
+    app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Gratis per vedere. Pago per tenere.</h1><p class="lede">La simulazione è gratis. Il Piano 90 è per chi vuole un'abitudine, un diario, e 90 giorni di seguito.</p>
+      <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>La simulazione</h3><ul class="ok"><li>18 domande</li><li>Come stai oggi, in 5 aree</li><li>Tre versioni di te, a 1 anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
+      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Anche 5 e 10 anni</li><li>Un'abitudine da tenere ogni giorno</li><li>Diario la sera</li><li>Calendario di 90 giorni</li></ul><div class="row"><button class="cta light" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
+      <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né un medico, né un consulente. È un posto dove tieni una cosa per 90 giorni.</p></article></section></main>`;
     document.getElementById("pay").onclick=()=> db.pro?go("oggi"):startCheckout();
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     return;
   }
   if(state.view==="profilo"){
     const p=db.profile;
-    app.innerHTML=`<main class="step"><p class="meta">Passo 1 di 2</p><h1 class="q" style="font-size:40px">Chi sta simulando.</h1><p class="lede">Serve solo per scrivere i futuri. Resta sul dispositivo.</p>
+    app.innerHTML=`<main class="step"><p class="meta">Passo 1 di 2</p><h1 class="q" style="font-size:40px">Prima, chi sei.</h1><p class="lede">Nome ed età servono solo per scrivere i tuoi futuri. Restano sul telefono.</p>
       <label class="field">Nome<input id="nome" value="${esc(p.nome||"")}" /></label>
       <label class="field">Età<input id="eta" type="number" value="${esc(p.eta||"")}" /></label>
-      <label class="field">Contesto<select id="contesto"><option value="citta">Città</option><option value="paese">Paese</option><option value="estero">Estero</option></select></label>
-      <div class="row"><button class="cta" id="next">Alle 18 domande</button></div></main>`;
+      <label class="field">Dove vivi<select id="contesto"><option value="citta">In città</option><option value="paese">In un paese</option><option value="estero">All'estero</option></select></label>
+      <div class="row"><button class="cta" id="next">Vai alle domande</button></div></main>`;
     document.getElementById("contesto").value=p.contesto||"citta";
     document.getElementById("next").onclick=()=>{db.profile={nome:document.getElementById("nome").value.trim(),eta:document.getElementById("eta").value,contesto:document.getElementById("contesto").value}; save(db); state.i=0; go("simula");};
     return;
@@ -220,7 +220,7 @@ function render(){
       <p class="lede num"><strong style="font-size:28px;color:var(--fg)">${val}</strong> / 100</p>
       <input class="range" id="rng" type="range" min="0" max="100" value="${val}" />
       <div class="labels"><span>${q.min}</span><span>${q.max}</span></div>
-      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Genera i futuri"}</button></div></main>`;
+      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Vedi i tuoi futuri"}</button></div></main>`;
     document.getElementById("rng").oninput=e=>{const n=Number(e.target.value); db.answers[q.id]=n; e.target.previousElementSibling.innerHTML=`<strong style="font-size:28px;color:var(--fg)">${n}</strong> / 100`;};
     document.getElementById("back").onclick=()=>{if(state.i>0){state.i--;render();}};
     document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++;render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak}); db.history=db.history.slice(0,12); if(!db.habits.length) db.habits=seedHabits(sim.weak); save(db); go("futuri"); };
@@ -231,14 +231,14 @@ function render(){
     const s=db.sim; const who=s.profile.nome||"Tu"; if(!db.pro && state.h!==1) {/* keep */}
     const locked=!db.pro && state.h>1;
     const pack=s.horizons[locked?1:state.h];
-    const cols=["deriva","inerzia","miglioramento"].map(id=>{const x=pack[id]; return `<article class="card"><h3>${x.title}</h3><p>${x.narrative}</p><ul class="facts">${x.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;}).join("");
-    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · leva: ${AXIS_LABEL[s.weak]}${db.pro?" · Piano 90":""}</p>
-      <h1 class="q" style="font-size:40px">I tuoi assi, oggi</h1>
-      <p class="lede">Tre versioni di te. Quella che scivola, quella che resta, quella che muove due leve e basta.</p>
+    const cols=["deriva","inerzia","miglioramento"].map(id=>{const x=pack[id]; return `<article class="card"><h3>${KIND_TITLE[id]}</h3><p>${x.narrative}</p><ul class="facts">${x.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;}).join("");
+    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${AXIS_LABEL[s.weak]}${db.pro?" · Piano 90":""}</p>
+      <h1 class="q" style="font-size:40px">Come stai, oggi</h1>
+      <p class="lede">Tre versioni di te. Quella che lascia andare, quella che resta così, quella che cambia un po'.</p>
       <div class="grid" style="grid-template-columns:minmax(0,18rem) 1fr;align-items:center">${radar(s.scores)}<div>${axisBars(s.scores)}</div></div>
-      <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!db.pro&&y>1)?" · bloccati":""}</button>`).join("")}</div>
-      ${locked?paywall(`I ${state.h} anni restano coperti.`,"Gratis vedi un anno. Il Piano 90 apre 5 e 10 anni, e il giorno per giorno.",lever(s.weak)): `<div class="cols">${cols}</div>`}
-      <div class="row">${db.pro?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Piano 90 giorni</button>`}<button class="btn" data-go="profilo">Rifai la simulazione</button></div>
+      <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!db.pro&&y>1)?" · chiusi":""}</button>`).join("")}</div>
+      ${locked?paywall(`I prossimi ${state.h} anni restano chiusi.`,"Gratis vedi un anno. Con il Piano 90 vedi anche 5 e 10 anni, e tieni un'abitudine ogni giorno.",lever(s.weak)): `<div class="cols">${cols}</div>`}
+      <div class="row">${db.pro?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Attiva il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
       ${s && db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${AXIS_LABEL[h.weak]}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
     </main>`;
     app.querySelectorAll("[data-y]").forEach(b=>b.onclick=()=>{state.h=Number(b.dataset.y);render();});
@@ -248,7 +248,7 @@ function render(){
   }
   if(state.view==="oggi"){
     if(!db.sim){go("profilo");return;}
-    if(!db.pro){ app.innerHTML=paywall("Una leva. Novanta giorni.","Abitudini, diario e il calendario restano chiusi finché non attivi il Piano 90.",lever(db.sim.weak)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
+    if(!db.pro){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Abitudini, diario e calendario si aprono con il Piano 90.",lever(db.sim.weak)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
     if(!db.planStart){db.planStart=new Date().toISOString();save(db);}
     if(!db.habits.length) db.habits=seedHabits(db.sim.weak);
     const pl=planItems(db.sim.weak); const day=dayN(); const phase=currentPhase(day); const t=today();
@@ -256,18 +256,18 @@ function render(){
     const list=db.habits.map(h=>{
       const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id); const w=weekDone(db.habitLog,h.id);
       const dots=Array.from({length:14},(_,i)=>{const dayK=daysBack(13-i); const ok=db.habitLog[dayK]&&db.habitLog[dayK][h.id]; return `<i class="${ok?"on":""}"></i>`;}).join("");
-      return `<article class="card"><label class="check"><input type="checkbox" data-h="${h.id}" ${on?"checked":""}/> <strong>${esc(h.name)}</strong> <span class="pill">streak ${st} · ${w}/7</span></label><div class="dots">${dots}</div></article>`;
+      return `<article class="card"><label class="check"><input type="checkbox" data-h="${h.id}" ${on?"checked":""}/> <strong>${esc(h.name)}</strong> <span class="pill">${st} giorni di fila · ${w}/7</span></label><div class="dots">${dots}</div></article>`;
     }).join("");
     const notes=(db.journal||[]).slice(0,6).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora.</p>`;
-    const tasks=[["t1","Leva in calendario"],["t2","Fatta almeno 3 volte"],["t3","Tolto uno spreco serale"],["t4","Detto a qualcuno"]];
+    const tasks=[["t1","Messa in calendario"],["t2","Fatta almeno 3 volte"],["t3","Tolto uno spreco la sera"],["t4","Detto a qualcuno"]];
     app.innerHTML=`<main class="step wide">
       <div class="flex-head"><div><p class="meta">Oggi · ${AXIS_LABEL[db.sim.weak]}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${pl.weeks[phase][0]} — ${pl.weeks[phase][1]}</p></div>${dayRing(day)}</div>
-      <h2 style="margin:36px 0 12px">Leve di oggi</h2>
+      <h2 style="margin:36px 0 12px">Le tue abitudini</h2>
       <div class="grid">${list}</div>
       <div class="row"><input id="newHabit" maxlength="60" placeholder="Aggiungi un'abitudine" style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px"/><button class="btn" id="addH">Aggiungi</button></div>
       <div class="grid" style="grid-template-columns:1.2fr .8fr;margin-top:36px">
-        <div><h2>Due righe, stasera</h2><label class="field"><textarea id="note" rows="4" placeholder="Cosa hai tenuto. Cosa hai lasciato."></textarea></label><button class="cta" id="saveN">Salva nota</button>${notes}</div>
-        <div><h2>Fasi</h2>${pl.weeks.map(([t,d],i)=>`<article class="card" style="margin-top:10px;${i===phase?"border-color:var(--border-strong)":""}"><h3>${t}</h3><p>${d}</p></article>`).join("")}${tasks.map(([id,label])=>`<label class="check"><input type="checkbox" data-c="${id}" ${db.checks[id]?"checked":""}/> ${label}</label>`).join("")}<div class="row"><button class="ghost" data-go="futuri">Rivedi i futuri</button></div></div>
+        <div><h2>Due righe, stasera</h2><label class="field"><textarea id="note" rows="4" placeholder="Cosa hai fatto. Cosa hai saltato."></textarea></label><button class="cta" id="saveN">Salva nota</button>${notes}</div>
+        <div><h2>Le 12 settimane</h2>${pl.weeks.map(([t,d],i)=>`<article class="card" style="margin-top:10px;${i===phase?"border-color:var(--border-strong)":""}"><h3>${t}</h3><p>${d}</p></article>`).join("")}${tasks.map(([id,label])=>`<label class="check"><input type="checkbox" data-c="${id}" ${db.checks[id]?"checked":""}/> ${label}</label>`).join("")}<div class="row"><button class="ghost" data-go="futuri">Rivedi i futuri</button></div></div>
       </div>
     </main>`;
     app.querySelectorAll("[data-h]").forEach(el=>el.onchange=()=>{if(!db.habitLog[t]) db.habitLog[t]={}; db.habitLog[t][el.dataset.h]=el.checked; save(db); render();});

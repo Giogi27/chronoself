@@ -38,14 +38,14 @@ window.CS.renderAccount = function () {
   const mail = CS.user ? CS.user.email : "";
   app.innerHTML = `<main class="step">
     <p class="meta">Account</p>
-    <h1 class="q">${CS.user ? "Sei dentro." : "Entra per salvare nel cloud."}</h1>
-    <p class="lede">${CS.user ? mail : "Email + password. Dopo la conferma torni su questo sito."}</p>
+    <h1 class="q">${CS.user ? "Il tuo account." : "Entra per salvare i tuoi dati."}</h1>
+    <p class="lede">${CS.user ? mail : "Email e password. Ti arriva una mail di conferma, poi torni qui."}</p>
     ${CS.user ? "" : `<label class="field">Email<input id="csEmail" type="email" /></label>
     <label class="field">Password (min 6)<input id="csPass" type="password" /></label>`}
     <p class="meta" id="csMsg">${CS.status || ""}</p>
     <div class="row">
       ${CS.user
-        ? `<button class="cta" id="csPush" style="margin-top:0">Salva ora</button><button class="btn" id="csPull">Scarica</button><button class="btn" id="csOut">Esci</button>`
+        ? `<button class="cta" id="csPush" style="margin-top:0">Salva ora</button><button class="btn" id="csPull">Recupera</button><button class="btn" id="csOut">Esci</button>`
         : `<button class="cta" id="csIn" style="margin-top:0">Accedi</button><button class="btn" id="csUp">Crea account</button>`}
     </div>
   </main>`;
