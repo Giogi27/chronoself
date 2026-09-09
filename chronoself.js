@@ -299,13 +299,13 @@ function chrome(){
   const dock=document.getElementById("dock");
   const logged=signedIn();
   const inside=inPlan();
-  const links=inside?[["oggi","Oggi"],["futuri","Futuri"]]:(logged&&db.sim?[["futuri","I tuoi futuri"]]:[["profilo","Simula"]]);
+  const links=inside?[["oggi","Oggi"],["futuri","Futuri"]]:(db.sim?[["futuri","I tuoi futuri"]]:[["profilo","Simula"]]);
   const extra=inside?[]:[["prezzi","Piano 90"]];
   const right=logged
     ?`<button class="ghost" data-go="account">Account</button>`
-    :`<button class="ghost" data-go="account">Accedi</button><button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`;
+    :`<button class="ghost" data-go="account">Accedi</button>${db.sim?"":`<button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`}`;
   nav.innerHTML=`<button class="brand" data-go="home">${MARK} Chrono<em>Self</em></button><div class="navlinks">${[...links,...extra].map(([v,l])=>`<button class="ghost ${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("")}</div><div>${right}</div>`;
-  const dockItems=inside?[["oggi","Oggi"],["futuri","Futuri"],["account","Account"]]:[["home","Home"],[logged&&db.sim?"futuri":"profilo",logged&&db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
+  const dockItems=inside?[["oggi","Oggi"],["futuri","Futuri"],["account","Account"]]:[["home","Home"],[db.sim?"futuri":"profilo",db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
   dock.innerHTML=dockItems.map(([v,l])=>`<button class="${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("");
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   document.querySelector("footer").style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
@@ -314,7 +314,6 @@ function chrome(){
 function go(v){
   if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
-  if(!signedIn() && (v==="oggi"||v==="futuri")){ v="account"; }
   if(v==="piano"||v==="diario"||v==="habits"){ v=inPlan()?"oggi":"prezzi"; }
   if((v==="futuri"||v==="oggi"||v==="soglia") && !db.sim){ v="profilo"; }
   state.view=v; render();
@@ -383,7 +382,7 @@ function render(){
   document.onkeydown=null;
   chrome();
   if(state.view==="home"){
-    const cta=inPlan()?"Vai a oggi":(signedIn()&&midQuiz())?`Riprendi (${db.quizI+1}/18)`:(signedIn()&&db.sim)?"Apri i tuoi futuri":"Inizia";
+    const cta=inPlan()?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
@@ -431,7 +430,7 @@ function render(){
       </div>
       <img src="./brand/loggia.jpg" alt="Tre archi, tre ore del giorno"/>
     </section>`;
-    const goStart=()=>{ if(inPlan()) return go("oggi"); if(signedIn()&&midQuiz()){ state.i=db.quizI; return go("simula"); } go(signedIn()&&db.sim?"futuri":"profilo"); };
+    const goStart=()=>{ if(inPlan()) return go("oggi"); if(midQuiz()){ state.i=db.quizI; return go("simula"); } go(db.sim?"futuri":"profilo"); };
     document.getElementById("start").onclick=goStart;
     document.getElementById("start2").onclick=goStart;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -483,9 +482,11 @@ function render(){
     const d=diagnose(db.sim.answers||db.answers); const play=playFor(d.primary.id);
     const who=(db.sim.profile||db.profile).nome||"Tu";
     const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
-    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">Il punto è ${esc(play.hole)}.</h1><p class="lede reveal" style="animation-delay:.4s">${esc(play.action)}</p><p class="lede reveal" style="animation-delay:.5s">Tre lettere. Poi questa cosa, per 90 giorni.</p><div class="row reveal" style="animation-delay:.55s"><button class="cta" id="enter">Leggi chi diventi</button></div></main>`;
-    document.getElementById("enter").onclick=()=>go("futuri");
-    document.onkeydown=e=>{ if(e.key==="Enter") document.getElementById("enter")?.click(); };
+    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">Il punto è ${esc(play.hole)}.</h1><p class="lede reveal" style="animation-delay:.4s">${esc(play.action)}</p><p class="lede reveal" style="animation-delay:.5s">Tre lettere. Poi questa cosa, per 90 giorni.</p><div class="row reveal" style="animation-delay:.55s"><button class="cta" id="enter" data-go="futuri">Leggi chi diventi</button></div></main>`;
+    const openLetters=()=>go("futuri");
+    document.getElementById("enter").onclick=openLetters;
+    document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+    document.onkeydown=e=>{ if(e.key==="Enter") openLetters(); };
     return;
   }
   if(state.view==="futuri"){
