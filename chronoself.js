@@ -370,13 +370,14 @@ function render(){
   document.onkeydown=null;
   chrome();
   if(state.view==="home"){
-    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Leggi chi diventi";
+    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
       <div class="hero-copy">
         <h1>Chi diventi<br>se continui così.</h1>
-        <p class="hero-line">A un anno. A cinque. A dieci.</p>
+        <p class="hero-lede">Diciotto domande su come stai, davvero. Sonno, soldi, lavoro, persone, abitudini.</p>
+        <p class="hero-lede">Da lì tre lettere, scritte da chi sarai: se lasci andare, se resti così, se cambi un po'. Poi una cosa da tenere, per novanta giorni.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
       </div>
       <div class="hero-photo">
