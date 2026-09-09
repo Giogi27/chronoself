@@ -370,17 +370,20 @@ function render(){
   document.onkeydown=null;
   chrome();
   if(state.view==="home"){
-    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia, è gratis";
+    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Apri la lettera";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
+    const then=new Date(); then.setFullYear(then.getFullYear()+1);
+    const dateline=then.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
     app.innerHTML=`<section class="hero-split">
-      <div>
-        <p class="meta">Non un tracker. Tre lettere da te futuro.</p>
-        <h1>Chi diventi se continui così.</h1>
-        <p class="lede">18 domande. Tre lettere scritte da te futuro. Poi una cosa da tenere, per 90 giorni.</p>
+      <article class="open-letter">
+        <p class="open-letter-when">${dateline}</p>
+        <h1>Ciao.<br>Sono tu,<br>tra un anno.</h1>
+        <p class="open-letter-body">Stamattina hai fatto una cosa. O non l'hai fatta.</p>
+        <p class="open-letter-punch">Io sono quella differenza.</p>
+        <p class="open-letter-sign">— Tu</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
-        <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>3</dt><dd>lettere</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
-      </div>
+      </article>
       <div class="hero-photo">
         <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
         ${clockFace()}
