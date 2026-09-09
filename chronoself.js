@@ -370,20 +370,15 @@ function render(){
   document.onkeydown=null;
   chrome();
   if(state.view==="home"){
-    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Apri la lettera";
+    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Leggi chi diventi";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
-    const then=new Date(); then.setFullYear(then.getFullYear()+1);
-    const dateline=then.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
     app.innerHTML=`<section class="hero-split">
-      <article class="open-letter">
-        <p class="open-letter-when">${dateline}</p>
-        <h1>Ciao.<br>Sono tu,<br>tra un anno.</h1>
-        <p class="open-letter-body">Stamattina hai fatto una cosa. O non l'hai fatta.</p>
-        <p class="open-letter-punch">Io sono quella differenza.</p>
-        <p class="open-letter-sign">— Tu</p>
+      <div class="hero-copy">
+        <h1>Chi diventi<br>se continui così.</h1>
+        <p class="hero-line">A un anno. A cinque. A dieci.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
-      </article>
+      </div>
       <div class="hero-photo">
         <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
         ${clockFace()}
