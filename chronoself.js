@@ -21,7 +21,6 @@ const QUESTIONS=[
 const AXES=["salute","soldi","lavoro","relazioni","abitudini"];
 const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relazioni",abitudini:"Abitudini"};
 const KIND_TITLE={deriva:"Se lasci andare",inerzia:"Se resti così",miglioramento:"Se cambi un po'"};
-const SUGGEST={salute:["A letto prima delle 23:30","30 minuti di movimento"],soldi:["Bonifico automatico, anche 50€","Annotare le uscite"],lavoro:["4 ore a settimana a imparare","Un blocco senza notifiche"],relazioni:["Una chiamata vera a settimana","Niente telefono a tavola"],abitudini:["Niente telefono i primi 20 minuti","Niente social dopo le 22"]};
 const KEY="chronoself.v2";
 const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
 const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); return d.innerHTML;};
@@ -31,23 +30,99 @@ const qstr=new URLSearchParams(location.search);
 const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null}, load());
 if(qstr.get("paid")==="1"){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); save(db); history.replaceState(null,"",location.pathname);}
 function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTIONS.forEach(q=>{acc[q.axis].s+=(a[q.id]??50);acc[q.axis].n++;}); const out={}; AXES.forEach(x=>out[x]=Math.round(acc[x].s/acc[x].n)); return out;}
-function project(score,y,kind){const d={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind]; return clamp(score+d*y*(1+y*0.08));}
 function weakest(base){return [...AXES].sort((a,b)=>base[a]-base[b])[0];}
-function lever(axis){return {salute:"Sonno fisso + 3 movimenti da 30 minuti a settimana.",soldi:"Bonifico automatico il giorno dello stipendio. Anche 50€.",lavoro:"4 ore a settimana su una competenza che il lavoro futuro chiede.",relazioni:"Una chiamata o cena vera a settimana, in agenda.",abitudini:"Togli 45 minuti di scroll serale."}[axis];}
-function story(p,y,kind){const avg=AXES.reduce((s,a)=>s+p[a],0)/5;const year=new Date().getFullYear()+y;const open={miglioramento:`Nel ${year} non sei un'altra persona. Sei la stessa, con due o tre abitudini tenute ogni giorno.`,deriva:`Nel ${year} niente è crollato in un giorno. È scivolato, un po' alla volta.`,inerzia:avg<50?`Nel ${year} la vita è riconoscibile: gli stessi problemi, un po' più stretti.`:`Nel ${year} è andato avanti da solo, senza grandi scossoni.`}[kind];const bits=[p.salute<45?"Il corpo ha poco margine: fatica, sonno corto, poca energia.":p.salute<70?"L'energia va e viene. Alcuni giorni tieni, altri no.":"Stai bene: hai energia di riserva.",p.soldi<45?"Un imprevisto ti mette in difficoltà in poche settimane.":p.soldi<70?"Tieni il passo, ma metti da parte poco.":"Hai dei risparmi a cui appoggiarti.",p.lavoro<45?"Dipendi da un lavoro che non controlli.":p.lavoro<70?"Lavori, ma la direzione la decidono altri.":"Stai imparando cose che ti serviranno.",p.relazioni<45?"I giorni pesanti li fai da solo.":p.relazioni<70?"I rapporti vanno avanti da soli, senza davvero tenersi.":"Hai persone a cui puoi dire la verità.",p.abitudini<45?"La giornata la decide il telefono.":p.abitudini<70?"Tieni alcune routine, altre le perdi.":"Tieni abbastanza promesse da vedere i risultati."];return [open,...bits].join(" ");}
-function facts(p,y){return [["Energia", p.salute>=70?"Buona":p.salute>=45?"Alti e bassi":"Bassa"],["Risparmi", p.soldi>=75?(Math.max(6,y*3)+"+ mesi"):p.soldi>=50?(Math.max(1,Math.round(y*.8))+"–"+Math.max(2,y)+" mesi"):"Poche settimane"],["Lavoro", p.lavoro>=70?"In crescita":p.lavoro>=45?"Fermo":"In ritardo"],["Persone", p.relazioni>=70?"Ci sei":p.relazioni>=45?"Poche":"Quasi da solo"]];}
-function simulate(answers,profile){const base=scoresFrom(answers); const horizons={}; [1,5,10].forEach(y=>{ horizons[y]={}; ["deriva","inerzia","miglioramento"].forEach(k=>{ const p={}; AXES.forEach(a=>p[a]=project(base[a],y,k)); horizons[y][k]={title:KIND_TITLE[k],narrative:story(p,y,k),facts:facts(p,y),scores:p}; }); }); return {at:new Date().toISOString(),profile,answers,scores:base,weak:weakest(base),horizons};}
-function planItems(weak){return {focus:lever(weak),weeks:[["Settimane 1–2","Una sola abitudine. Nient'altro."],["Settimane 3–4","Rendila automatica: stesso orario, stesso posto."],["Settimane 5–8","Tienila. Una volta a settimana, guarda come sta andando."],["Settimane 9–12","Rifai le 18 domande. Vedi se qualcosa si è mosso."]]};}
+function diagnose(answers){
+  const scores=scoresFrom(answers); const weak=weakest(scores);
+  const signals=QUESTIONS.map(q=>({id:q.id,axis:q.axis,score:answers[q.id]??50}));
+  signals.sort((a,b)=>{ if(Math.abs(a.score-b.score)>8) return a.score-b.score; return ACTIONABLE.indexOf(a.id)-ACTIONABLE.indexOf(b.id); });
+  let primary=signals[0];
+  if(primary.id==="energia"){
+    const drivers=["sonno","cibo","schermo","movimento"].map(id=>signals.find(s=>s.id===id)).filter(Boolean).sort((a,b)=>a.score-b.score);
+    if(drivers[0]&&drivers[0].score<=65) primary=drivers[0];
+  }
+  const secondary=signals.find(s=>s.id!==primary.id&&s.score<58&&s.id!=="energia")||null;
+  const strengths=[...signals].filter(s=>s.score>=70).sort((a,b)=>b.score-a.score).slice(0,3);
+  return {primary,secondary,strengths,scores,weak,balanced:primary.score>=62};
+}
+function lever(axis){return {salute:PLAY.sonno.action,soldi:PLAY.risparmio.action,lavoro:PLAY.competenza.action,relazioni:PLAY.legami.action,abitudini:PLAY.schermo.action}[axis];}
+function leverFor(answers){return playFor(diagnose(answers).primary.id).action;}
+function opener(kind,year,y,profile,play){
+  const age=parseInt(profile.eta,10); const ageThen=(age>12&&age<90)?age+y:null;
+  const ageBit=ageThen?`, a ${ageThen} anni`:"";
+  const who=(profile.nome||"").trim();
+  if(kind==="deriva") return `Nel ${year}${ageBit} niente è crollato in un giorno. È scivolato, un po' alla volta.`;
+  if(kind==="inerzia") return who?`Nel ${year}${ageBit} ${who} è ancora riconoscibile. Stessi nodi, un po' più vecchi.`:`Nel ${year}${ageBit} la vita è riconoscibile. Stessi nodi, un po' più vecchi.`;
+  return `Nel ${year}${ageBit} non sei un'altra persona. Sei la stessa — con ${play.hole} tenuto, giorno dopo giorno.`;
+}
+function story(d,p,y,kind,profile){
+  const year=new Date().getFullYear()+y; const play=playFor(d.primary.id);
+  const later=y>=5?(kind==="deriva"?` A ${y} anni di distanza il conto si vede.`:kind==="miglioramento"?` ${y} anni di giorni tenuti si vedono senza bisogno di raccontarli.`:` ${y} anni dopo, il tempo è passato comunque.`):"";
+  const sec=d.secondary?(kind==="deriva"?` Intanto ${playFor(d.secondary.id).hole} non è stato toccato.`:kind==="inerzia"?` ${playFor(d.secondary.id).label} resta com'è.`:` E ${playFor(d.secondary.id).hole} ha seguito, un po'.`):"";
+  const str=d.strengths.length?(kind==="deriva"?` Quello che teneva — ${d.strengths.map(s=>playFor(s.id).label).join(", ")} — alla lunga sente il peso.`:kind==="inerzia"?` Tiene ancora: ${d.strengths.map(s=>playFor(s.id).label).join(", ")}.`:` Quello che già tenevi — ${d.strengths.map(s=>playFor(s.id).label).join(", ")} — ha più spazio.`):"";
+  const spread=(kind==="deriva"&&p[d.weak]<40)?` ${AXIS_LABEL[d.weak]} è il punto da cui il resto si è piegato.`:"";
+  return `${opener(kind,year,y,profile,play)} ${play.futures[kind]}${later}${sec}${str}${spread}`.replace(/\s+/g," ").trim();
+}
+function facts(p,d){
+  const play=playFor(d.primary.id);
+  const focusAxis=(QUESTIONS.find(q=>q.id===d.primary.id)||{axis:d.weak}).axis;
+  const n=p[focusAxis];
+  const word=n>=70?"tiene":n>=45?"in bilico":"il buco";
+  return [[play.label,word],["Se manca lo stipendio", p.soldi>=75?"Diversi mesi":p.soldi>=50?"Qualche mese":"Pochi giorni"],["Telefono", p.abitudini>=70?"Sotto controllo":p.abitudini>=45?"Troppe ore":"Mangia le sere"],["Persone", p.relazioni>=70?"Ci sei":p.relazioni>=45?"Poche":"Quasi da solo"]];
+}
+function project(score,y,kind,axis,weak,focusAxis){
+  let delta={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind];
+  if(axis===weak) delta*=1.2;
+  if(axis===focusAxis) delta*=kind==="miglioramento"?1.35:1.15;
+  return clamp(score+delta*y*(1+y*0.08));
+}
+function simulate(answers,profile){
+  const d=diagnose(answers); const horizons={};
+  const focusAxis=(QUESTIONS.find(q=>q.id===d.primary.id)||{axis:d.weak}).axis;
+  [1,5,10].forEach(y=>{ horizons[y]={}; ["deriva","inerzia","miglioramento"].forEach(k=>{ const p={}; AXES.forEach(a=>p[a]=project(d.scores[a],y,k,a,d.weak,focusAxis)); horizons[y][k]={title:KIND_TITLE[k],narrative:story(d,p,y,k,profile),facts:facts(p,d),scores:p}; }); });
+  return {at:new Date().toISOString(),profile,answers,scores:d.scores,weak:d.weak,focus:d.primary.id,secondary:d.secondary?d.secondary.id:null,horizons};
+}
+function planItems(answers){
+  const d=diagnose(answers); const play=playFor(d.primary.id);
+  return {focus:play.action,why:play.why,prompt:play.prompt,label:play.label,hole:play.hole,weeks:play.weeks,balanced:d.balanced};
+}
+function mergeHabits(habits,answers){
+  const d=diagnose(answers); const wanted=[...playFor(d.primary.id).habits];
+  if(d.secondary) wanted.push(playFor(d.secondary.id).habits[0]);
+  const have=new Set(habits.map(h=>h.name)); const next=habits.slice();
+  [...wanted].reverse().forEach((name,i)=>{ if(!have.has(name)){ next.unshift({id:"h"+Date.now().toString(36)+i,name}); have.add(name);} });
+  return next.slice(0,6);
+}
+function seedHabits(answers){return mergeHabits([],answers);}
 function dayN(){ if(!db.planStart) return 1; return Math.min(90, Math.max(1, Math.floor((Date.now()-new Date(db.planStart))/86400000)+1)); }
 function currentPhase(day){ if(day<=14) return 0; if(day<=28) return 1; if(day<=56) return 2; return 3; }
 function today(){return new Date().toISOString().slice(0,10);}
 function daysBack(n){const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10);}
 function tone(n){return n>=70?"good":n>=45?"mid":"low";}
-function seedHabits(weak){return (SUGGEST[weak]||SUGGEST.abitudini).map((name,i)=>({id:"h"+(i+1),name}));}
 function streak(log,id){let n=0; for(let i=0;i<90;i++){const day=daysBack(i); if(log[day]&&log[day][id]) n++; else if(i===0) continue; else break;} return n;}
 function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); if(log[day]&&log[day][id]) c++;} return c;}
-function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim&&!db.habits.length) db.habits=seedHabits(db.sim.weak); save(db);}
+function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
 async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview||!res.ok){unlockPro(); go("oggi"); return;} alert(data.error||"Stripe non configurato.");}catch(e){unlockPro(); go("oggi");}}
+function diagnosisCard(answers){
+  const d=diagnose(answers); const play=playFor(d.primary.id);
+  const tone=d.primary.score>=70?"good":d.primary.score>=45?"mid":"low";
+  return `<section class="diag">
+    <div>
+      <p class="meta">${d.balanced?"Il punto più basso":"Il punto debole"}</p>
+      <h2>${esc(play.label)}</h2>
+      <p class="diag-score ${tone}">${d.primary.score}</p>
+      <p class="lede" style="margin-top:4px">su 100 · ${AXIS_LABEL[d.primary.axis]}</p>
+      <p class="lede">${esc(play.why)}</p>
+      ${d.secondary?`<p class="lede">Dietro c'è anche ${esc(playFor(d.secondary.id).label.toLowerCase())} (${d.secondary.score}).</p>`:""}
+      ${d.strengths.length?`<p class="lede">Tiene: ${d.strengths.map(s=>playFor(s.id).label).join(", ")}.</p>`:""}
+    </div>
+    <div class="diag-action">
+      <p class="meta">Cosa fare</p>
+      <h3>${esc(play.action)}</h3>
+      <ul class="ok">${play.habits.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
+      <p>Gratis vedi cosa succede tra un anno. Il Piano 90 è per tenere questa cosa, ogni giorno.</p>
+    </div>
+  </section>`;
+}
 function axisBars(scores){return AXES.map(a=>`<div class="axisbar"><span>${AXIS_LABEL[a]}</span><div class="bar ${tone(scores[a])}"><span style="width:${scores[a]}%"></span></div><span class="num">${scores[a]}</span></div>`).join("");}
 function radar(scores){const SIZE=280,CX=140,CY=140,R=104; const pt=(i,r)=>{const ang=-Math.PI/2+(i*2*Math.PI)/5; return [CX+r*Math.cos(ang),CY+r*Math.sin(ang)];}; const ring=f=>AXES.map((_,i)=>pt(i,R*f).join(",")).join(" "); const poly=AXES.map((a,i)=>pt(i,(scores[a]/100)*R).join(",")).join(" "); const labels=AXES.map((a,i)=>{const [x,y]=pt(i,R+22); return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" fill="#6a6358" font-size="11" font-family="Outfit,sans-serif">${AXIS_LABEL[a]}</text>`;}).join(""); return `<svg class="radar-wrap" viewBox="0 0 ${SIZE} ${SIZE}" role="img">${[0.25,0.5,0.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="#1b1914" stroke-opacity=".12"/>`).join("")}${AXES.map((_,i)=>{const [x,y]=pt(i,R); return `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="#1b1914" stroke-opacity=".12"/>`;}).join("")}<polygon points="${poly}" fill="#2a332e" fill-opacity=".12" stroke="#2a332e" stroke-opacity=".75" stroke-width="1.5"/>${labels}</svg>`;}
 function dayRing(day){const r=42,c=2*Math.PI*r,pct=day/90; return `<div class="dayring"><svg viewBox="0 0 108 108"><circle cx="54" cy="54" r="${r}" fill="none" stroke="#e7dfd0" stroke-width="6"/><circle cx="54" cy="54" r="${r}" fill="none" stroke="#2a332e" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c*pct} ${c}"/></svg><div class="n"><div><div class="q" style="font-size:28px">${day}</div><div class="meta">di 90</div></div></div></div>`;}
@@ -223,23 +298,30 @@ function render(){
       <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Vedi i tuoi futuri"}</button></div></main>`;
     document.getElementById("rng").oninput=e=>{const n=Number(e.target.value); db.answers[q.id]=n; e.target.previousElementSibling.innerHTML=`<strong style="font-size:28px;color:var(--fg)">${n}</strong> / 100`;};
     document.getElementById("back").onclick=()=>{if(state.i>0){state.i--;render();}};
-    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++;render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak}); db.history=db.history.slice(0,12); if(!db.habits.length) db.habits=seedHabits(sim.weak); save(db); go("futuri"); };
+    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++;render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus}); db.history=db.history.slice(0,12); db.habits=mergeHabits(db.habits,db.answers); save(db); go("futuri"); };
     return;
   }
   if(state.view==="futuri"){
     if(!db.sim){go("profilo");return;}
-    const s=db.sim; const who=s.profile.nome||"Tu"; if(!db.pro && state.h!==1) {/* keep */}
+    const live=simulate(db.sim.answers||db.answers, db.sim.profile||db.profile);
+    const s=Object.assign({}, db.sim, live);
+    const who=s.profile.nome||"Tu";
+    const d=diagnose(s.answers);
+    const play=playFor(d.primary.id);
     const locked=!db.pro && state.h>1;
     const pack=s.horizons[locked?1:state.h];
     const cols=["deriva","inerzia","miglioramento"].map(id=>{const x=pack[id]; return `<article class="card"><h3>${KIND_TITLE[id]}</h3><p>${x.narrative}</p><ul class="facts">${x.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;}).join("");
-    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${AXIS_LABEL[s.weak]}${db.pro?" · Piano 90":""}</p>
+    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${esc(play.label)}${db.pro?" · Piano 90":""}</p>
       <h1 class="q" style="font-size:40px">Come stai, oggi</h1>
-      <p class="lede">Tre versioni di te. Quella che lascia andare, quella che resta così, quella che cambia un po'.</p>
+      <p class="lede">I numeri escono dalle tue 18 risposte. Poi tre versioni di te, scritte da lì.</p>
       <div class="grid" style="grid-template-columns:minmax(0,18rem) 1fr;align-items:center">${radar(s.scores)}<div>${axisBars(s.scores)}</div></div>
+      ${diagnosisCard(s.answers)}
+      <p class="meta" style="margin-top:48px">Tre strade</p>
+      <h2 style="font-size:clamp(28px,4vw,40px);max-width:16ch;margin:12px 0 18px">Stessa vita. Tre direzioni.</h2>
       <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!db.pro&&y>1)?" · chiusi":""}</button>`).join("")}</div>
-      ${locked?paywall(`I prossimi ${state.h} anni restano chiusi.`,"Gratis vedi un anno. Con il Piano 90 vedi anche 5 e 10 anni, e tieni un'abitudine ogni giorno.",lever(s.weak)): `<div class="cols">${cols}</div>`}
+      ${locked?paywall(`I prossimi ${state.h} anni restano chiusi.`,"Gratis vedi un anno. Con il Piano 90 vedi anche 5 e 10 anni, e tieni questa abitudine ogni giorno.",play.action): `<div class="cols">${cols}</div>`}
       <div class="row">${db.pro?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Attiva il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
-      ${s && db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${AXIS_LABEL[h.weak]}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
+      ${db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${esc(h.focus?playFor(h.focus).label:AXIS_LABEL[h.weak])}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
     </main>`;
     app.querySelectorAll("[data-y]").forEach(b=>b.onclick=()=>{state.h=Number(b.dataset.y);render();});
     const pay=document.getElementById("pay"); if(pay) pay.onclick=startCheckout;
@@ -248,10 +330,13 @@ function render(){
   }
   if(state.view==="oggi"){
     if(!db.sim){go("profilo");return;}
-    if(!db.pro){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Abitudini, diario e calendario si aprono con il Piano 90.",lever(db.sim.weak)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
+    if(!db.pro){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Abitudini, diario e calendario si aprono con il Piano 90. L'abitudine è quella che esce dalle tue risposte.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
     if(!db.planStart){db.planStart=new Date().toISOString();save(db);}
-    if(!db.habits.length) db.habits=seedHabits(db.sim.weak);
-    const pl=planItems(db.sim.weak); const day=dayN(); const phase=currentPhase(day); const t=today();
+    const prevNames=db.habits.map(h=>h.name).join("|");
+    db.habits=mergeHabits(db.habits, db.sim.answers);
+    if(db.habits.map(h=>h.name).join("|")!==prevNames) save(db);
+    const pl=planItems(db.sim.answers); const day=dayN(); const phase=currentPhase(day); const t=today();
+    const isSunday=new Date().getDay()===0; const done90=day>=90;
     if(!db.habitLog[t]) db.habitLog[t]={};
     const list=db.habits.map(h=>{
       const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id); const w=weekDone(db.habitLog,h.id);
@@ -259,15 +344,17 @@ function render(){
       return `<article class="card"><label class="check"><input type="checkbox" data-h="${h.id}" ${on?"checked":""}/> <strong>${esc(h.name)}</strong> <span class="pill">${st} giorni di fila · ${w}/7</span></label><div class="dots">${dots}</div></article>`;
     }).join("");
     const notes=(db.journal||[]).slice(0,6).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora.</p>`;
-    const tasks=[["t1","Messa in calendario"],["t2","Fatta almeno 3 volte"],["t3","Tolto uno spreco la sera"],["t4","Detto a qualcuno"]];
+    const tasks=[["t1","Messa in calendario"],["t2","Fatta almeno 3 volte questa settimana"],["t3","Tolto uno spreco la sera"],["t4","Detto a qualcuno che la stai tenendo"]];
     app.innerHTML=`<main class="step wide">
-      <div class="flex-head"><div><p class="meta">Oggi · ${AXIS_LABEL[db.sim.weak]}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${pl.weeks[phase][0]} — ${pl.weeks[phase][1]}</p></div>${dayRing(day)}</div>
+      <div class="flex-head"><div><p class="meta">Giorno ${day} di 90 · ${esc(pl.label)}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${esc(pl.why)}</p><p class="lede">${esc(pl.weeks[phase][0])} — ${esc(pl.weeks[phase][1])}</p></div>${dayRing(day)}</div>
+      ${done90?`<section class="diag-action" style="margin:28px 0;border-radius:24px;padding:24px"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:""}
+      ${isSunday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Domenica</p><h3>Due minuti. Cosa hai tenuto questa settimana?</h3><p>Non una biografia. Quanti giorni su 7, e una riga su cosa l'ha resa facile o difficile.</p></section>`:""}
       <h2 style="margin:36px 0 12px">Le tue abitudini</h2>
       <div class="grid">${list}</div>
       <div class="row"><input id="newHabit" maxlength="60" placeholder="Aggiungi un'abitudine" style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px"/><button class="btn" id="addH">Aggiungi</button></div>
       <div class="grid" style="grid-template-columns:1.2fr .8fr;margin-top:36px">
-        <div><h2>Due righe, stasera</h2><label class="field"><textarea id="note" rows="4" placeholder="Cosa hai fatto. Cosa hai saltato."></textarea></label><button class="cta" id="saveN">Salva nota</button>${notes}</div>
-        <div><h2>Le 12 settimane</h2>${pl.weeks.map(([t,d],i)=>`<article class="card" style="margin-top:10px;${i===phase?"border-color:var(--border-strong)":""}"><h3>${t}</h3><p>${d}</p></article>`).join("")}${tasks.map(([id,label])=>`<label class="check"><input type="checkbox" data-c="${id}" ${db.checks[id]?"checked":""}/> ${label}</label>`).join("")}<div class="row"><button class="ghost" data-go="futuri">Rivedi i futuri</button></div></div>
+        <div><h2>Due righe, stasera</h2><label class="field"><textarea id="note" rows="4" placeholder="${esc(pl.prompt)}"></textarea></label><button class="cta" id="saveN">Salva nota</button>${notes}</div>
+        <div><h2>Le 12 settimane</h2>${pl.weeks.map(([t,d],i)=>`<article class="card" style="margin-top:10px;${i===phase?"outline:1px solid var(--border-strong)":""}"><h3>${t}</h3><p>${d}</p></article>`).join("")}${tasks.map(([id,label])=>`<label class="check"><input type="checkbox" data-c="${id}" ${db.checks[id]?"checked":""}/> ${label}</label>`).join("")}<div class="row"><button class="ghost" data-go="futuri">Rivedi i futuri</button></div></div>
       </div>
     </main>`;
     app.querySelectorAll("[data-h]").forEach(el=>el.onchange=()=>{if(!db.habitLog[t]) db.habitLog[t]={}; db.habitLog[t][el.dataset.h]=el.checked; save(db); render();});
