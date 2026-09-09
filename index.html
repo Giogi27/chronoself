@@ -1,289 +1,60 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>PRIME 72</title>
-  <meta name="theme-color" content="#0a0612" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="map-hud.css" />
-  <link rel="stylesheet" href="profile.css" />
-  <link rel="stylesheet" href="home.css" />
-  <link rel="stylesheet" href="pro.css" />
-  <link rel="stylesheet" href="dash.css" />
-  <link rel="stylesheet" href="race.css" />
-  <link rel="stylesheet" href="speed.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChronoSelf — i tuoi futuri possibili</title>
+  <meta name="description" content="Simula chi diventi tra 1, 5 e 10 anni a partire dalle abitudini di oggi." />
+  <style>
+    :root { --bg:#0e1014; --bg2:#161a21; --ink:#f3efe6; --muted:#9aa3b2; --line:#2a3140; --accent:#e8c07d; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Georgia,"Iowan Old Style",Palatino,serif;background:var(--bg);color:var(--ink);line-height:1.55;min-height:100vh}
+    button,input{font:inherit}
+    .wrap{width:min(1080px,calc(100% - 32px));margin:0 auto}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0 8px}
+    .brand{letter-spacing:.08em;font-size:13px;text-transform:uppercase;color:var(--accent);background:none;border:0;cursor:pointer}
+    .ghost{color:var(--muted);background:none;border:0;cursor:pointer;font-size:14px}
+    .hero{padding:72px 0 40px}
+    h1{font-size:clamp(36px,6vw,64px);line-height:1.05;font-weight:500;max-width:16ch}
+    .lede{margin-top:20px;color:var(--muted);max-width:46ch;font-size:18px}
+    .cta{display:inline-block;margin-top:28px;background:var(--accent);color:#1a1408;padding:12px 18px;border-radius:999px;font-size:15px;border:0;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px 0 80px}
+    .card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:20px}
+    .card h3{font-size:18px;font-weight:500;margin-bottom:8px}
+    .card p{color:var(--muted);font-size:15px}
+    .step{padding:40px 0 80px}
+    .q{font-size:clamp(24px,4vw,36px);max-width:22ch}
+    .meta{color:var(--muted);margin:12px 0 28px;font-size:14px}
+    .range{width:100%;accent-color:var(--accent)}
+    .labels{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:8px}
+    .row{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+    .btn{background:transparent;color:var(--ink);border:1px solid var(--line);padding:10px 16px;border-radius:999px;cursor:pointer}
+    .tabs{display:flex;gap:8px;margin:16px 0 24px;flex-wrap:wrap}
+    .tab{border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 12px;border-radius:999px;cursor:pointer}
+    .tab.on{color:#1a1408;background:var(--accent);border-color:var(--accent)}
+    .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .scenario h2{font-size:20px;margin-bottom:8px}
+    .scenario p{color:#d7d2c8;font-size:15px}
+    .facts{list-style:none;margin:14px 0}
+    .facts li{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding:8px 0;font-size:14px}
+    .levers{margin-top:10px;color:var(--muted);padding-left:18px;font-size:14px}
+    .axisbar{display:grid;grid-template-columns:90px 1fr 36px;gap:8px;align-items:center;margin:6px 0;font-size:13px;color:var(--muted)}
+    .bar{height:6px;background:#242a36;border-radius:99px;overflow:hidden}
+    .bar>span{display:block;height:100%;background:var(--accent)}
+    .disclaimer{color:var(--muted);font-size:13px;margin-top:28px;max-width:70ch}
+    footer{color:var(--muted);font-size:13px;padding:24px 0 48px;border-top:1px solid var(--line)}
+    @media(max-width:800px){.grid,.cols{grid-template-columns:1fr}.hero{padding-top:40px}}
+  </style>
 </head>
 <body>
-  <div class="noise"></div>
-  <header class="top">
-    <div class="brand" onclick="show('home')">
-      <span class="logo-mark">72</span>
-      <div><strong>PRIME 72</strong><small>19 NOV 2026</small></div>
-    </div>
+  <div class="wrap">
     <nav class="nav">
-      <button data-view="home" data-i18n="navHome">Home</button>
-      <button data-view="map" data-i18n="navMap">Mappa</button>
-      <button data-view="feed" data-i18n="navRace">Gara</button>
-      <button data-view="quiz" data-i18n="navProfile">Profilo</button>
-      <button data-view="dash" id="navDash" hidden data-i18n="navDash">Console</button>
-      <button data-view="pro" class="pro-btn" data-i18n="navPro">Pro</button>
-      <select id="langSel" onchange="setLang(this.value)" aria-label="Language">
-        <option value="it">IT</option>
-        <option value="en">EN</option>
-        <option value="es">ES</option>
-        <option value="fr">FR</option>
-        <option value="de">DE</option>
-        <option value="pt">PT</option>
-        <option value="ja">JP</option>
-      </select>
+      <button class="brand" id="goHome">ChronoSelf</button>
+      <button class="ghost" id="goPrivacy">Privacy</button>
     </nav>
-  </header>
-  <main>
-    <section id="view-home" class="view active">
-      <div class="hero">
-        <p class="kicker" data-i18n="kickerHome">GTA VI · 19 NOVEMBRE 2026</p>
-        <h1><span data-i18n="h1a">Il lancio è per tutti.</span><br><span data-i18n="h1b">Le prime 72 ore no.</span></h1>
-        <p class="lead" data-i18n="leadHome">Countdown, mappa, guide e comandi di gioco che si aprono alle date.</p>
-        <div class="countdown" id="countdown">
-          <div><b id="d">--</b><span data-i18n="days">giorni</span></div>
-          <div><b id="h">--</b><span data-i18n="hours">ore</span></div>
-          <div><b id="m">--</b><span data-i18n="mins">min</span></div>
-          <div><b id="s">--</b><span data-i18n="secs">sec</span></div>
-        </div>
-        <div class="cta-row">
-          <button class="btn primary" type="button" onclick="show('map')" data-i18n="ctaMap">Apri la mappa</button>
-          <button class="btn ghost" type="button" onclick="goConsoleOrPro()" data-i18n="ctaConsole">Entra in console</button>
-        </div>
-      </div>
-    </section>
-    <section id="view-map" class="view">
-      <div class="map-stage">
-        <div id="map"></div>
-        <button class="map-exit" type="button" onclick="show('home')">Home</button>
-        <div class="radar-bar">
-          <button type="button" class="active" data-filter="Tutti" onclick="setMapFilter('Tutti')" data-i18n="all">Tutti</button>
-          <button type="button" data-filter="Locale" onclick="setMapFilter('Locale')" data-i18n="loc">Locale</button>
-          <button type="button" data-filter="Spiaggia" onclick="setMapFilter('Spiaggia')" data-i18n="beach">Spiaggia</button>
-          <button type="button" data-filter="Quartiere" onclick="setMapFilter('Quartiere')" data-i18n="hood">Quartiere</button>
-          <button type="button" data-filter="Missione" onclick="setMapFilter('Missione')" data-i18n="mission">Missione</button>
-          <button type="button" data-filter="Easter egg" onclick="setMapFilter('Easter egg')" data-i18n="easter">Easter</button>
-        </div>
-        <aside class="map-dock pin-form">
-          <p class="hint" id="mapHint" data-i18n="mapHint">Tocca la mappa, dai un nome, invia.</p>
-          <h4 data-i18n="newSignal">Nuovo segnale</h4>
-          <input id="pinTitle" data-i18n-placeholder="pinName" placeholder="Nome location" />
-          <select id="pinType"><option>Locale</option><option>Spiaggia</option><option>Quartiere</option><option>Missione</option><option>Easter egg</option></select>
-          <textarea id="pinNote" rows="2" data-i18n-placeholder="pinNote" placeholder="Nota corta"></textarea>
-          <button class="btn primary full" type="button" onclick="addPin()" data-i18n="send">Invia</button>
-          <p class="kicker" style="margin-top:16px" id="radarCount">0</p>
-          <div id="radarList"></div>
-        </aside>
-      </div>
-    </section>
-    <section id="view-feed" class="view">
-      <div class="race-hero">
-        <p class="kicker" data-i18n="raceKicker">STAGIONE 1 · LANCIO</p>
-        <h2 data-i18n="raceTitle">Classifica pin</h2>
-        <p class="lead" data-i18n="raceLead">Parte il 19 novembre 2026 e chiude dopo 30 giorni. Poi arrivano altre gare.</p>
-        <p id="raceYou" class="race-pos"></p>
-      </div>
-      <div class="race-grid">
-        <div>
-          <h3 data-i18n="boardTitle">Classifica</h3>
-          <div id="raceBoard" class="race-board"></div>
-        </div>
-        <aside class="race-aside">
-          <article class="hud">
-            <h3 data-i18n="raceHow">Come si gioca</h3>
-            <ol class="race-ol">
-              <li data-i18n="race1">Attiva l’abbonamento mensile.</li>
-              <li data-i18n="race2">Metti il tuo nome in Profilo.</li>
-              <li data-i18n="race3">Apri Mappa, tocca un punto, dai un nome, Invia.</li>
-              <li data-i18n="race4">Se il pin è reale entra in classifica.</li>
-            </ol>
-            <button class="btn primary full" type="button" onclick="show('map')" data-i18n="raceDrop">Piazza un pin</button>
-          </article>
-          <article class="hud">
-            <h3 data-i18n="raceRules">Regole</h3>
-            <ul class="race-rules">
-              <li data-i18n="rule1">Contano solo i pin accettati.</li>
-              <li data-i18n="rule2">Doppi e fake non valgono.</li>
-              <li data-i18n="rule3">Stagione 1: 19 nov – 19 dic 2026.</li>
-            </ul>
-          </article>
-          <article class="hud">
-            <h3 data-i18n="prizeTitle">Premi stagione 1</h3>
-            <p data-i18n="prizeBody">1° 100 € PlayStation Store · 2° 50 € · 3° 25 €. Codici via email a fine stagione.</p>
-          </article>
-          <article class="hud" id="raceCta">
-            <h3 data-i18n="packTitle">PRIME 72</h3>
-            <ul class="race-rules">
-              <li data-i18n="pack1">Entri in questa gara</li>
-              <li data-i18n="pack2">Guide 12 e 19 novembre</li>
-              <li data-i18n="pack3">Cheat dal 19 novembre</li>
-              <li data-i18n="pack4">Sala + pin col tuo nome</li>
-            </ul>
-            <button class="btn primary full" type="button" onclick="show('pro')" data-i18n="packBtn">Abbonati 4,99 € / mese</button>
-          </article>
-        </aside>
-      </div>
-    </section>
-    <section id="view-quiz" class="view">
-      <p class="kicker">IDENTITÀ</p>
-      <h2>Profilo</h2>
-      <p class="lead">Questo nome esce sui pin e in classifica.</p>
-      <div class="id-card">
-        <label class="id-photo">
-          <div id="opPreview" class="op-preview">72</div>
-          <input id="opPhoto" type="file" accept="image/*" hidden />
-          <span>Tocca per la foto</span>
-        </label>
-        <div class="id-fields">
-          <label for="opName">Nome</label>
-          <input id="opName" name="p72-op-name" autocomplete="off" placeholder="Inserisci nome" />
-          <label for="opCrew">Tag crew</label>
-          <input id="opCrew" name="p72-op-crew" autocomplete="off" placeholder="Inserisci tag" />
-          <button class="btn primary full" type="button" onclick="saveOperator()">Salva identità</button>
-        </div>
-      </div>
-      <div class="quiz" id="quizBox"></div>
-    </section>
-    <section id="view-dash" class="view">
-      <div class="cockpit">
-        <header class="cockpit-top">
-          <div class="dash-avatar" id="dashAvatar">72</div>
-          <div class="cockpit-who">
-            <span class="kicker">CONSOLE</span>
-            <h2 id="dashName">Operatore</h2>
-            <p id="dashCrew"></p>
-          </div>
-          <div class="cockpit-pips">
-            <div><b id="kpiPins">0</b><i>pin</i></div>
-            <div><b id="kpiDone">0/8</b><i>ok</i></div>
-            <div><b id="kpiVault">0/6</b><i>vault</i></div>
-            <div><b>19.11</b><i>drop</i></div>
-          </div>
-          <div class="dash-actions">
-            <div class="dash-status"><b>LIVE</b></div>
-            <button class="btn ghost" type="button" onclick="cancelSubscription()">Disdici</button>
-            <button class="btn ghost" type="button" onclick="logoutConsole()">Esci</button>
-          </div>
-        </header>
-        <div class="brief" id="dailyBrief"></div>
-        <div class="cockpit-body">
-          <article class="hud hud-main">
-            <span class="tag live">VAULT</span>
-            <div id="vaultGrid" class="vault-grid"></div>
-            <div id="checkList"></div>
-          </article>
-          <div class="cockpit-side">
-            <article class="hud">
-              <textarea id="salaText" rows="3" maxlength="280"></textarea>
-              <button class="btn primary full" type="button" onclick="addSala()">OK</button>
-              <div id="salaList" class="feed" style="margin-top:10px"></div>
-            </article>
-            <article class="hud"><div id="myPins"></div></article>
-            <article class="hud">
-              <h3>Contattaci</h3>
-              <p class="hint">Problemi o idee. Arrivano in admin.</p>
-              <input id="dashEmail" placeholder="tua email" />
-              <textarea id="inboxText" rows="4" maxlength="1000" placeholder="Messaggio"></textarea>
-              <button class="btn primary full" type="button" onclick="sendInbox()">Invia</button>
-              <button class="btn ghost full" type="button" onclick="cancelSubscription()">Disdici abbonamento</button>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section id="view-pro" class="view">
-      <div class="pro-hero">
-        <div class="pro-copy">
-          <p class="kicker" data-i18n="proKicker">ABBONAMENTO · 4,99 € / MESE</p>
-          <h2><span data-i18n="proH2a">Il 19 novembre</span><br><span data-i18n="proH2b">non partire a caso.</span></h2>
-          <p class="lead" data-i18n="proLead">Guide, cheat, sala, pin, gara e dashboard.</p>
-          <ul class="perks">
-            <li data-i18n="perkRace">Gara pin — stagione 1 dal lancio, poi nuove gare.</li>
-            <li data-i18n="perkGuide">Guide di completamento — 12 e 19 novembre.</li>
-            <li data-i18n="perkCheat">Cheat e comandi di gioco — dal 19 novembre.</li>
-            <li data-i18n="perkNight">Prima notte — le prime 8 ore.</li>
-            <li data-i18n="perkSala">Sala + pin col tuo nome</li>
-            <li data-i18n="perkDash">Dashboard account: pin, sala, vault, gestione abbonamento.</li>
-          </ul>
-          <div class="price"><strong>4,99 €</strong><span data-i18n="month">al mese</span></div>
-        </div>
-        <div class="pin-form" autocomplete="off">
-          <h4 data-i18n="activate">Attiva la console</h4>
-          <label class="hint" for="loginName">Inserisci nome utente</label>
-          <input id="loginName" name="p72-user" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Inserisci nome utente" value="" />
-          <label class="hint" for="loginCode">Inserisci il tuo codice</label>
-          <input id="loginCode" name="p72-code" type="password" autocomplete="new-password" placeholder="Inserisci il tuo codice" value="" />
-          <button class="btn primary full" type="button" onclick="payWithStripe()" data-i18n="pay">Paga 4,99 € / mese</button>
-          <button class="btn ghost full" type="button" onclick="loginConsole()" data-i18n="already">Ho gia l’abbonamento</button>
-        </div>
-      </div>
-    </section>
-    <section id="view-admin" class="view">
-      <div class="ops-wrap">
-        <header class="ops-head">
-          <div>
-            <p class="kicker">BASE OPERATIVA</p>
-            <h2>Command</h2>
-            <p class="hint">Pin, inbox, sala, abbonamenti Stripe.</p>
-          </div>
-          <div class="ops-lock">
-            <input id="adminSecret" type="password" placeholder="password admin" />
-            <button class="btn primary" type="button" onclick="bootOps()">Apri command</button>
-          </div>
-        </header>
-        <div class="ops-kpis">
-          <div><b id="kpiPend">–</b><i>coda</i></div>
-          <div><b id="kpiLive">–</b><i>live</i></div>
-          <div><b id="kpiMsg">–</b><i>inbox</i></div>
-          <div><b id="kpiSala">–</b><i>sala</i></div>
-          <div><b id="kpiSub">–</b><i>sub</i></div>
-        </div>
-        <div class="ops-tabs">
-          <button type="button" class="on" data-ops="coda" onclick="opsTab('coda')">Coda pin</button>
-          <button type="button" data-ops="live" onclick="opsTab('live')">Pin live</button>
-          <button type="button" data-ops="inbox" onclick="opsTab('inbox')">Inbox</button>
-          <button type="button" data-ops="sala" onclick="opsTab('sala')">Sala</button>
-          <button type="button" data-ops="subs" onclick="opsTab('subs')">Abbonamenti</button>
-        </div>
-        <div id="ops-coda" class="ops-pane on">
-          <div id="adminMap"></div>
-          <div id="adminList"></div>
-        </div>
-        <div id="ops-live" class="ops-pane"><div id="opsLiveList"></div></div>
-        <div id="ops-inbox" class="ops-pane"><div id="adminInbox"></div></div>
-        <div id="ops-sala" class="ops-pane"><div id="opsSala"></div></div>
-        <div id="ops-subs" class="ops-pane"><div id="opsSubs"></div></div>
-      </div>
-    </section>
-  </main>
-  <footer><p data-i18n="footer">Prototipo indipendente.</p></footer>
-  <div id="toast" hidden></div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="i18n.js"></script>
-  <script src="pro-perks.js"></script>
-  <script src="app.js"></script>
-  <script src="map-radar.js"></script>
-  <script src="map-labels.js"></script>
-  <script src="map-skin.js"></script>
-  <script src="vault.js"></script>
-  <script src="sala.js"></script>
-  <script src="inbox.js"></script>
-  <script src="ops.js"></script>
-  <script src="race.js"></script>
-  <script src="stripe-buy.js"></script>
-  <script src="nofill.js"></script>
-  <script src="prizes.js"></script>
-  <script src="i18n-fix.js"></script>
-  <script src="i18n-more.js"></script>
+    <div id="app"></div>
+    <footer>Strumento di riflessione, non consulenza medica, finanziaria o legale. I dati restano nel tuo browser.</footer>
+  </div>
+  <script src="./chronoself.js"></script>
 </body>
 </html>
