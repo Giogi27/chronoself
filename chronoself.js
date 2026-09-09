@@ -108,6 +108,52 @@ function splitStory(t){
   return [t.slice(0,i+1), t.slice(i+2)];
 }
 function midQuiz(){ return Number.isInteger(db.quizI) && db.quizI>=0 && db.quizI<QUESTIONS.length; }
+function dayMode(){
+  const h=new Date().getHours();
+  if(h>=5&&h<11) return "mattina";
+  if(h>=11&&h<18) return "giorno";
+  if(h>=18&&h<23) return "sera";
+  return "notte";
+}
+function dayModeLine(mode,focusId){
+  if(mode==="notte"&&focusId==="sonno") return {kicker:"Notte",line:"È tardi. Telefono in un'altra stanza. Domani conti."};
+  if(mode==="mattina") return {kicker:"Mattina",line:"Prima questa cosa. Poi il resto della giornata."};
+  if(mode==="giorno") return {kicker:"Giorno",line:"Se non l'hai fatta, adesso. Prima che la sera la mangi."};
+  if(mode==="sera") return {kicker:"Sera",line:"Due righe, ora. Poi chiudi."};
+  return {kicker:"Notte",line:"Domani. Oggi è chiuso."};
+}
+function letterOf(kind,y,profile){
+  const then=new Date(); then.setFullYear(then.getFullYear()+y);
+  const when=then.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"});
+  const place={citta:"dalla città",paese:"dal paese",estero:"da fuori"}[profile.contesto]||"";
+  const age=parseInt(profile.eta,10); const ageThen=(age>12&&age<90)?age+y:null;
+  const who=(profile.nome||"").trim()||"Tu";
+  const span=y===1?"un anno":y+" anni";
+  const greet=kind==="deriva"?`Ciao. Sono tu, tra ${span}.`:kind==="inerzia"?`Ciao. Sono tu, tra ${span}. Quasi tutto è uguale.`:`Ciao. Sono tu, tra ${span}. Non sono un altro.`;
+  return {dateline:place?`${when} · ${place}`:when,greet,sign:`— ${who}${ageThen?`, ${ageThen} anni`:""}`,span};
+}
+function letterCard(kind,pack,y,profile){
+  const m=letterOf(kind,y,profile); const parts=splitStory(pack.narrative);
+  return `<article class="letter"><p class="dateline">${esc(m.dateline)}</p><p class="kind">${KIND_TITLE[kind]}</p><p class="greet">${esc(m.greet)}</p><p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<p class="sign">${esc(m.sign)}</p><ul class="facts">${pack.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;
+}
+function sealedLetter(y){
+  const span=y===1?"un anno":y+" anni";
+  return `<article class="letter sealed">${MARK}<p class="meta">Tra ${span}</p><h3>Lettera chiusa</h3><p>Scritta da te, tra ${span}. Tre versioni. Si apre con il Piano 90.</p><div class="row"><button class="cta light" id="pay">Apri le lettere</button></div></article>`;
+}
+function polarAt(deg,r,cx,cy){ const a=(deg-90)*Math.PI/180; return [+(cx+Math.cos(a)*r).toFixed(1), +(cy+Math.sin(a)*r).toFixed(1)]; }
+function arcPath(cx,cy,r,start,end){
+  const [x1,y1]=polarAt(start,r,cx,cy); const [x2,y2]=polarAt(end,r,cx,cy);
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${end-start>180?1:0} 1 ${x2} ${y2}`;
+}
+function lifeClock(scores,weak){
+  const CX=140,CY=140,R=108,GAP=8,SWEEP=72-GAP;
+  const arcs=AXES.map((a,i)=>{
+    const start=-90+i*72+GAP/2; const end=start+SWEEP; const filled=start+SWEEP*(scores[a]/100);
+    const cls=a===weak?"low":tone(scores[a]); const [lx,ly]=polarAt(start+SWEEP/2,R+22,CX,CY);
+    return `<path class="lc-bg" d="${arcPath(CX,CY,R,start,end)}"/>${scores[a]>4?`<path class="lc-${cls}" d="${arcPath(CX,CY,R,start,Math.max(start+3,filled))}"/>`:""}<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="#6a6358" font-size="11" font-family="Outfit,sans-serif">${AXIS_LABEL[a]}</text>`;
+  }).join("");
+  return `<svg class="life-clock" viewBox="0 0 280 280" role="img" aria-label="Le cinque aree">${arcs}<text x="${CX}" y="${CY-8}" text-anchor="middle" fill="#1b1914" font-size="16" font-family="Fraunces,Georgia,serif">${AXIS_LABEL[weak]}</text><text x="${CX}" y="${CY+14}" text-anchor="middle" fill="#6a6358" font-size="11" font-family="Outfit,sans-serif">il punto</text></svg>`;
+}
 function diagnosisCard(answers){
   const d=diagnose(answers); const play=playFor(d.primary.id);
   const cls=d.primary.score>=70?"good":d.primary.score>=45?"mid":"low";
@@ -134,8 +180,25 @@ function diagnosisCard(answers){
   </section>`;
 }
 function axisBars(scores){return AXES.map(a=>`<div class="axisbar"><span>${AXIS_LABEL[a]}</span><div class="bar ${tone(scores[a])}"><span style="width:${scores[a]}%"></span></div><span class="num">${scores[a]}</span></div>`).join("");}
-function radar(scores){const SIZE=280,CX=140,CY=140,R=104; const pt=(i,r)=>{const ang=-Math.PI/2+(i*2*Math.PI)/5; return [CX+r*Math.cos(ang),CY+r*Math.sin(ang)];}; const ring=f=>AXES.map((_,i)=>pt(i,R*f).join(",")).join(" "); const poly=AXES.map((a,i)=>pt(i,(scores[a]/100)*R).join(",")).join(" "); const labels=AXES.map((a,i)=>{const [x,y]=pt(i,R+22); return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" fill="#6a6358" font-size="11" font-family="Outfit,sans-serif">${AXIS_LABEL[a]}</text>`;}).join(""); return `<svg class="radar-wrap" viewBox="0 0 ${SIZE} ${SIZE}" role="img">${[0.25,0.5,0.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="#1b1914" stroke-opacity=".12"/>`).join("")}${AXES.map((_,i)=>{const [x,y]=pt(i,R); return `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="#1b1914" stroke-opacity=".12"/>`;}).join("")}<polygon points="${poly}" fill="#2a332e" fill-opacity=".12" stroke="#2a332e" stroke-opacity=".75" stroke-width="1.5"/>${labels}</svg>`;}
-function dayRing(day){const r=42,c=2*Math.PI*r,pct=day/90; return `<div class="dayring"><svg viewBox="0 0 108 108"><circle cx="54" cy="54" r="${r}" fill="none" stroke="#e7dfd0" stroke-width="6"/><circle cx="54" cy="54" r="${r}" fill="none" stroke="#2a332e" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c*pct} ${c}"/></svg><div class="n"><div><div class="q" style="font-size:28px">${day}</div><div class="meta">di 90</div></div></div></div>`;}
+function radar(scores,weak){ return lifeClock(scores, weak||weakest(scores)); }
+function yearClock(day){
+  const CX=54,CY=54,R=40;
+  const ticks=Array.from({length:90},(_,i)=>{
+    const ang=-90+i*4;
+    let done=false;
+    if(db.planStart){
+      const d=new Date(db.planStart); d.setDate(d.getDate()+i);
+      const k=d.toISOString().slice(0,10);
+      const log=db.habitLog[k];
+      done=!!(log&&Object.values(log).some(Boolean));
+    }
+    const past=i<day;
+    const [x1,y1]=polarAt(ang,R-2,CX,CY); const [x2,y2]=polarAt(ang,done?R+6:R+2,CX,CY);
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${done?"#2a332e":"#1b1914"}" stroke-width="${done?2:1}" stroke-opacity="${done?1:past?0.28:0.12}" stroke-linecap="round"/>`;
+  }).join("");
+  return `<div class="dayring yearclock"><svg viewBox="0 0 108 108">${ticks}</svg><div class="n"><div><div class="q" style="font-size:28px">${day}</div><div class="meta">di 90</div></div></div></div>`;
+}
+function dayRing(day){ return yearClock(day); }
 const MARK=`<span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".28"/><circle cx="16" cy="16" r="9.6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="46 16" transform="rotate(-28 16 16)"/><circle cx="16" cy="16" r="2.1" fill="currentColor"/></svg><span class="mark-sun"></span></span>`;
 const state={view:"home",i:0,h:1};
 const app=document.getElementById("app");
@@ -149,14 +212,14 @@ function chrome(){
   const dockItems=db.pro?[["oggi","Oggi"],["futuri","Futuri"],["account","Account"]]:[["home","Home"],[db.sim?"futuri":"profilo",db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
   dock.innerHTML=dockItems.map(([v,l])=>`<button class="${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("");
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-  document.querySelector("footer").style.display=state.view==="simula"?"none":"";
-  dock.style.display=state.view==="simula"?"none":"";
+  document.querySelector("footer").style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
+  dock.style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
 }
 function go(v){
   if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
   if(v==="piano"||v==="diario"||v==="habits"){ v=db.pro?"oggi":"prezzi"; }
-  if((v==="futuri"||v==="oggi") && !db.sim){ v="profilo"; }
+  if((v==="futuri"||v==="oggi"||v==="soglia") && !db.sim){ v="profilo"; }
   state.view=v; render();
 }
 function paywall(title,lede,leverText){
@@ -230,7 +293,7 @@ function render(){
       <div>
         <p class="meta">18 domande sulla tua vita</p>
         <h1>Chi diventi se continui così.</h1>
-        <p class="lede">Rispondi su salute, soldi, lavoro, persone e abitudini. Vedi tre versioni di te tra un anno. Se vuoi, tieni un'abitudine per 90 giorni.</p>
+        <p class="lede">18 domande. Tre lettere scritte da te futuro. Poi una cosa da tenere, ogni giorno.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
         <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>5</dt><dd>aree</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
       </div>
@@ -242,7 +305,7 @@ function render(){
     <div class="bleed marquee"><div class="marquee-track">${marquee}${marquee}</div></div>
     <section class="grid three" style="padding-top:64px">
       <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Come stai, davvero, in cinque parti della vita. Niente diagnosi, niente guru.</p></article>
-      <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre futuri</h3><p>Cosa succede se lasci andare, se resti così, o se cambi un po'. Scritto a 1, 5 e 10 anni.</p></article>
+      <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre lettere</h3><p>Da te, tra un anno: se lasci andare, se resti così, se cambi un po'.</p></article>
       <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Un'abitudine</h3><p>Scegli una cosa da fare ogni giorno. La sera, due righe. Per 90 giorni.</p></article>
     </section>
     <section class="thesis">
@@ -254,7 +317,7 @@ function render(){
       </div>
     </section>
     <section>
-      <p class="meta">Tre strade</p>
+      <p class="meta">Tre lettere</p>
       <h2 style="font-size:clamp(28px,4vw,44px);max-width:16ch;margin:12px 0 24px">Stessa vita. Tre direzioni.</h2>
       <div class="grid three" style="padding-top:0">
         <article class="card"><p class="k">01</p><h3>Se lasci andare</h3><p>Il punto debole resta lì. Col tempo pesa di più.</p></article>
@@ -310,12 +373,22 @@ function render(){
       <p class="lede num"><strong style="font-size:28px;color:var(--fg)">${val}</strong> / 100</p>
       <input class="range" id="rng" type="range" min="0" max="100" value="${val}" />
       <div class="labels"><span>${q.min}</span><span>${q.max}</span></div>
-      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Vedi i tuoi futuri"}</button></div></main>`;
+      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Vedi il punto"}</button></div></main>`;
     document.getElementById("rng").oninput=e=>{const n=Number(e.target.value); db.answers[q.id]=n; save(db); e.target.previousElementSibling.innerHTML=`<strong style="font-size:28px;color:var(--fg)">${n}</strong> / 100`;};
     document.getElementById("back").onclick=()=>{if(state.i>0){state.i--; db.quizI=state.i; save(db); render();}};
-    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.quizI=null; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus}); db.history=db.history.slice(0,12); db.habits=mergeHabits(db.habits,db.answers); save(db); go("futuri"); };
+    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.quizI=null; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus}); db.history=db.history.slice(0,12); db.habits=mergeHabits(db.habits,db.answers); save(db); go("soglia"); };
     document.getElementById("rng").focus();
     document.onkeydown=e=>{ if(state.view!=="simula") return; if(e.key==="Enter"){ e.preventDefault(); document.getElementById("next").click(); } };
+    return;
+  }
+  if(state.view==="soglia"){
+    if(!db.sim){go("profilo");return;}
+    const d=diagnose(db.sim.answers||db.answers); const play=playFor(d.primary.id);
+    const who=(db.sim.profile||db.profile).nome||"Tu";
+    const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
+    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">Il punto è ${esc(play.hole)}.</h1><p class="lede reveal" style="animation-delay:.4s">${esc(play.action)}</p><div class="row reveal" style="animation-delay:.55s"><button class="cta" id="enter">Leggi chi diventi</button></div></main>`;
+    document.getElementById("enter").onclick=()=>go("futuri");
+    document.onkeydown=e=>{ if(e.key==="Enter") document.getElementById("enter")?.click(); };
     return;
   }
   if(state.view==="futuri"){
@@ -327,16 +400,16 @@ function render(){
     const play=playFor(d.primary.id);
     const locked=!db.pro && state.h>1;
     const pack=s.horizons[locked?1:state.h];
-    const cols=["deriva","inerzia","miglioramento"].map(id=>{const x=pack[id]; const parts=splitStory(x.narrative); return `<article class="card"><h3>${KIND_TITLE[id]}</h3><p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<ul class="facts">${x.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;}).join("");
+    const cols=["deriva","inerzia","miglioramento"].map(id=>letterCard(id,pack[id],state.h,s.profile)).join("");
     app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${esc(play.label)}${db.pro?" · Piano 90":""}</p>
       <h1 class="q" style="font-size:40px">Come stai, oggi</h1>
-      <p class="lede">I numeri escono dalle tue 18 risposte. Poi tre versioni di te, scritte da lì.</p>
-      <div class="scores-grid">${radar(s.scores)}<div>${axisBars(s.scores)}</div></div>
+      <p class="lede">I numeri escono dalle tue 18 risposte. Poi tre lettere, scritte da te futuro.</p>
+      <div class="scores-grid">${radar(s.scores,d.weak)}<div>${axisBars(s.scores)}</div></div>
       ${diagnosisCard(s.answers)}
-      <p class="meta" style="margin-top:48px">Tre strade</p>
+      <p class="meta" style="margin-top:48px">Tre lettere</p>
       <h2 style="font-size:clamp(28px,4vw,40px);max-width:16ch;margin:12px 0 18px">Stessa vita. Tre direzioni.</h2>
-      <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!db.pro&&y>1)?" · chiusi":""}</button>`).join("")}</div>
-      ${locked?paywall(`I prossimi ${state.h} anni restano chiusi.`,"Gratis vedi un anno. Con il Piano 90 vedi anche 5 e 10 anni, e tieni questa abitudine ogni giorno.",play.action): `<div class="cols">${cols}</div>`}
+      <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!db.pro&&y>1)?" · chiuse":""}</button>`).join("")}</div>
+      ${locked?sealedLetter(state.h): `<div class="cols">${cols}</div>`}
       <div class="row">${db.pro?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Attiva il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
       ${db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${esc(h.focus?playFor(h.focus).label:AXIS_LABEL[h.weak])}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
     </main>`;
@@ -353,6 +426,7 @@ function render(){
     db.habits=mergeHabits(db.habits, db.sim.answers);
     if(db.habits.map(h=>h.name).join("|")!==prevNames) save(db);
     const pl=planItems(db.sim.answers); const day=dayN(); const phase=currentPhase(day); const t=today();
+    const mode=dayMode(); const mood=dayModeLine(mode, diagnose(db.sim.answers).primary.id);
     const isSunday=new Date().getDay()===0; const done90=day>=90;
     const yest=daysBack(1);
     const missedYest=day>1 && db.habits.some(h=>!(db.habitLog[yest]&&db.habitLog[yest][h.id]));
@@ -366,7 +440,7 @@ function render(){
     const notes=(db.journal||[]).slice(0,6).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora.</p>`;
     const tasks=[["t1","Messa in calendario"],["t2","Fatta almeno 3 volte questa settimana"],["t3","Tolto uno spreco la sera"],["t4","Detto a qualcuno che la stai tenendo"]];
     app.innerHTML=`<main class="step wide">
-      <div class="flex-head"><div><p class="meta">Giorno ${day} di 90 · ${esc(pl.label)}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${esc(pl.why)}</p><p class="lede">${esc(pl.weeks[phase][0])} — ${esc(pl.weeks[phase][1])}</p></div>${dayRing(day)}</div>
+      <div class="flex-head"><div><p class="meta">${esc(mood.kicker)} · Giorno ${day} di 90 · ${esc(pl.label)}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${esc(mood.line)}</p><p class="lede">${esc(pl.why)}</p><p class="lede">${esc(pl.weeks[phase][0])} — ${esc(pl.weeks[phase][1])}</p></div>${yearClock(day)}</div>
       ${done90?`<section class="diag-action" style="margin:28px 0;border-radius:24px;padding:24px"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:""}
       ${isSunday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Domenica</p><h3>Due minuti. Cosa hai tenuto questa settimana?</h3><p>Non una biografia. Quanti giorni su 7, e una riga su cosa l'ha resa facile o difficile.</p></section>`:""}
       ${missedYest&&!doneToday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Ieri</p><h3>Non l'hai spuntata. Va bene.</h3><p>Oggi conta di più di ieri. Una volta, adesso.</p></section>`:""}

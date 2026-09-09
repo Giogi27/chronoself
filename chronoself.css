@@ -185,7 +185,38 @@ footer { display: flex; justify-content: space-between; align-items: center; col
 @media (min-width: 800px) { .scores-grid { grid-template-columns: minmax(0,18rem) 1fr; } }
 .weights { margin-top: 8px; }
 .weight { display: grid; grid-template-columns: 90px 1fr 36px; gap: 8px; align-items: center; margin: 8px 0; font-size: 13px; color: var(--muted); }
-.future-open { color: var(--fg); font-size: 16px; margin-top: 12px; }
+.letter {
+  background: var(--surface);
+  border-radius: 4px 24px 24px 24px;
+  padding: 32px 28px 36px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.letter .dateline { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--subtle); font-weight: 500; }
+.letter .kind { color: var(--muted); font-size: 14px; margin-top: 10px; }
+.letter .greet { font-family: var(--display); font-style: italic; font-size: 22px; margin: 16px 0 12px; letter-spacing: -0.03em; }
+.letter .sign { font-family: var(--display); font-style: italic; margin-top: 28px; }
+.letter.sealed {
+  background: var(--primary); color: var(--primary-fg); min-height: 280px; justify-content: flex-end;
+}
+.letter.sealed .meta, .letter.sealed p { color: rgb(243 238 228 / 0.75); }
+.letter.sealed h3 { color: var(--primary-fg); font-size: 32px; max-width: 12ch; }
+.letter.sealed .mark { width: 48px; height: 48px; margin-bottom: 18px; color: rgb(243 238 228 / 0.85); }
+.soglia { min-height: 72vh; display: grid; place-items: center; text-align: center; padding: 48px 0; }
+.soglia .mark { width: 56px; height: 56px; margin: 0 auto 24px; }
+.soglia h1 { margin: 16px auto 0; }
+.soglia .row { justify-content: center; }
+.soglia .reveal { animation: rise 0.7s ease both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.life-clock { width: 100%; max-width: 280px; margin: 0 auto; display: block; }
+.lc-bg { fill: none; stroke: var(--surface-2); stroke-width: 12; stroke-linecap: round; }
+.lc-good { fill: none; stroke: var(--good); stroke-width: 12; stroke-linecap: round; }
+.lc-mid { fill: none; stroke: var(--mid); stroke-width: 12; stroke-linecap: round; }
+.lc-low { fill: none; stroke: var(--low); stroke-width: 12; stroke-linecap: round; }
 .oggi-split { display: grid; gap: 16px; margin-top: 36px; }
 @media (min-width: 800px) { .oggi-split { grid-template-columns: 1.2fr 0.8fr; } }
 @keyframes orbit { to { transform: rotate(360deg); } }
