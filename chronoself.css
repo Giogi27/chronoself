@@ -225,7 +225,7 @@ footer { display: flex; justify-content: space-between; align-items: center; col
 }
 .oggi-pills button {
   border: 0; background: none; color: var(--muted);
-  height: 36px; padding: 0 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
+  height: 44px; padding: 0 18px; border-radius: 999px; font-size: 14px; font-weight: 500;
 }
 .oggi-pills button.on { background: var(--fg); color: var(--bg); }
 .dash-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 28px; }

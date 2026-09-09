@@ -93,26 +93,70 @@ function mergeHabits(habits,answers){
   return next.slice(0,6);
 }
 function seedHabits(answers){return mergeHabits([],answers);}
-function dayN(){ if(!db.planStart) return 1; return Math.min(90, Math.max(1, Math.floor((Date.now()-new Date(db.planStart))/86400000)+1)); }
+let clockOverride=null;
+function nowDate(){ return clockOverride?new Date(clockOverride):new Date(); }
+function localKey(d){
+  d=d||nowDate();
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+  return y+"-"+m+"-"+day;
+}
+function parseLocal(key){
+  const p=String(key).split("-").map(Number);
+  return new Date(p[0], (p[1]||1)-1, p[2]||1, 12, 0, 0, 0);
+}
+function addLocalDays(key,n){ const d=parseLocal(key); d.setDate(d.getDate()+n); return localKey(d); }
+function setClockKey(key){
+  clockOverride=key?parseLocal(key):null;
+  try{ if(key) sessionStorage.setItem("cs.clock",key); else sessionStorage.removeItem("cs.clock"); }catch(e){}
+}
+try{ const ck=sessionStorage.getItem("cs.clock"); if(ck) clockOverride=parseLocal(ck); }catch(e){}
+window.__csDayClock=true;
+function dayNFromKeys(startKey,todayKey){
+  const diff=Math.round((parseLocal(todayKey).getTime()-parseLocal(startKey).getTime())/86400000);
+  return Math.min(90, Math.max(1, diff+1));
+}
+function dayN(){
+  if(!db.planStart) return 1;
+  return dayNFromKeys(localKey(new Date(db.planStart)), localKey());
+}
 function currentPhase(day){ if(day<=14) return 0; if(day<=28) return 1; if(day<=56) return 2; return 3; }
-function today(){return new Date().toISOString().slice(0,10);}
-function daysBack(n){const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10);}
+function today(){ return localKey(); }
+function daysBack(n){ return addLocalDays(localKey(), -n); }
+function planDayKey(i){ return addLocalDays(localKey(new Date(db.planStart||Date.now())), i); }
+function weekKeys(){
+  const now=nowDate();
+  const x=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day=x.getDay(); const diff=day===0?-6:1-day;
+  x.setDate(x.getDate()+diff);
+  return Array.from({length:7},(_,i)=>{ const d=new Date(x); d.setDate(x.getDate()+i); return localKey(d); });
+}
+let lastSeenKey=localKey();
+function tickDay(){
+  const k=localKey();
+  if(k===lastSeenKey) return false;
+  lastSeenKey=k;
+  if(state.view==="oggi") render();
+  return true;
+}
+function armDayTick(){
+  if(window.__csDayTick) clearTimeout(window.__csDayTick);
+  if(clockOverride) return;
+  const now=new Date();
+  const next=new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 2);
+  window.__csDayTick=setTimeout(()=>{ tickDay(); armDayTick(); }, Math.max(1000, next-now));
+}
+
 function tone(n){return n>=70?"good":n>=45?"mid":"low";}
 function streak(log,id){let n=0; for(let i=0;i<90;i++){const day=daysBack(i); if(log[day]&&log[day][id]) n++; else if(i===0) continue; else break;} return n;}
 function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); if(log[day]&&log[day][id]) c++;} return c;}
 const WEEK_LABELS=["Lu","Ma","Me","Gi","Ve","Sa","Do"];
-function weekKeys(){
-  const now=new Date(); const day=now.getDay(); const diff=day===0?-6:1-day;
-  return Array.from({length:7},(_,i)=>{ const d=new Date(now); d.setDate(now.getDate()+diff+i); return d.toISOString().slice(0,10); });
-}
-function planDayKey(i){ const d=new Date(db.planStart||Date.now()); d.setDate(d.getDate()+i); return d.toISOString().slice(0,10); }
 function heldDays(id,day){ let n=0; for(let i=0;i<day;i++){ const k=planDayKey(i); if(db.habitLog[k]&&db.habitLog[k][id]) n++; } return n; }
-function journalOn(key){ return (db.journal||[]).filter(j=>String(j.at).slice(0,10)===key); }
-function holdBtn(h,big){
+function journalOn(key){ return (db.journal||[]).filter(j=>localKey(new Date(j.at))===key); }
+function holdBtn(h,big,hint){
   const t=today(); const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id);
   return `<button type="button" class="hold ${big?"hold-lg":""} ${on?"is-on":""}" data-h="${h.id}" aria-pressed="${on}">
     <span class="hold-mark" aria-hidden="true"></span>
-    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?"Tenuto, oggi.":big?"Tocca quando l'hai fatta.":(st?st+" giorni di fila.":"Ancora no.")}</span></span>
+    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?"Tenuto, oggi.":big?(hint||"Tocca quando l'hai fatta."):(st?st+" giorni di fila.":"Ancora no.")}</span></span>
   </button>`;
 }
 function weekStrip(id){
@@ -122,10 +166,11 @@ function weekStrip(id){
     return `<div class="week-cell${on?" on":""}${isToday?" today":""}${future?" future":""}"><b>${WEEK_LABELS[i]}</b></div>`;
   }).join("")}</div>`;
 }
-function cal90(day,id){
+function cal90(day,id,play,playId){
   return `<div class="cal90">${Array.from({length:90},(_,i)=>{
     const k=planDayKey(i); const on=!!(db.habitLog[k]&&db.habitLog[k][id]);
-    return `<i class="${on?"on":""}${i===day-1?" now":""}${i>=day?" future":""}" title="Giorno ${i+1}"></i>`;
+    const tip=(typeof dayCard==="function"&&play)?dayCard(play,playId,i+1,parseLocal(k)).line:`Giorno ${i+1}`;
+    return `<i class="${on?"on":""}${i===day-1?" now":""}${i>=day?" future":""}" title="${esc(tip)}"></i>`;
   }).join("")}</div>`;
 }
 function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
@@ -136,7 +181,7 @@ window.CS.applyFounder=function(){
   unlockPro();
   if(!was) render();
 };
-async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview||!res.ok){unlockPro(); go("oggi"); return;} alert(data.error||"Stripe non configurato.");}catch(e){unlockPro(); go("oggi");}}
+async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview){unlockPro(); go("oggi"); return;} alert(data.error||"Pagamento non disponibile.");}catch(e){alert("Pagamento non disponibile. Riprova.");}}
 function splitStory(t){
   const i=String(t).indexOf(". ");
   if(i<12) return [t,""];
@@ -144,7 +189,7 @@ function splitStory(t){
 }
 function midQuiz(){ return Number.isInteger(db.quizI) && db.quizI>=0 && db.quizI<QUESTIONS.length; }
 function dayMode(){
-  const h=new Date().getHours();
+  const h=nowDate().getHours();
   if(h>=5&&h<11) return "mattina";
   if(h>=11&&h<18) return "giorno";
   if(h>=18&&h<23) return "sera";
@@ -210,7 +255,7 @@ function diagnosisCard(answers){
       <p class="meta">Cosa fare</p>
       <h3>${esc(play.action)}</h3>
       <ul class="ok">${play.habits.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
-      <p>Gratis vedi cosa succede tra un anno. Il Piano 90 è per tenere questa cosa, ogni giorno.</p>
+      <p>Gratis vedi cosa succede tra un anno. Il Piano 90 è per tenere questa cosa, per 90 giorni.</p>
     </div>
   </section>`;
 }
@@ -222,8 +267,7 @@ function yearClock(day){
     const ang=-90+i*4;
     let done=false;
     if(db.planStart){
-      const d=new Date(db.planStart); d.setDate(d.getDate()+i);
-      const k=d.toISOString().slice(0,10);
+      const k=planDayKey(i);
       const log=db.habitLog[k];
       done=!!(log&&Object.values(log).some(Boolean));
     }
@@ -328,7 +372,7 @@ function render(){
       <div>
         <p class="meta">18 domande sulla tua vita</p>
         <h1>Chi diventi se continui così.</h1>
-        <p class="lede">18 domande. Tre lettere scritte da te futuro. Poi una cosa da tenere, ogni giorno.</p>
+        <p class="lede">18 domande. Tre lettere scritte da te futuro. Poi una cosa da tenere, per 90 giorni.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
         <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>5</dt><dd>aree</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
       </div>
@@ -341,7 +385,7 @@ function render(){
     <section class="grid three" style="padding-top:64px">
       <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Come stai, davvero, in cinque parti della vita. Niente diagnosi, niente guru.</p></article>
       <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre lettere</h3><p>Da te, tra un anno: se lasci andare, se resti così, se cambi un po'.</p></article>
-      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Un'abitudine</h3><p>Scegli una cosa da fare ogni giorno. La sera, due righe. Per 90 giorni.</p></article>
+      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Un'abitudine</h3><p>Una cosa da tenere, per 90 giorni. La sera, due righe.</p></article>
     </section>
     <section class="thesis">
       <img src="./brand/looking.jpg" alt="Una persona alla finestra, di spalle"/>
@@ -357,7 +401,7 @@ function render(){
       <div class="grid three" style="padding-top:0">
         <article class="card"><p class="k">01</p><h3>Se lasci andare</h3><p>Il punto debole resta lì. Col tempo pesa di più.</p></article>
         <article class="card"><p class="k">02</p><h3>Se resti così</h3><p>Niente crolla. Niente migliora. Il tempo passa lo stesso.</p></article>
-        <article class="card"><p class="k">03</p><h3>Se cambi un po'</h3><p>Due o tre abitudini, tenute ogni giorno. Basta quello.</p></article>
+        <article class="card"><p class="k">03</p><h3>Se cambi un po'</h3><p>Una cosa tenuta, a lungo. Basta quello.</p></article>
       </div>
     </section>
     <section class="cta-band">
@@ -380,7 +424,7 @@ function render(){
   if(state.view==="prezzi"){
     app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Gratis per vedere. Pago per tenere.</h1><p class="lede">La simulazione è gratis. Il Piano 90 è per chi vuole un'abitudine, un diario, e 90 giorni di seguito.</p>
       <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>La simulazione</h3><ul class="ok"><li>18 domande</li><li>Come stai oggi, in 5 aree</li><li>Tre versioni di te, a 1 anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
-      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Anche 5 e 10 anni</li><li>Un'abitudine da tenere ogni giorno</li><li>Diario la sera</li><li>Calendario di 90 giorni</li></ul><div class="row"><button class="cta light" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
+      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Anche 5 e 10 anni</li><li>Una cosa da tenere, per 90 giorni</li><li>Diario la sera</li><li>Calendario di 90 giorni</li></ul><div class="row"><button class="cta light" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
       <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né un medico, né un consulente. È un posto dove tieni una cosa per 90 giorni.</p></article></section></main>`;
     document.getElementById("pay").onclick=()=> db.pro?go("oggi"):startCheckout();
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -462,70 +506,76 @@ function render(){
     if(db.habits.map(h=>h.name).join("|")!==prevNames) save(db);
     const pl=planItems(db.sim.answers); const day=dayN(); const phase=currentPhase(day); const t=today();
     const focusId=diagnose(db.sim.answers).primary.id;
+    const playNow=playFor(focusId);
+    const card=(typeof dayCard==="function")?dayCard(playNow,focusId,day,nowDate()):null;
+    const weeks=(typeof weeksOfPlan==="function")?weeksOfPlan(playNow,focusId):pl.weeks.map((w,i)=>({title:w[0],span:"",job:w[1],week:i+1}));
+    const cadence=(card&&card.cadence)||(typeof CADENCE_OF!=="undefined"&&CADENCE_OF[focusId])||"daily";
     const mode=dayMode(); const mood=dayModeLine(mode, focusId);
-    const isSunday=new Date().getDay()===0; const done90=day>=90;
-    if(!db.habitLog[t]) db.habitLog[t]={};
+    const isSunday=nowDate().getDay()===0; const done90=day>=90;
     const primary=db.habits[0]; const extra=db.habits.slice(1);
     const pid=primary?primary.id:"";
-    const onPrimary=!!(primary&&db.habitLog[t][pid]);
+    const onPrimary=!!(primary&&db.habitLog[t]&&db.habitLog[t][pid]);
     const held=primary?heldDays(pid,day):0;
-    const missed=Math.max(0,day-held-(onPrimary?0:0));
-    const missedPast=Math.max(0,(day-(onPrimary?1:0))-held);
+    const heldPast=primary?heldDays(pid, Math.max(0, day-1)):0;
+    const lost=Math.max(0, (day-1)-heldPast);
     const st=primary?streak(db.habitLog,pid):0;
     const w=primary?weekKeys().filter(k=>db.habitLog[k]&&db.habitLog[k][pid]).length:0;
     const yest=daysBack(1);
     const missedYest=day>1 && primary && !(db.habitLog[yest]&&db.habitLog[yest][pid]);
     const notesToday=journalOn(t);
     const evening=mode==="sera"||mode==="notte";
+    const thisWeek=weeks[card?card.week-1:0];
+    const sun=(typeof sundayCount==="function")?sundayCount(cadence,w):{title:w+" giorni su 7 questa settimana.",line:"Una riga su cosa l'ha resa facile o difficile. Poi chiudi."};
+    const stats=(typeof scoreLine==="function")?scoreLine(cadence,w,st,held,day,done90):( (st?st+" di fila · ":"")+w+"/7 questa settimana · "+held+" tenuti su "+day+(done90?"":" · a mezzanotte, giorno "+(day+1)) );
     if(!state.tab) state.tab="oggi";
     const pills=[["oggi","Oggi"],["percorso","Percorso"],["diario","Diario"]].map(([id,l])=>`<button type="button" class="${state.tab===id?"on":""}" data-tab="${id}">${l}</button>`).join("");
     const banner90=done90?`<section class="dash-banner dark"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:"";
     const composer=`<section class="dash-note">
         <p class="meta">Due righe</p>
         <h2>${evening?"Ora. Poi chiudi.":"A stasera."}</h2>
-        <label class="field"><textarea id="note" rows="4" placeholder="${esc(pl.prompt)}"></textarea></label>
+        <label class="field"><textarea id="note" rows="4" placeholder="${esc(card?card.evening:pl.prompt)}"></textarea></label>
         <button class="cta" id="saveN">Salva nota</button>
         ${notesToday.length?`<p class="lede">Scritto oggi. Va bene così.</p>${notesToday.map(j=>`<div class="hist"><p>${esc(j.text)}</p></div>`).join("")}`:""}
       </section>`;
     let body="";
     if(state.tab==="percorso"){
       body=`<header class="dash-head">
-        <div><p class="meta">Percorso · ${esc(pl.label)}</p><h1>Novanta giorni. Uno alla volta.</h1>
-          <p class="lede">${held} tenuti · ${missedPast} persi · giorno ${day}. I persi non si recuperano. Si continua.</p></div>
+        <div><p class="meta">Percorso · ${esc(pl.label)}${card?" · "+esc(card.pace):""}</p><h1>Giorno ${day} di 90.</h1>
+          <p class="lede">${esc(card?card.line+". ":"")}${held} tenuti · ${lost} persi. I persi non si recuperano. Si continua.</p></div>
         ${yearClock(day)}
       </header>
       ${banner90}
+      <section class="phase-now"><p class="meta">Oggi · settimana ${card?card.week:Math.ceil(day/7)} di 12</p><h2>${esc(card?card.title:pl.focus)}</h2><p>${esc(card?card.line:pl.weeks[phase][1])}</p></section>
       <p class="meta" style="margin-top:8px">I 90 giorni</p>
-      ${cal90(day,pid)}
-      <section class="phase-now"><p class="meta">Questa fase</p><h2>${esc(pl.weeks[phase][0])}</h2><p>${esc(pl.weeks[phase][1])}</p></section>
-      <ol class="phase-list">${pl.weeks.map(([title,d],i)=>`<li class="${i===phase?"now":""}"><strong>${esc(title)}</strong><span>${esc(d)}</span></li>`).join("")}</ol>
+      ${cal90(day,pid,playNow,focusId)}
+      <ol class="phase-list">${weeks.map((wk,i)=>`<li class="${(card?card.week:phase+1)===wk.week?"now":""}"><strong>${esc(wk.title)}</strong><span>${esc((wk.span?wk.span+". ":"")+wk.job)}</span></li>`).join("")}</ol>
       <div class="row"><button class="cta" data-go="futuri">Rivedi le lettere</button></div>
+      ${(window.CS&&CS.isFounder&&CS.isFounder())?`<p class="dash-later">${clockOverride?`<strong>Prova.</strong> Stai vedendo il giorno ${day}, non il calendario vero. ` : ""}<button class="ghost" id="simMidnight">Simula mezzanotte → giorno ${Math.min(90,day+1)}</button>${clockOverride?` <button class="ghost" id="resetClock">Torna a oggi</button>`:""}</p>`:""}
       <details class="dash-more"><summary>Aggiungi un'altra cosa</summary>
         <div class="row" style="margin-top:12px"><input id="newHabit" maxlength="60" placeholder="Solo se serve davvero"/><button class="btn" id="addH">Aggiungi</button></div>
         ${extra.map(h=>holdBtn(h,false)).join("")}
       </details>`;
     } else if(state.tab==="diario"){
       const hist=(db.journal||[]).slice(0,20).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora. Una sera, due righe.</p>`;
-      body=`<header class="dash-head"><div><p class="meta">Diario</p><h1>Due righe. Basta così.</h1><p class="lede">${esc(pl.prompt)}</p></div></header>
-      ${isSunday?`<section class="phase-now"><p class="meta">Domenica</p><h2>${w} giorni su 7 questa settimana.</h2><p>Una riga su cosa l'ha resa facile o difficile. Poi chiudi.</p></section>`:""}
+      body=`<header class="dash-head"><div><p class="meta">Diario</p><h1>Due righe. Basta così.</h1><p class="lede">${esc(card?card.evening:pl.prompt)}</p></div></header>
+      ${isSunday?`<section class="phase-now"><p class="meta">Domenica</p><h2>${esc(sun.title)}</h2><p>${esc(sun.line)}</p></section>`:""}
       ${composer}
       <div class="dash-hist">${hist}</div>`;
     } else {
-      const status=onPrimary?"Tenuto.":missedYest?"Ieri no. Oggi sì.":mood.line;
+      const job=(typeof jobLede==="function")?jobLede(cadence,onPrimary,w,missedYest,card?card.line:mood.line):(onPrimary?"Tenuto.":missedYest?"Ieri no. "+(card?card.line:mood.line):(card?card.line:mood.line));
       body=`<header class="dash-head">
         <div>
-          <p class="meta">${esc(mood.kicker)} · Giorno ${day} di 90 · ${esc(pl.label)}</p>
-          <h1>${esc(pl.focus)}</h1>
-          <p class="lede">${esc(status)}</p>
-          <p class="lede">${esc(pl.why)}</p>
+          <p class="meta">${esc(card?card.tag:mood.kicker+" · "+nowDate().toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}))}</p>
+          <h1>${esc(card?card.title:pl.focus)}</h1>
+          <p class="lede">${esc(job)}</p>
         </div>
       </header>
       ${banner90}
-      ${primary?holdBtn(primary,true):""}
+      ${primary?holdBtn(primary,true,card?card.holdHint:""):""}
       ${primary?weekStrip(pid):""}
-      <p class="dash-stat">${st?st+" di fila · ":""}${w}/7 questa settimana · ${held} tenuti su ${day}</p>
+      <p class="dash-stat">${esc(stats)}</p>
       ${extra.length?`<div class="dash-extra"><p class="meta">Anche questo</p>${extra.map(h=>holdBtn(h,false)).join("")}</div>`:""}
-      <section class="phase-now"><p class="meta">${esc(pl.weeks[phase][0])}</p><p>${esc(pl.weeks[phase][1])}</p></section>
+      <section class="phase-now"><p class="meta">Settimana ${card?card.week:Math.ceil(day/7)} di 12${card?" · "+esc(card.pace):""}</p><p>${esc(thisWeek?thisWeek.job:(pl.weeks[phase][1]))}</p></section>
       ${evening||notesToday.length?composer:`<p class="dash-later">A stasera le due righe. Ora conta solo la cosa di oggi.</p>`}
       ${!evening&&!notesToday.length?`<p class="dash-later"><button class="ghost" data-tab="diario">Apri il diario</button></p>`:""}
       `;
@@ -535,14 +585,31 @@ function render(){
       ${body}
     </main>`;
     app.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab; render();});
-    app.querySelectorAll("[data-h]").forEach(el=>el.onclick=()=>{ if(!db.habitLog[t]) db.habitLog[t]={}; db.habitLog[t][el.dataset.h]=!db.habitLog[t][el.dataset.h]; save(db); render(); });
+    app.querySelectorAll("[data-h]").forEach(el=>el.onclick=()=>{
+      if(clockOverride) return;
+      const key=today();
+      if(!db.habitLog[key]) db.habitLog[key]={};
+      db.habitLog[key][el.dataset.h]=!db.habitLog[key][el.dataset.h];
+      save(db); render();
+    });
     const saveN=document.getElementById("saveN");
-    if(saveN) saveN.onclick=()=>{ const text=(document.getElementById("note").value||"").trim(); if(!text) return; const prefix=isSunday&&state.tab==="diario"?`Settimana: ${w}/7. `:""; db.journal.unshift({at:new Date().toISOString(),text:prefix+text}); db.journal=db.journal.slice(0,60); save(db); render(); };
+    if(saveN) saveN.onclick=()=>{ const text=(document.getElementById("note").value||"").trim(); if(!text) return; const prefix=isSunday&&state.tab==="diario"?(cadence==="weekly"?(w?"Settimana: sì. ":"Settimana: no. "):`Settimana: ${w}/7. `):""; db.journal.unshift({at:new Date().toISOString(),text:prefix+text}); db.journal=db.journal.slice(0,60); save(db); render(); };
     const addH=document.getElementById("addH");
     if(addH) addH.onclick=()=>{ const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Massimo 6 cose."); db.habits.push({id:"h"+Date.now(),name}); save(db); render(); };
+    const simM=document.getElementById("simMidnight");
+    if(simM) simM.onclick=()=>{ setClockKey(addLocalDays(localKey(),1)); lastSeenKey=localKey(); render(); };
+    const rst=document.getElementById("resetClock");
+    if(rst) rst.onclick=()=>{ setClockKey(null); lastSeenKey=localKey(); render(); };
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     if(keepNote){ const n=document.getElementById("note"); if(n) n.value=keepNote; }
+    armDayTick();
   }
 }
+function onWake(){ if(state.view==="oggi") render(); }
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") onWake(); });
+window.addEventListener("focus", onWake);
+window.addEventListener("pageshow", onWake);
+if(!window.__csDayPulse) window.__csDayPulse=setInterval(()=>{ if(!clockOverride) tickDay(); }, 30000);
+armDayTick();
 render();
 
