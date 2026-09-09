@@ -388,7 +388,7 @@ function render(){
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
       <div class="hero-copy">
-        <h1>Chi diventi<br>se continui così.</h1>
+        <h1>Chi diventi<br>se continui così?</h1>
         <p class="hero-lede">Diciotto domande su come stai, davvero. Sonno, soldi, lavoro, persone, abitudini.</p>
         <p class="hero-lede">Da lì tre lettere, scritte da chi sarai: se lasci andare, se resti così, se cambi un po'.</p>
         <p class="hero-lede">Se vorrai, un percorso di novanta giorni, guidato: ogni giorno sai cosa fare.</p>
