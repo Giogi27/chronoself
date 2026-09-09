@@ -1,22 +1,26 @@
+const PICK_SCORE=[10,30,50,70,90];
+function Q(id,axis,text,choices,hint){
+  return {id,axis,text,hint,choices,min:choices[0],max:choices[4]};
+}
 const QUESTIONS=[
-  {id:"sonno",axis:"salute",text:"Quante ore dormi, in media, a notte?",min:"Meno di 5",max:"7-9 ore stabili"},
-  {id:"movimento",axis:"salute",text:"Quanti giorni a settimana ti muovi almeno 30 minuti?",min:"Mai",max:"5+ giorni"},
-  {id:"energia",axis:"salute",text:"Come valuti la tua energia nelle giornate normali?",min:"Sempre stanco",max:"Stabile e buona"},
-  {id:"cibo",axis:"salute",text:"Quante volte a settimana cucini o mangi con un minimo di attenzione?",min:"Quasi mai",max:"Quasi sempre"},
-  {id:"risparmio",axis:"soldi",text:"Quanto riesci a mettere da parte ogni mese?",hint:"Basta una stima.",min:"Niente / in rosso",max:"Risparmio costante"},
-  {id:"debiti",axis:"soldi",text:"Quanto pesano debiti, rate e spese fisse?",min:"Mi soffocano",max:"Sotto controllo"},
-  {id:"cuscinetto",axis:"soldi",text:"Se perdessi il reddito principale, per quanto terresti?",min:"Pochi giorni",max:"6+ mesi"},
-  {id:"spese",axis:"soldi",text:"Sai dove vanno i soldi ogni mese?",min:"No",max:"Sì, quasi tutto tracciato"},
-  {id:"competenza",axis:"lavoro",text:"Le tue competenze stanno crescendo?",min:"Ferme da anni",max:"Imparo ogni mese"},
-  {id:"autonomia",axis:"lavoro",text:"Quanto controllo hai su orari, reddito e direzione?",min:"Quasi nessuno",max:"Molto alto"},
-  {id:"senso",axis:"lavoro",text:"Il lavoro che fai ha senso per te?",min:"Per niente",max:"Molto"},
-  {id:"retepro",axis:"lavoro",text:"Hai persone con cui puoi parlare di lavoro senza recitare?",min:"Nessuna",max:"Sì, diverse"},
-  {id:"legami",axis:"relazioni",text:"Quante persone vedi o senti davvero ogni settimana?",min:"Quasi nessuno",max:"Una rete solida"},
-  {id:"conflitti",axis:"relazioni",text:"Quanto spazio occupano litigi o rapporti tossici?",min:"Occupano tutto",max:"Poco o niente"},
-  {id:"cura",axis:"relazioni",text:"Ti senti visto da almeno una persona?",min:"No",max:"Sì, in modo stabile"},
-  {id:"schermo",axis:"abitudini",text:"Ore al giorno su telefono e social senza scopo?",min:"4+ ore perse",max:"Poco e intenzionale"},
-  {id:"routine",axis:"abitudini",text:"Hai una routine mattutina o serale che tieni?",min:"Mai",max:"Quasi sempre"},
-  {id:"promesse",axis:"abitudini",text:"Quante promesse a te stesso tieni in un mese?",min:"Quasi nessuna",max:"La maggior parte"}
+  Q("sonno","salute","Quante ore dormi, in media, a notte?",["Meno di 5, e spezzate","5 o 6, spesso corte","A volte 7, a volte no","Quasi sempre 7","7-9 ore, stabili"]),
+  Q("movimento","salute","Quanti giorni a settimana ti muovi almeno mezz'ora?",["Mai","Uno, se va bene","Due o tre","Quattro","Cinque o più, di rito"]),
+  Q("energia","salute","Nelle giornate normali, l'energia com'è?",["Sempre stanco","Spesso giù","A giorni","Più su che giù","Stabile, buona"]),
+  Q("cibo","salute","I pasti: li decidi tu, o capitano?",["Quello che capita, in piedi","Qualche pasto vero, molti no","A metà","Spesso un pasto vero","Quasi sempre, da seduto"]),
+  Q("risparmio","soldi","Alla fine del mese, metti da parte?",["Niente. A volte in rosso","Qualche euro, quando avanza","Qualcosa, non ogni mese","Quasi ogni mese","Ogni mese, da solo"],"Basta una stima. Non i decimali."),
+  Q("debiti","soldi","Debiti, rate, spese fisse: quanto pesano?",["Mi soffocano","Occupano la testa","Ci sono, si pagano","Sotto controllo","Pochi o nessuno"]),
+  Q("cuscinetto","soldi","Se sparisse lo stipendio, per quanto terresti?",["Pochi giorni","Qualche settimana","Un mese o due","Tre-cinque mesi","Sei mesi o più"]),
+  Q("spese","soldi","Sai dove vanno i soldi, ogni mese?",["No","A grandi linee","Le voci grosse sì","Quasi tutto","Tutto, scritto"]),
+  Q("competenza","lavoro","Le cose che sai fare, stanno crescendo?",["Ferme da anni","Qualche pezzo, a caso","Un po', quando capita","Sì, quasi ogni mese","Ogni mese, di proposito"]),
+  Q("autonomia","lavoro","Orari, soldi, direzione: quanto decidi tu?",["Quasi niente","Poco","Qualche pezzo","Abbastanza","Molto"]),
+  Q("senso","lavoro","Il lavoro che fai, ha senso per te?",["Per niente","Raro","A tratti","Spesso sì","Sì, quasi sempre"]),
+  Q("retepro","lavoro","Hai persone con cui parlare di lavoro senza recitare?",["Nessuna","Una, forse","Due o tre","Diverse","Una rete vera"]),
+  Q("legami","relazioni","Quante persone vedi o senti davvero, ogni settimana?",["Quasi nessuno","Una, a volte","Due o tre","Un gruppetto","Una rete solida"]),
+  Q("conflitti","relazioni","Litigi o rapporti che fanno male: quanto spazio prendono?",["Occupano tutto","Troppo","Ci sono, si tengono","Poco","Quasi niente"]),
+  Q("cura","relazioni","C'è almeno una persona che ti vede per come stai?",["No","Qualche volta","Sì, a tratti","Sì, di solito","Sì, in modo stabile"]),
+  Q("schermo","abitudini","Ore al giorno su telefono e social, senza uno scopo?",["Quattro ore o più, perse","Un bel po'","A giorni","Poco","Poco, e lo scelgo"]),
+  Q("routine","abitudini","Hai un inizio o una fine della giornata che tieni?",["Mai","Qualche volta","A tratti","Spesso","Quasi sempre, gli stessi gesti"]),
+  Q("promesse","abitudini","Le promesse che fai a te: in un mese, quante ne tieni?",["Quasi nessuna","Poche","A metà","La maggior parte","Quasi tutte"])
 ];
 const AXES=["salute","soldi","lavoro","relazioni","abitudini"];
 const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relazioni",abitudini:"Abitudini"};
@@ -27,22 +31,56 @@ const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); re
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
 function save(db){localStorage.setItem(KEY,JSON.stringify(db)); if(window.CS&&CS.user&&CS.push) CS.push();}
 const qstr=new URLSearchParams(location.search);
-const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null}, load());
+const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),picked:{},focusOverride:null,sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null}, load());
 if(qstr.get("paid")==="1"){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); save(db); history.replaceState(null,"",location.pathname);}
 function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTIONS.forEach(q=>{acc[q.axis].s+=(a[q.id]??50);acc[q.axis].n++;}); const out={}; AXES.forEach(x=>out[x]=Math.round(acc[x].s/acc[x].n)); return out;}
 function weakest(base){return [...AXES].sort((a,b)=>base[a]-base[b])[0];}
-function diagnose(answers){
+function pickIndex(score){
+  let best=0, dist=Infinity;
+  PICK_SCORE.forEach((s,i)=>{ const d=Math.abs(s-score); if(d<dist){ dist=d; best=i; } });
+  return best;
+}
+function echoOf(id,score){
+  const q=QUESTIONS.find(x=>x.id===id); if(!q) return "";
+  return q.choices[pickIndex(score)];
+}
+function wasPicked(id,answers,picked){
+  if(picked && Object.prototype.hasOwnProperty.call(picked,id)) return true;
+  const s=answers[id];
+  return typeof s==="number" && s!==50;
+}
+function diagnose(answers,picked,focusId){
+  picked=picked||db.picked; focusId=focusId||db.focusOverride;
   const scores=scoresFrom(answers); const weak=weakest(scores);
   const signals=QUESTIONS.map(q=>({id:q.id,axis:q.axis,score:answers[q.id]??50}));
-  signals.sort((a,b)=>{ if(Math.abs(a.score-b.score)>8) return a.score-b.score; return ACTIONABLE.indexOf(a.id)-ACTIONABLE.indexOf(b.id); });
-  let primary=signals[0];
-  if(primary.id==="energia"){
+  const informative=signals.filter(s=>wasPicked(s.id,answers,picked)||s.score<=42||s.score>=62);
+  const pool=(informative.length>=4?informative:signals).slice().sort((a,b)=>{
+    if(Math.abs(a.score-b.score)>4) return a.score-b.score;
+    return ACTIONABLE.indexOf(a.id)-ACTIONABLE.indexOf(b.id);
+  });
+  let primary=pool[0]||signals[0];
+  if(focusId){ const forced=signals.find(s=>s.id===focusId); if(forced) primary=forced; }
+  else if(primary.id==="energia"){
     const drivers=["sonno","cibo","schermo","movimento"].map(id=>signals.find(s=>s.id===id)).filter(Boolean).sort((a,b)=>a.score-b.score);
     if(drivers[0]&&drivers[0].score<=65) primary=drivers[0];
   }
-  const secondary=signals.find(s=>s.id!==primary.id&&s.score<58&&s.id!=="energia")||null;
+  const cluster=pool.filter(s=>s.id!==primary.id&&s.score<=primary.score+12).slice(0,3);
+  const secondary=cluster[0]||pool.find(s=>s.id!==primary.id&&s.score<58&&s.id!=="energia")||null;
   const strengths=[...signals].filter(s=>s.score>=70).sort((a,b)=>b.score-a.score).slice(0,3);
-  return {primary,secondary,strengths,scores,weak,balanced:primary.score>=62};
+  return {primary,secondary,strengths,lows:cluster.slice(0,2),cluster,scores,weak,balanced:primary.score>=62,vague:informative.length<6};
+}
+function readLife(answers,picked,focusId){
+  const d=diagnose(answers,picked,focusId); const play=playFor(d.primary.id);
+  const said=echoOf(d.primary.id,d.primary.score);
+  const also=d.secondary?`Subito dietro: ${playFor(d.secondary.id).label.toLowerCase()} — «${echoOf(d.secondary.id,d.secondary.score)}».`:null;
+  const holds=d.strengths.length?`Tiene: ${d.strengths.map(s=>playFor(s.id).label.toLowerCase()).join(", ")}.`:null;
+  const alts=[d.primary,...d.cluster].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,4).map(s=>{ const p=playFor(s.id); return {id:s.id,label:p.label,hole:p.hole}; });
+  return {d,play,reading:{
+    title:d.vague?"La lettura è sottile.":`Il punto è ${play.hole}.`,
+    said:d.vague?"Hai lasciato troppe cose in mezzo. Il resoconto non inventa un buco.":`Hai detto: «${said}».`,
+    why:d.vague?"Tocca le risposte che senti davvero, e rifai. Altrimenti il punto è solo il più basso tra i mezzi.":play.why,
+    also,holds,action:play.action,vague:d.vague,alts
+  }};
 }
 function lever(axis){return {salute:PLAY.sonno.action,soldi:PLAY.risparmio.action,lavoro:PLAY.competenza.action,relazioni:PLAY.legami.action,abitudini:PLAY.schermo.action}[axis];}
 function leverFor(answers){return playFor(diagnose(answers).primary.id).action;}
@@ -56,18 +94,19 @@ function opener(kind,year,y,profile,play){
 }
 function story(d,p,y,kind,profile){
   const year=new Date().getFullYear()+y; const play=playFor(d.primary.id);
-  const later=y>=5?(kind==="deriva"?` A ${y} anni di distanza il conto si vede.`:kind==="miglioramento"?` ${y} anni di giorni tenuti si vedono senza bisogno di raccontarli.`:` ${y} anni dopo, il tempo è passato comunque.`):"";
-  const sec=d.secondary?(kind==="deriva"?` Intanto ${playFor(d.secondary.id).hole} non è stato toccato.`:kind==="inerzia"?` ${playFor(d.secondary.id).label} resta com'è.`:` E ${playFor(d.secondary.id).hole} ha seguito, un po'.`):"";
-  const str=d.strengths.length?(kind==="deriva"?` Quello che teneva — ${d.strengths.map(s=>playFor(s.id).label).join(", ")} — alla lunga sente il peso.`:kind==="inerzia"?` Tiene ancora: ${d.strengths.map(s=>playFor(s.id).label).join(", ")}.`:` Quello che già tenevi — ${d.strengths.map(s=>playFor(s.id).label).join(", ")} — ha più spazio.`):"";
-  const spread=(kind==="deriva"&&p[d.weak]<40)?` ${AXIS_LABEL[d.weak]} è il punto da cui il resto si è piegato.`:"";
-  return `${opener(kind,year,y,profile,play)} ${play.futures[kind]}${later}${sec}${str}${spread}`.replace(/\s+/g," ").trim();
+  const said=echoOf(d.primary.id,d.primary.score);
+  const quoted=kind==="deriva"?` Partivi da «${said}». Non si è sistemato da solo.`:kind==="inerzia"?` Avevi detto: «${said}». È rimasto quello.`:` Partivi da «${said}». L'hai tenuto. Basta quello.`;
+  const later=y>=5?(kind==="deriva"?` A ${y} anni di distanza il conto si vede.`:kind==="miglioramento"?` ${y} anni di giorni tenuti si vedono senza raccontarli.`:` ${y} anni dopo, il tempo è passato comunque.`):"";
+  const extra=d.secondary?(kind==="deriva"?` Intanto ${playFor(d.secondary.id).hole} — «${echoOf(d.secondary.id,d.secondary.score)}» — non è stato toccato.`:kind==="inerzia"?` ${playFor(d.secondary.id).label} resta com'è.`:` E ${playFor(d.secondary.id).hole} ha seguito, un po'.`):(d.strengths[0]?(kind==="deriva"?` Quello che teneva — ${playFor(d.strengths[0].id).label.toLowerCase()} — alla lunga sente il peso.`:kind==="inerzia"?` Tiene ancora: ${playFor(d.strengths[0].id).label.toLowerCase()}.`:` Quello che già tenevi — ${playFor(d.strengths[0].id).label.toLowerCase()} — ha più spazio.`):"");
+  return `${opener(kind,year,y,profile,play)} ${play.futures[kind]}${quoted}${later}${extra}`.replace(/\s+/g," ").trim();
 }
-function facts(p,d){
+function facts(p,d,kind){
   const play=playFor(d.primary.id);
-  const focusAxis=(QUESTIONS.find(q=>q.id===d.primary.id)||{axis:d.weak}).axis;
-  const n=p[focusAxis];
-  const word=n>=70?"tiene":n>=45?"in bilico":"il buco";
-  return [[play.label,word],["Se manca lo stipendio", p.soldi>=75?"Diversi mesi":p.soldi>=50?"Qualche mese":"Pochi giorni"],["Telefono", p.abitudini>=70?"Sotto controllo":p.abitudini>=45?"Troppe ore":"Mangia le sere"],["Persone", p.relazioni>=70?"Ci sei":p.relazioni>=45?"Poche":"Quasi da solo"]];
+  const rows=[[play.label, echoOf(d.primary.id,d.primary.score)]];
+  if(d.secondary) rows.push([playFor(d.secondary.id).label, echoOf(d.secondary.id,d.secondary.score)]);
+  if(d.strengths[0]) rows.push([playFor(d.strengths[0].id).label,"tiene"]);
+  rows.push(["Se continua", kind==="deriva"?"si allarga":kind==="inerzia"?"resta uguale":"si chiude"]);
+  return rows.slice(0,4);
 }
 function project(score,y,kind,axis,weak,focusAxis){
   let delta={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind];
@@ -75,10 +114,10 @@ function project(score,y,kind,axis,weak,focusAxis){
   if(axis===focusAxis) delta*=kind==="miglioramento"?1.35:1.15;
   return clamp(score+delta*y*(1+y*0.08));
 }
-function simulate(answers,profile){
-  const d=diagnose(answers); const horizons={};
+function simulate(answers,profile,picked,focusId){
+  const d=diagnose(answers,picked,focusId); const horizons={};
   const focusAxis=(QUESTIONS.find(q=>q.id===d.primary.id)||{axis:d.weak}).axis;
-  [1,5,10].forEach(y=>{ horizons[y]={}; ["deriva","inerzia","miglioramento"].forEach(k=>{ const p={}; AXES.forEach(a=>p[a]=project(d.scores[a],y,k,a,d.weak,focusAxis)); horizons[y][k]={title:KIND_TITLE[k],narrative:story(d,p,y,k,profile),facts:facts(p,d),scores:p}; }); });
+  [1,5,10].forEach(y=>{ horizons[y]={}; ["deriva","inerzia","miglioramento"].forEach(k=>{ const p={}; AXES.forEach(a=>p[a]=project(d.scores[a],y,k,a,d.weak,focusAxis)); horizons[y][k]={title:KIND_TITLE[k],narrative:story(d,p,y,k,profile),facts:facts(p,d,k),scores:p}; }); });
   return {at:new Date().toISOString(),profile,answers,scores:d.scores,weak:d.weak,focus:d.primary.id,secondary:d.secondary?d.secondary.id:null,horizons};
 }
 function planItems(answers){
@@ -177,7 +216,7 @@ function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOStr
 window.CS=window.CS||{};
 window.CS.applyPayload=function(p){
   if(!p||typeof p!=="object") return;
-  ["profile","answers","sim","history","checks","journal","habits","habitLog","pro","planStart","quizI"].forEach(function(k){
+  ["profile","answers","picked","focusOverride","sim","history","checks","journal","habits","habitLog","pro","planStart","quizI"].forEach(function(k){
     if(k in p) db[k]=p[k];
   });
 };
@@ -246,20 +285,18 @@ function lifeClock(scores,weak){
   return `<svg class="life-clock" viewBox="0 0 280 280" role="img" aria-label="Le cinque aree">${arcs}<text x="${CX}" y="${CY-8}" text-anchor="middle" fill="#1b1914" font-size="16" font-family="Fraunces,Georgia,serif">${AXIS_LABEL[weak]}</text><text x="${CX}" y="${CY+14}" text-anchor="middle" fill="#6a6358" font-size="11" font-family="Outfit,sans-serif">il punto</text></svg>`;
 }
 function diagnosisCard(answers){
-  const d=diagnose(answers); const play=playFor(d.primary.id);
-  const cls=d.primary.score>=70?"good":d.primary.score>=45?"mid":"low";
+  const {d,play,reading:r}=readLife(answers,db.picked,db.focusOverride);
   return `<section class="diag">
     <div>
-      <p class="meta">${d.balanced?"Il punto più basso":"Il punto debole"}</p>
+      <p class="meta">${r.vague?"Lettura sottile":d.balanced?"Il punto più basso":"Il punto"}</p>
       <h2>${esc(play.label)}</h2>
-      <p class="diag-score ${cls}">${d.primary.score}</p>
-      <p class="lede" style="margin-top:4px">su 100 · ${AXIS_LABEL[d.primary.axis]}</p>
-      <p class="lede">${esc(play.why)}</p>
-      ${d.secondary?`<p class="lede">Dietro c'è anche ${esc(playFor(d.secondary.id).label.toLowerCase())} (${d.secondary.score}).</p>`:""}
-      ${d.strengths.length?`<p class="lede">Tiene: ${d.strengths.map(s=>playFor(s.id).label).join(", ")}.</p>`:""}
+      <p class="said">«${esc(echoOf(d.primary.id,d.primary.score))}»</p>
+      <p class="lede">${esc(r.why)}</p>
+      ${r.also?`<p class="lede">${esc(r.also)}</p>`:""}
+      ${r.holds?`<p class="lede">${esc(r.holds)}</p>`:""}
       <div class="weights">
-        <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le tre risposte che pesano</p>
-        ${QUESTIONS.map(q=>({id:q.id,score:answers[q.id]??50})).sort((a,b)=>a.score-b.score).slice(0,3).map(r=>`<div class="weight"><span>${esc(playFor(r.id).label)}</span><div class="bar ${tone(r.score)}"><span style="width:${r.score}%"></span></div><span class="num">${r.score}</span></div>`).join("")}
+        <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le risposte che pesano</p>
+        ${[d.primary,...d.lows].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,3).map(row=>`<div class="weight"><span>${esc(playFor(row.id).label)}</span><div class="bar ${tone(row.score)}"><span style="width:${row.score}%"></span></div><span class="num" style="width:auto;max-width:40%;text-align:right;font-size:12px">${esc(echoOf(row.id,row.score))}</span></div>`).join("")}
       </div>
     </div>
     <div class="diag-action">
@@ -462,27 +499,48 @@ function render(){
     return;
   }
   if(state.view==="simula"){
-    const q=QUESTIONS[state.i]; const pct=Math.round(((state.i+1)/QUESTIONS.length)*100); const val=db.answers[q.id];
+    const q=QUESTIONS[state.i]; const pct=Math.round(((state.i+1)/QUESTIONS.length)*100);
+    if(!db.picked) db.picked={};
+    const chosen=db.picked[q.id];
+    const hasPick=typeof chosen==="number";
     app.innerHTML=`<main class="step"><p class="meta">${state.i+1} / ${QUESTIONS.length} · ${AXIS_LABEL[q.axis]}</p><div class="prog"><span style="width:${pct}%"></span></div>
       <h1 class="q" style="font-size:36px;margin-top:28px">${q.text}</h1>
       ${q.hint?`<p class="lede">${q.hint}</p>`:""}
-      <p class="lede num"><strong style="font-size:28px;color:var(--fg)">${val}</strong> / 100</p>
-      <input class="range" id="rng" type="range" min="0" max="100" value="${val}" />
-      <div class="labels"><span>${q.min}</span><span>${q.max}</span></div>
-      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Vedi il punto"}</button></div></main>`;
-    document.getElementById("rng").oninput=e=>{const n=Number(e.target.value); db.answers[q.id]=n; save(db); e.target.previousElementSibling.innerHTML=`<strong style="font-size:28px;color:var(--fg)">${n}</strong> / 100`;};
+      <div class="choices">${q.choices.map((c,i)=>`<button type="button" class="choice ${chosen===i?"on":""}" data-pick="${i}">${esc(c)}</button>`).join("")}</div>
+      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" ${hasPick?"":"disabled"}>${state.i<QUESTIONS.length-1?"Avanti":"Vedi il punto"}</button></div></main>`;
+    app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
+      const i=Number(b.dataset.pick);
+      db.picked[q.id]=i; db.answers[q.id]=PICK_SCORE[i]; save(db); render();
+    });
     document.getElementById("back").onclick=()=>{if(state.i>0){state.i--; db.quizI=state.i; save(db); render();}};
-    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.quizI=null; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus}); db.history=db.history.slice(0,12); db.habits=mergeHabits(db.habits,db.answers); save(db); go("soglia"); };
-    document.getElementById("rng").focus();
+    document.getElementById("next").onclick=()=>{
+      if(!hasPick) return;
+      if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render();return;}
+      db.focusOverride=null;
+      const sim=simulate(db.answers,db.profile,db.picked,null);
+      db.sim=sim; db.quizI=null;
+      db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus});
+      db.history=db.history.slice(0,12);
+      db.habits=mergeHabits(db.habits,db.answers);
+      save(db); go("soglia");
+    };
     document.onkeydown=e=>{ if(state.view!=="simula") return; if(e.key==="Enter"){ e.preventDefault(); document.getElementById("next").click(); } };
     return;
   }
   if(state.view==="soglia"){
     if(!db.sim){go("profilo");return;}
-    const d=diagnose(db.sim.answers||db.answers); const play=playFor(d.primary.id);
+    const {d,play,reading:r}=readLife(db.sim.answers||db.answers,db.picked,db.focusOverride||db.sim.focus);
     const who=(db.sim.profile||db.profile).nome||"Tu";
     const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
-    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">Il punto è ${esc(play.hole)}.</h1><p class="lede reveal" style="animation-delay:.4s">${esc(play.action)}</p><p class="lede reveal" style="animation-delay:.5s">Tre lettere. Poi questa cosa, per 90 giorni.</p><div class="row reveal" style="animation-delay:.55s"><button class="cta" id="enter" data-go="futuri">Leggi chi diventi</button></div></main>`;
+    const current=db.focusOverride||d.primary.id;
+    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Se il punto è un altro</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
+    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">${esc(r.title)}</h1><p class="said reveal" style="animation-delay:.35s">${esc(r.said)}</p><p class="lede reveal" style="animation-delay:.45s">${esc(r.why)}</p>${r.also?`<p class="lede reveal">${esc(r.also)}</p>`:""}${r.holds?`<p class="lede reveal">${esc(r.holds)}</p>`:""}<p class="lede reveal" style="animation-delay:.5s">${esc(r.action)}</p>${alts}<div class="row reveal" style="animation-delay:.55s;justify-content:center"><button class="cta" id="enter" data-go="futuri">Leggi chi diventi</button></div></main>`;
+    app.querySelectorAll("[data-focus]").forEach(b=>b.onclick=()=>{
+      db.focusOverride=b.dataset.focus;
+      db.sim=simulate(db.sim.answers||db.answers, db.sim.profile||db.profile, db.picked, db.focusOverride);
+      db.habits=mergeHabits(db.habits, db.sim.answers);
+      save(db); render();
+    });
     const openLetters=()=>go("futuri");
     document.getElementById("enter").onclick=openLetters;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));

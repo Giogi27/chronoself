@@ -139,6 +139,28 @@ h3 { font-size: 20px; }
   padding: 12px 14px; border-radius: 14px; outline: none;
 }
 .range { width: 100%; accent-color: var(--primary); }
+.choices { display: grid; gap: 8px; margin: 28px 0 8px; }
+.choice {
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.35;
+  min-height: 48px;
+}
+.choice.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.said {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(20px, 3.4vw, 28px);
+  margin: 16px auto 0;
+  max-width: 28ch;
+  letter-spacing: -0.03em;
+}
+.btn.on-alt { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .labels { display: flex; justify-content: space-between; color: var(--subtle); font-size: 13px; margin-top: 8px; }
 .tabs { display: flex; gap: 8px; margin: 16px 0 20px; flex-wrap: wrap; }
 .tab { border: 1px solid var(--border); background: var(--surface); color: var(--muted); padding: 8px 14px; border-radius: 999px; }
