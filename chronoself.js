@@ -152,11 +152,11 @@ function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); i
 const WEEK_LABELS=["Lu","Ma","Me","Gi","Ve","Sa","Do"];
 function heldDays(id,day){ let n=0; for(let i=0;i<day;i++){ const k=planDayKey(i); if(db.habitLog[k]&&db.habitLog[k][id]) n++; } return n; }
 function journalOn(key){ return (db.journal||[]).filter(j=>localKey(new Date(j.at))===key); }
-function holdBtn(h,big,hint){
+function holdBtn(h,big,hint,doneLine){
   const t=today(); const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id);
   return `<button type="button" class="hold ${big?"hold-lg":""} ${on?"is-on":""}" data-h="${h.id}" aria-pressed="${on}">
     <span class="hold-mark" aria-hidden="true"></span>
-    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?"Tenuto, oggi.":big?(hint||"Tocca quando l'hai fatta."):(st?st+" giorni di fila.":"Ancora no.")}</span></span>
+    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?(doneLine||"Tenuto, oggi."):big?(hint||"Tocca quando l'hai fatta."):(st?st+" giorni di fila.":"Ancora no.")}</span></span>
   </button>`;
 }
 function weekStrip(id){
@@ -211,6 +211,11 @@ function letterOf(kind,y,profile){
   const span=y===1?"un anno":y+" anni";
   const greet=kind==="deriva"?`Ciao. Sono tu, tra ${span}.`:kind==="inerzia"?`Ciao. Sono tu, tra ${span}. Quasi tutto è uguale.`:`Ciao. Sono tu, tra ${span}. Non sono un altro.`;
   return {dateline:place?`${when} · ${place}`:when,greet,sign:`— ${who}${ageThen?`, ${ageThen} anni`:""}`,span};
+}
+function fromYouLine(answers,profile){
+  const play=playFor(diagnose(answers).primary.id);
+  const meta=letterOf("miglioramento",1,profile);
+  return {kicker:"Da te, tra un anno",line:play.futures.miglioramento,sign:meta.sign};
 }
 function letterCard(kind,pack,y,profile){
   const m=letterOf(kind,y,profile); const parts=splitStory(pack.narrative);
@@ -370,11 +375,11 @@ function render(){
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
       <div>
-        <p class="meta">18 domande sulla tua vita</p>
+        <p class="meta">Non un tracker. Tre lettere da te futuro.</p>
         <h1>Chi diventi se continui così.</h1>
         <p class="lede">18 domande. Tre lettere scritte da te futuro. Poi una cosa da tenere, per 90 giorni.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
-        <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>5</dt><dd>aree</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
+        <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>3</dt><dd>lettere</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
       </div>
       <div class="hero-photo">
         <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
@@ -465,7 +470,7 @@ function render(){
     const d=diagnose(db.sim.answers||db.answers); const play=playFor(d.primary.id);
     const who=(db.sim.profile||db.profile).nome||"Tu";
     const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
-    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">Il punto è ${esc(play.hole)}.</h1><p class="lede reveal" style="animation-delay:.4s">${esc(play.action)}</p><div class="row reveal" style="animation-delay:.55s"><button class="cta" id="enter">Leggi chi diventi</button></div></main>`;
+    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">Il punto è ${esc(play.hole)}.</h1><p class="lede reveal" style="animation-delay:.4s">${esc(play.action)}</p><p class="lede reveal" style="animation-delay:.5s">Tre lettere. Poi questa cosa, per 90 giorni.</p><div class="row reveal" style="animation-delay:.55s"><button class="cta" id="enter">Leggi chi diventi</button></div></main>`;
     document.getElementById("enter").onclick=()=>go("futuri");
     document.onkeydown=e=>{ if(e.key==="Enter") document.getElementById("enter")?.click(); };
     return;
@@ -499,7 +504,7 @@ function render(){
   }
   if(state.view==="oggi"){
     if(!db.sim){go("profilo");return;}
-    if(!db.pro){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Abitudini, diario e calendario si aprono con il Piano 90. L'abitudine è quella che esce dalle tue risposte.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
+    if(!db.pro){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Hai letto chi diventi. Ora tieni questa cosa, per 90 giorni. Diario e calendario si aprono qui.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
     if(!db.planStart){db.planStart=new Date().toISOString();save(db);}
     const prevNames=db.habits.map(h=>h.name).join("|");
     db.habits=mergeHabits(db.habits, db.sim.answers);
@@ -527,6 +532,9 @@ function render(){
     const thisWeek=weeks[card?card.week-1:0];
     const sun=(typeof sundayCount==="function")?sundayCount(cadence,w):{title:w+" giorni su 7 questa settimana.",line:"Una riga su cosa l'ha resa facile o difficile. Poi chiudi."};
     const stats=(typeof scoreLine==="function")?scoreLine(cadence,w,st,held,day,done90):( (st?st+" di fila · ":"")+w+"/7 questa settimana · "+held+" tenuti su "+day+(done90?"":" · a mezzanotte, giorno "+(day+1)) );
+    const fromYou=fromYouLine(db.sim.answers, db.sim.profile||db.profile);
+    const tomCard=(!done90 && typeof dayCard==="function")?dayCard(playNow,focusId,Math.min(90,day+1),parseLocal(addLocalDays(t,1))):null;
+    const whisper=`<blockquote class="from-you" data-go="futuri" role="link" aria-label="Rileggi le lettere"><p class="meta">${esc(fromYou.kicker)}</p><p class="from-you-line">${esc(fromYou.line)}</p><p class="from-you-sign">${esc(fromYou.sign)}</p></blockquote>`;
     if(!state.tab) state.tab="oggi";
     const pills=[["oggi","Oggi"],["percorso","Percorso"],["diario","Diario"]].map(([id,l])=>`<button type="button" class="${state.tab===id?"on":""}" data-tab="${id}">${l}</button>`).join("");
     const banner90=done90?`<section class="dash-banner dark"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:"";
@@ -536,6 +544,7 @@ function render(){
         <label class="field"><textarea id="note" rows="4" placeholder="${esc(card?card.evening:pl.prompt)}"></textarea></label>
         <button class="cta" id="saveN">Salva nota</button>
         ${notesToday.length?`<p class="lede">Scritto oggi. Va bene così.</p>${notesToday.map(j=>`<div class="hist"><p>${esc(j.text)}</p></div>`).join("")}`:""}
+        ${evening?(tomCard?`<p class="dash-later">Domani: ${esc(tomCard.line)}</p>`:`<p class="dash-later">Il percorso è chiuso. Rifai le 18 domande.</p>`):""}
       </section>`;
     let body="";
     if(state.tab==="percorso"){
@@ -570,8 +579,9 @@ function render(){
           <p class="lede">${esc(job)}</p>
         </div>
       </header>
+      ${whisper}
       ${banner90}
-      ${primary?holdBtn(primary,true,card?card.holdHint:""):""}
+      ${primary?holdBtn(primary,true,card?card.holdHint:"","Tenuto. "+fromYou.sign):""}
       ${primary?weekStrip(pid):""}
       <p class="dash-stat">${esc(stats)}</p>
       ${extra.length?`<div class="dash-extra"><p class="meta">Anche questo</p>${extra.map(h=>holdBtn(h,false)).join("")}</div>`:""}

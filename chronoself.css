@@ -277,6 +277,20 @@ footer { display: flex; justify-content: space-between; align-items: center; col
   background: var(--primary); color: var(--primary-fg);
   border-radius: 24px; padding: 24px; margin: 0 0 24px;
 }
+.from-you {
+  display: block; margin: 0 0 28px; padding: 0; border: 0;
+  cursor: pointer; max-width: 32rem;
+}
+.from-you .from-you-line {
+  font-family: var(--display); font-style: italic;
+  font-size: clamp(20px, 3vw, 26px); letter-spacing: -0.03em;
+  line-height: 1.35; margin: 10px 0 6px; max-width: 28ch;
+}
+.from-you .from-you-sign {
+  font-family: var(--display); font-style: italic;
+  color: var(--muted); font-size: 15px; margin: 0;
+}
+.from-you:hover .from-you-line { opacity: 0.78; }
 .dash-banner.dark .meta, .dash-banner.dark p { color: rgb(243 238 228 / 0.75); }
 .dash-banner.dark h3 { color: var(--primary-fg); font-size: 26px; margin: 8px 0 10px; }
 .cal90 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin: 12px 0 28px; }
