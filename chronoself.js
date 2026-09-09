@@ -377,7 +377,8 @@ function render(){
       <div class="hero-copy">
         <h1>Chi diventi<br>se continui così.</h1>
         <p class="hero-lede">Diciotto domande su come stai, davvero. Sonno, soldi, lavoro, persone, abitudini.</p>
-        <p class="hero-lede">Da lì tre lettere, scritte da chi sarai: se lasci andare, se resti così, se cambi un po'. Poi una cosa da tenere, per novanta giorni.</p>
+        <p class="hero-lede">Da lì tre lettere, scritte da chi sarai: se lasci andare, se resti così, se cambi un po'.</p>
+        <p class="hero-lede">Se vorrai, un percorso di novanta giorni, guidato: ogni giorno sai cosa fare.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
       </div>
       <div class="hero-photo">
@@ -389,7 +390,7 @@ function render(){
     <section class="grid three" style="padding-top:64px">
       <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Come stai, davvero, in cinque parti della vita. Niente diagnosi, niente guru.</p></article>
       <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre lettere</h3><p>Da te, tra un anno: se lasci andare, se resti così, se cambi un po'.</p></article>
-      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Un'abitudine</h3><p>Una cosa da tenere, per 90 giorni. La sera, due righe.</p></article>
+      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>90 giorni</h3><p>Se vuoi, un percorso guidato. Ogni giorno sai cosa fare.</p></article>
     </section>
     <section class="thesis">
       <img src="./brand/looking.jpg" alt="Una persona alla finestra, di spalle"/>
