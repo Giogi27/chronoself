@@ -395,7 +395,7 @@ const VOICE = {
     miglioramento: "L'energia non è esplosa. È tornata. Basta per fare quello che avevi detto.",
   },
   cibo: {
-    now: "I pasti capitano. In piedi, tardi, quello che c'è. Poi il corpo chiede altro.",
+    now: "Il pasto non esiste. Capitano cose. Poi il corpo chiede altro, e il conto anche.",
     deriva: "Si mangia ancora in piedi, tardi, quello che capita. Il corpo e il conto se ne sono accorti. Non è successo niente di grave. È successo niente, e basta.",
     inerzia: "Qualche pasto vero, molti no. Come adesso. Non stai male. Non stai bene. Il divano e il telefono restano il modo in cui finisce la giornata.",
     miglioramento: "Un pasto al giorno, tuo, da seduto. Sembrava poco. Dopo un po' è l'unica cosa della giornata che non ti sfugge.",

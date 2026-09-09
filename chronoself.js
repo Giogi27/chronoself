@@ -69,46 +69,40 @@ function diagnose(answers,picked,focusId){
   const strengths=[...signals].filter(s=>s.score>=70).sort((a,b)=>b.score-a.score).slice(0,3);
   return {primary,secondary,strengths,lows:cluster.slice(0,2),cluster,scores,weak,balanced:primary.score>=62,vague:informative.length<6};
 }
+function lowerFirst(s){ return s ? s.charAt(0).toLowerCase()+s.slice(1) : s; }
+function alsoLine(d){
+  if(!d.secondary) return null;
+  const hole=playFor(d.secondary.id).hole;
+  const echo=echoOf(d.secondary.id,d.secondary.score).replace(/\.$/,"");
+  return `E ${hole}: ${lowerFirst(echo)}.`;
+}
+function whenPhrase(y){ return y===1?"Tra un anno":y===5?"Tra cinque anni":"Tra dieci anni"; }
 function readLife(answers,picked,focusId){
   const d=diagnose(answers,picked,focusId); const play=playFor(d.primary.id);
   const said=echoOf(d.primary.id,d.primary.score);
   const voice=VOICE[d.primary.id];
-  const also=d.secondary?echoOf(d.secondary.id,d.secondary.score):null;
-  const holds=d.strengths[0]?echoOf(d.strengths[0].id,d.strengths[0].score):null;
   const alts=[d.primary,...d.cluster].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,4).map(s=>{ const p=playFor(s.id); return {id:s.id,label:p.label,hole:p.hole}; });
   return {d,play,reading:{
     title:d.vague?"Hai lasciato troppe cose in mezzo.":said,
-    said:d.vague?"Il resoconto non può inventare una vita che non hai raccontato.":(voice?voice.now:play.why),
+    said:d.vague?"Senza risposte vere, non si può scrivere una vita.":(voice?voice.now:play.why),
     why:d.vague?"Tocca le risposte che senti, e rifai.":play.action,
-    also:also&&!d.vague?also:null,
-    holds:holds&&!d.vague?holds:null,
+    also:d.vague?null:alsoLine(d),
+    holds:null,
     action:play.action,vague:d.vague,alts
   }};
 }
 function lever(axis){return {salute:PLAY.sonno.action,soldi:PLAY.risparmio.action,lavoro:PLAY.competenza.action,relazioni:PLAY.legami.action,abitudini:PLAY.schermo.action}[axis];}
 function leverFor(answers){return playFor(diagnose(answers).primary.id).action;}
 function opener(){ return ""; }
-function hook(kind,y,said){
-  const when=y===1?"un anno":y+" anni";
-  if(kind==="deriva") return said+". Dopo "+when+", è ancora così.";
-  if(kind==="inerzia") return said+". Dopo "+when+", quasi tutto è uguale.";
-  return said+". Dopo "+when+", quella cosa l'hai tenuta.";
-}
 function story(d,p,y,kind,profile){
   const play=playFor(d.primary.id);
-  const said=echoOf(d.primary.id,d.primary.score);
   const body=(VOICE[d.primary.id]||play.futures)[kind];
-  const extra=d.secondary?` Accanto resta questo: ${echoOf(d.secondary.id,d.secondary.score).charAt(0).toLowerCase()+echoOf(d.secondary.id,d.secondary.score).slice(1)}.`:(d.strengths[0]?` Intanto tieni ancora: ${echoOf(d.strengths[0].id,d.strengths[0].score).charAt(0).toLowerCase()+echoOf(d.strengths[0].id,d.strengths[0].score).slice(1)}.`:"");
-  const later=y>=5?(kind==="deriva"?" Il conto, a questa distanza, si vede.":kind==="miglioramento"?" Gli anni tenuti si vedono. Non serve raccontarli.":" Il tempo è passato comunque."):"";
-  return (hook(kind,y,said)+" "+body+extra+later).replace(/\s+/g," ").trim();
+  const lead=whenPhrase(y)+" "+lowerFirst(body);
+  const extra=d.secondary?(kind==="miglioramento"?`E ${playFor(d.secondary.id).hole} ha seguito, un po'.`:`E ${playFor(d.secondary.id).hole} è rimasto com'è.`):"";
+  const later=y>=5?(kind==="deriva"?"A questa distanza il conto si vede.":kind==="miglioramento"?"Gli anni tenuti si vedono. Non serve raccontarli.":"Il tempo è passato comunque."):"";
+  return [lead,extra,later].filter(Boolean).join(" ").replace(/\s+/g," ").trim();
 }
-function facts(p,d,kind){
-  const play=playFor(d.primary.id);
-  const rows=[[play.label, echoOf(d.primary.id,d.primary.score)]];
-  if(d.secondary) rows.push([playFor(d.secondary.id).label, echoOf(d.secondary.id,d.secondary.score)]);
-  rows.push(["Tra un anno", kind==="deriva"?"resta così, e pesa":kind==="inerzia"?"resta com'è":"si allenta"]);
-  return rows.slice(0,3);
-}
+function facts(){ return []; }
 function project(score,y,kind,axis,weak,focusAxis){
   let delta={inerzia:score>=60?0.35:-1.15,miglioramento:2.35,deriva:-2.9}[kind];
   if(axis===weak) delta*=1.2;
@@ -266,7 +260,7 @@ function fromYouLine(answers,profile){
 }
 function letterCard(kind,pack,y,profile){
   const m=letterOf(kind,y,profile); const parts=splitStory(pack.narrative);
-  return `<article class="letter"><p class="dateline">${esc(m.dateline)}</p><p class="kind">${KIND_TITLE[kind]}</p>${m.greet?`<p class="greet">${esc(m.greet)}</p>`:""}<p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<p class="sign">${esc(m.sign)}</p><ul class="facts">${pack.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;
+  return `<article class="letter"><p class="dateline">${esc(m.dateline)}</p><p class="kind">${KIND_TITLE[kind]}</p>${m.greet?`<p class="greet">${esc(m.greet)}</p>`:""}<p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<p class="sign">${esc(m.sign)}</p>${pack.facts.length?`<ul class="facts">${pack.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul>`:""}</article>`;
 }
 function sealedLetter(y){
   const span=y===1?"un anno":y+" anni";
@@ -293,7 +287,7 @@ function diagnosisCard(answers){
       <p class="meta">${esc(play.label)}</p>
       <h2>${esc(r.title)}</h2>
       <p class="lede">${esc(r.said)}</p>
-      ${r.also?`<p class="lede">Accanto: ${esc(r.also)}.</p>`:""}
+      ${r.also?`<p class="lede">${esc(r.also)}</p>`:""}
       <div class="weights">
         <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le risposte che pesano</p>
         ${[d.primary,...d.lows].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,3).map(row=>`<div class="weight"><span>${esc(playFor(row.id).label)}</span><div class="bar ${tone(row.score)}"><span style="width:${row.score}%"></span></div><span class="num" style="width:auto;max-width:40%;text-align:right;font-size:12px">${esc(echoOf(row.id,row.score))}</span></div>`).join("")}
@@ -356,7 +350,7 @@ function go(v){
   state.view=v; render();
 }
 function paywall(title,lede,leverText){
-  return `<main class="step"><p class="meta">Piano 90</p><h1 class="q" style="font-size:40px">${title}</h1><p class="lede">${lede}</p>${leverText?`<p class="lock">${esc(leverText)}</p>`:""}<p class="lede">4,99 € al mese. Un'abitudine da tenere, un diario la sera, e vedi anche chi diventi tra 5 e 10 anni.</p><div class="row"><button class="cta" id="pay">Attiva Piano 90</button><button class="btn" data-go="prezzi">Vedi i piani</button></div></main>`;
+  return `<main class="step"><p class="meta">Piano 90</p><h1 class="q" style="font-size:40px">${title}</h1><p class="lede">${lede}</p>${leverText?`<p class="lock">${esc(leverText)}</p>`:""}<p class="lede">4,99 € al mese. Novanta giorni guidati, un diario la sera, e le lettere a cinque e dieci anni.</p><div class="row"><button class="cta" id="pay">Attiva Piano 90</button><button class="btn" data-go="prezzi">Vedi i piani</button></div></main>`;
 }
 function clockPhase(h){ if(h<5) return "notte"; if(h<8) return "alba"; if(h<12) return "mattina"; if(h<17) return "pomeriggio"; if(h<21) return "sera"; return "notte"; }
 function polar(deg,r){ const a=(deg-90)*Math.PI/180; return [Math.round((160+Math.cos(a)*r)*10)/10, Math.round((160+Math.sin(a)*r)*10)/10]; }
@@ -420,14 +414,10 @@ function render(){
   chrome();
   if(state.view==="home"){
     const cta=inPlan()?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia";
-    const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
-    const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
       <div class="hero-copy">
         <h1>Chi diventi<br>se continui così?</h1>
-        <p class="hero-lede">Diciotto domande su come stai, davvero. Sonno, soldi, lavoro, persone, abitudini.</p>
-        <p class="hero-lede">Da lì tre lettere, scritte da chi sarai: se lasci andare, se resti così, se cambi un po'.</p>
-        <p class="hero-lede">Se vorrai, un percorso di novanta giorni, guidato: ogni giorno sai cosa fare.</p>
+        <p class="hero-lede">Diciotto domande su come stai. Tre lettere da chi sarai tra un anno — se lasci andare, se resti così, se cambi un po'. Se vuoi, novanta giorni per tenere una cosa.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${inPlan()?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
       </div>
       <div class="hero-photo">
@@ -435,18 +425,12 @@ function render(){
         ${clockFace()}
       </div>
     </section>
-    <div class="bleed marquee"><div class="marquee-track">${marquee}${marquee}</div></div>
-    <section class="grid three" style="padding-top:64px">
-      <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Come stai, davvero, in cinque parti della vita. Niente diagnosi, niente guru.</p></article>
-      <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre lettere</h3><p>Da te, tra un anno: se lasci andare, se resti così, se cambi un po'.</p></article>
-      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>90 giorni</h3><p>Se vuoi, un percorso guidato. Ogni giorno sai cosa fare.</p></article>
-    </section>
     <section class="thesis">
       <img src="./brand/looking.jpg" alt="Una persona alla finestra, di spalle"/>
       <div>
         <p class="meta">L'idea</p>
         <blockquote>Il futuro non è magia. È la somma di quello che ripeti.</blockquote>
-        <p class="lede">ChronoSelf non indovina niente. Prende come stai oggi e lo porta avanti — a un anno, a cinque, a dieci.</p>
+        <p class="lede">ChronoSelf prende come stai oggi e lo porta avanti — a un anno, a cinque, a dieci.</p>
       </div>
     </section>
     <section>
@@ -461,8 +445,8 @@ function render(){
     <section class="cta-band">
       <div>
         <p class="meta">Inizia</p>
-        <h2>Diciotto minuti. Poi vedi dove stai andando.</h2>
-        <p>Gratis vedi i prossimi 12 mesi. Il Piano 90 apre 5 e 10 anni, e il giorno per giorno.</p>
+        <h2>Diciotto domande. Poi vedi dove stai andando.</h2>
+        <p>Gratis: le tre lettere a un anno. Il Piano 90 apre cinque e dieci anni, e il giorno per giorno.</p>
         <div class="row"><button class="cta light" id="start2">${cta}</button>${inPlan()?"":`<button class="cta ghosted" data-go="prezzi">Vedi i piani</button>`}</div>
       </div>
       <img src="./brand/loggia.jpg" alt="Tre archi, tre ore del giorno"/>
@@ -476,10 +460,10 @@ function render(){
   }
   if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy</p><h1 class="q" style="font-size:40px">I dati restano tuoi.</h1><p class="lede">Domande, diario e abitudini stanno sul tuo telefono. I pagamenti passano da Stripe. Non è un medico e non è terapia.</p></main>`; return; }
   if(state.view==="prezzi"){
-    app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Gratis per vedere. Pago per tenere.</h1><p class="lede">La simulazione è gratis. Il Piano 90 è per chi vuole un'abitudine, un diario, e 90 giorni di seguito.</p>
-      <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>La simulazione</h3><ul class="ok"><li>18 domande</li><li>Come stai oggi, in 5 aree</li><li>Tre versioni di te, a 1 anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
-      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Anche 5 e 10 anni</li><li>Una cosa da tenere, per 90 giorni</li><li>Diario la sera</li><li>Calendario di 90 giorni</li></ul><div class="row"><button class="cta light" id="pay">${inPlan()?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
-      <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né un medico, né un consulente. È un posto dove tieni una cosa per 90 giorni.</p></article></section></main>`;
+    app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Un anno è gratis. Il resto, se vuoi tenerlo.</h1><p class="lede">Le tre lettere a un anno sono libere. Il Piano 90 apre cinque e dieci anni, e il percorso giorno per giorno.</p>
+      <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>Le lettere</h3><ul class="ok"><li>18 domande</li><li>Tre lettere, a un anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
+      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Lettere a cinque e dieci anni</li><li>Novanta giorni, guidati</li><li>Diario la sera</li></ul><div class="row"><button class="cta light" id="pay">${inPlan()?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
+      <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né un medico, né un consulente. Un posto per vedere dove stai andando.</p></article></section></main>`;
     document.getElementById("pay").onclick=()=> inPlan()?go("oggi"):startCheckout();
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     return;
@@ -487,7 +471,7 @@ function render(){
   if(state.view==="profilo"){
     const p=db.profile;
     const resume=midQuiz() && db.quizI>0;
-    app.innerHTML=`<main class="step"><p class="meta">Passo 1 di 2</p><h1 class="q" style="font-size:40px">Prima, chi sei.</h1><p class="lede">Nome ed età servono solo per scrivere i tuoi futuri. Restano sul telefono.</p>
+    app.innerHTML=`<main class="step"><p class="meta">Prima delle domande</p><h1 class="q" style="font-size:40px">Come ti chiami?</h1><p class="lede">Nome ed età. Servono per firmare le lettere.</p>
       <label class="field">Nome<input id="nome" value="${esc(p.nome||"")}" /></label>
       <label class="field">Età<input id="eta" type="number" value="${esc(p.eta||"")}" /></label>
       <label class="field">Dove vivi<select id="contesto"><option value="citta">In città</option><option value="paese">In un paese</option><option value="estero">All'estero</option></select></label>
@@ -503,11 +487,11 @@ function render(){
     if(!db.picked) db.picked={};
     const chosen=db.picked[q.id];
     const hasPick=typeof chosen==="number";
-    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} / ${QUESTIONS.length} · ${AXIS_LABEL[q.axis]}</p><div class="prog"><span style="width:${pct}%"></span></div>
+    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} di ${QUESTIONS.length}</p><div class="prog"><span style="width:${pct}%"></span></div>
       <h1 class="q" style="font-size:36px;margin-top:28px">${q.text}</h1>
       ${q.hint?`<p class="lede">${q.hint}</p>`:""}
       <div class="choices">${q.choices.map((c,i)=>`<button type="button" class="choice ${chosen===i?"on":""}" data-pick="${i}">${esc(c)}</button>`).join("")}</div>
-      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" ${hasPick?"":"disabled"}>${state.i<QUESTIONS.length-1?"Avanti":"Vedi il punto"}</button></div></main>`;
+      <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" ${hasPick?"":"disabled"}>${state.i<QUESTIONS.length-1?"Avanti":"Vedi il resoconto"}</button></div></main>`;
     app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
       const i=Number(b.dataset.pick);
       db.picked[q.id]=i; db.answers[q.id]=PICK_SCORE[i]; save(db); render();
@@ -533,8 +517,8 @@ function render(){
     const who=(db.sim.profile||db.profile).nome||"Tu";
     const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
     const current=db.focusOverride||d.primary.id;
-    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Se non è questo</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
-    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">${esc(r.title)}</h1><p class="said reveal" style="animation-delay:.35s">${esc(r.said)}</p>${r.also?`<p class="lede reveal">Accanto: ${esc(r.also)}.</p>`:""}<p class="lede reveal" style="animation-delay:.5s">${esc(r.action)}</p>${alts}<div class="row reveal" style="animation-delay:.55s;justify-content:center"><button class="cta" id="enter" data-go="futuri">Leggi chi diventi</button></div></main>`;
+    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Se è un'altra cosa</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
+    app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">${esc(r.title)}</h1><p class="said reveal" style="animation-delay:.35s">${esc(r.said)}</p>${r.also?`<p class="lede reveal">${esc(r.also)}</p>`:""}${alts}<div class="row reveal" style="animation-delay:.55s;justify-content:center"><button class="cta" id="enter" data-go="futuri">Apri le tre lettere</button></div></main>`;
     app.querySelectorAll("[data-focus]").forEach(b=>b.onclick=()=>{
       db.focusOverride=b.dataset.focus;
       db.sim=simulate(db.sim.answers||db.answers, db.sim.profile||db.profile, db.picked, db.focusOverride);
@@ -557,16 +541,16 @@ function render(){
     const locked=!inPlan() && state.h>1;
     const pack=s.horizons[locked?1:state.h];
     const cols=["deriva","inerzia","miglioramento"].map(id=>letterCard(id,pack[id],state.h,s.profile)).join("");
-    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${esc(play.label)}${inPlan()?" · Piano 90":""}</p>
-      <h1 class="q" style="font-size:40px">Come stai, oggi</h1>
-      <p class="lede">I numeri escono dalle tue 18 risposte. Poi tre lettere, scritte da te futuro.</p>
-      <div class="scores-grid">${radar(s.scores,d.weak)}<div>${axisBars(s.scores)}</div></div>
-      ${diagnosisCard(s.answers)}
-      <p class="meta" style="margin-top:48px">Tre lettere</p>
-      <h2 style="font-size:clamp(28px,4vw,40px);max-width:16ch;margin:12px 0 18px">Stessa vita. Tre direzioni.</h2>
+    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)}${inPlan()?" · Piano 90":""}</p>
+      <h1 class="q" style="font-size:40px">Tre lettere</h1>
+      <p class="lede">${esc(play.label)}. Tra un anno, tre direzioni. Stessa vita.</p>
       <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!inPlan()&&y>1)?" · chiuse":""}</button>`).join("")}</div>
       ${locked?sealedLetter(state.h): `<div class="cols">${cols}</div>`}
-      <div class="row">${inPlan()?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Attiva il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
+      <div class="row">${inPlan()?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Apri il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
+      <details class="dash-more" style="margin-top:48px"><summary>Come è uscito, dalle domande</summary>
+        <div class="scores-grid" style="margin-top:20px">${radar(s.scores,d.weak)}<div>${axisBars(s.scores)}</div></div>
+        ${diagnosisCard(s.answers)}
+      </details>
       ${db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${esc(h.focus?playFor(h.focus).label:AXIS_LABEL[h.weak])}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
     </main>`;
     app.querySelectorAll("[data-y]").forEach(b=>b.onclick=()=>{state.h=Number(b.dataset.y);render();});
@@ -576,7 +560,7 @@ function render(){
   }
   if(state.view==="oggi"){
     if(!db.sim){go("profilo");return;}
-    if(!inPlan()){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Hai letto chi diventi. Ora tieni questa cosa, per 90 giorni. Diario e calendario si aprono qui.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
+    if(!inPlan()){ app.innerHTML=paywall("Novanta giorni.","Ogni mattina sai cosa fare. Le lettere a cinque e dieci anni si aprono qui.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
     if(!db.planStart){db.planStart=new Date().toISOString();save(db);}
     const prevNames=db.habits.map(h=>h.name).join("|");
     db.habits=mergeHabits(db.habits, db.sim.answers);
