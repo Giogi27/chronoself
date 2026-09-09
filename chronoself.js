@@ -27,7 +27,7 @@ const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); re
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
 function save(db){localStorage.setItem(KEY,JSON.stringify(db)); if(window.CS&&CS.user&&CS.push) CS.push();}
 const qstr=new URLSearchParams(location.search);
-const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null}, load());
+const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null}, load());
 if(qstr.get("paid")==="1"){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); save(db); history.replaceState(null,"",location.pathname);}
 function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTIONS.forEach(q=>{acc[q.axis].s+=(a[q.id]??50);acc[q.axis].n++;}); const out={}; AXES.forEach(x=>out[x]=Math.round(acc[x].s/acc[x].n)); return out;}
 function weakest(base){return [...AXES].sort((a,b)=>base[a]-base[b])[0];}
@@ -102,18 +102,28 @@ function streak(log,id){let n=0; for(let i=0;i<90;i++){const day=daysBack(i); if
 function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); if(log[day]&&log[day][id]) c++;} return c;}
 function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
 async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview||!res.ok){unlockPro(); go("oggi"); return;} alert(data.error||"Stripe non configurato.");}catch(e){unlockPro(); go("oggi");}}
+function splitStory(t){
+  const i=String(t).indexOf(". ");
+  if(i<12) return [t,""];
+  return [t.slice(0,i+1), t.slice(i+2)];
+}
+function midQuiz(){ return Number.isInteger(db.quizI) && db.quizI>=0 && db.quizI<QUESTIONS.length; }
 function diagnosisCard(answers){
   const d=diagnose(answers); const play=playFor(d.primary.id);
-  const tone=d.primary.score>=70?"good":d.primary.score>=45?"mid":"low";
+  const cls=d.primary.score>=70?"good":d.primary.score>=45?"mid":"low";
   return `<section class="diag">
     <div>
       <p class="meta">${d.balanced?"Il punto più basso":"Il punto debole"}</p>
       <h2>${esc(play.label)}</h2>
-      <p class="diag-score ${tone}">${d.primary.score}</p>
+      <p class="diag-score ${cls}">${d.primary.score}</p>
       <p class="lede" style="margin-top:4px">su 100 · ${AXIS_LABEL[d.primary.axis]}</p>
       <p class="lede">${esc(play.why)}</p>
       ${d.secondary?`<p class="lede">Dietro c'è anche ${esc(playFor(d.secondary.id).label.toLowerCase())} (${d.secondary.score}).</p>`:""}
       ${d.strengths.length?`<p class="lede">Tiene: ${d.strengths.map(s=>playFor(s.id).label).join(", ")}.</p>`:""}
+      <div class="weights">
+        <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le tre risposte che pesano</p>
+        ${QUESTIONS.map(q=>({id:q.id,score:answers[q.id]??50})).sort((a,b)=>a.score-b.score).slice(0,3).map(r=>`<div class="weight"><span>${esc(playFor(r.id).label)}</span><div class="bar ${tone(r.score)}"><span style="width:${r.score}%"></span></div><span class="num">${r.score}</span></div>`).join("")}
+      </div>
     </div>
     <div class="diag-action">
       <p class="meta">Cosa fare</p>
@@ -209,9 +219,11 @@ function startClock(){
   frame();
 }
 function render(){
+  const keepNote=(document.getElementById("note")||{}).value||"";
+  document.onkeydown=null;
   chrome();
   if(state.view==="home"){
-    const cta=db.pro?"Vai a oggi":db.sim?"Apri i tuoi futuri":"Inizia, è gratis";
+    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia, è gratis";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
@@ -259,7 +271,7 @@ function render(){
       </div>
       <img src="./brand/loggia.jpg" alt="Tre archi, tre ore del giorno"/>
     </section>`;
-    const goStart=()=>go(db.pro?"oggi":db.sim?"futuri":"profilo");
+    const goStart=()=>{ if(db.pro) return go("oggi"); if(midQuiz()){ state.i=db.quizI; return go("simula"); } go(db.sim?"futuri":"profilo"); };
     document.getElementById("start").onclick=goStart;
     document.getElementById("start2").onclick=goStart;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -278,13 +290,16 @@ function render(){
   }
   if(state.view==="profilo"){
     const p=db.profile;
+    const resume=midQuiz() && db.quizI>0;
     app.innerHTML=`<main class="step"><p class="meta">Passo 1 di 2</p><h1 class="q" style="font-size:40px">Prima, chi sei.</h1><p class="lede">Nome ed età servono solo per scrivere i tuoi futuri. Restano sul telefono.</p>
       <label class="field">Nome<input id="nome" value="${esc(p.nome||"")}" /></label>
       <label class="field">Età<input id="eta" type="number" value="${esc(p.eta||"")}" /></label>
       <label class="field">Dove vivi<select id="contesto"><option value="citta">In città</option><option value="paese">In un paese</option><option value="estero">All'estero</option></select></label>
-      <div class="row"><button class="cta" id="next">Vai alle domande</button></div></main>`;
+      <div class="row"><button class="cta" id="next">${resume?`Riprendi da ${db.quizI+1} di 18`:"Vai alle domande"}</button>${resume?`<button class="btn" id="restart">Ricomincia</button>`:""}</div></main>`;
     document.getElementById("contesto").value=p.contesto||"citta";
-    document.getElementById("next").onclick=()=>{db.profile={nome:document.getElementById("nome").value.trim(),eta:document.getElementById("eta").value,contesto:document.getElementById("contesto").value}; save(db); state.i=0; go("simula");};
+    const saveP=()=>{db.profile={nome:document.getElementById("nome").value.trim(),eta:document.getElementById("eta").value,contesto:document.getElementById("contesto").value};};
+    document.getElementById("next").onclick=()=>{saveP(); if(!resume) db.quizI=0; state.i=db.quizI||0; save(db); go("simula");};
+    const rst=document.getElementById("restart"); if(rst) rst.onclick=()=>{saveP(); db.quizI=0; state.i=0; save(db); go("simula");};
     return;
   }
   if(state.view==="simula"){
@@ -296,9 +311,11 @@ function render(){
       <input class="range" id="rng" type="range" min="0" max="100" value="${val}" />
       <div class="labels"><span>${q.min}</span><span>${q.max}</span></div>
       <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next">${state.i<QUESTIONS.length-1?"Avanti":"Vedi i tuoi futuri"}</button></div></main>`;
-    document.getElementById("rng").oninput=e=>{const n=Number(e.target.value); db.answers[q.id]=n; e.target.previousElementSibling.innerHTML=`<strong style="font-size:28px;color:var(--fg)">${n}</strong> / 100`;};
-    document.getElementById("back").onclick=()=>{if(state.i>0){state.i--;render();}};
-    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++;render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus}); db.history=db.history.slice(0,12); db.habits=mergeHabits(db.habits,db.answers); save(db); go("futuri"); };
+    document.getElementById("rng").oninput=e=>{const n=Number(e.target.value); db.answers[q.id]=n; save(db); e.target.previousElementSibling.innerHTML=`<strong style="font-size:28px;color:var(--fg)">${n}</strong> / 100`;};
+    document.getElementById("back").onclick=()=>{if(state.i>0){state.i--; db.quizI=state.i; save(db); render();}};
+    document.getElementById("next").onclick=()=>{ if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render();return;} const sim=simulate(db.answers,db.profile); db.sim=sim; db.quizI=null; db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus}); db.history=db.history.slice(0,12); db.habits=mergeHabits(db.habits,db.answers); save(db); go("futuri"); };
+    document.getElementById("rng").focus();
+    document.onkeydown=e=>{ if(state.view!=="simula") return; if(e.key==="Enter"){ e.preventDefault(); document.getElementById("next").click(); } };
     return;
   }
   if(state.view==="futuri"){
@@ -310,11 +327,11 @@ function render(){
     const play=playFor(d.primary.id);
     const locked=!db.pro && state.h>1;
     const pack=s.horizons[locked?1:state.h];
-    const cols=["deriva","inerzia","miglioramento"].map(id=>{const x=pack[id]; return `<article class="card"><h3>${KIND_TITLE[id]}</h3><p>${x.narrative}</p><ul class="facts">${x.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;}).join("");
+    const cols=["deriva","inerzia","miglioramento"].map(id=>{const x=pack[id]; const parts=splitStory(x.narrative); return `<article class="card"><h3>${KIND_TITLE[id]}</h3><p class="future-open">${esc(parts[0])}</p>${parts[1]?`<p>${esc(parts[1])}</p>`:""}<ul class="facts">${x.facts.map(([l,v])=>`<li><span>${l}</span><strong>${v}</strong></li>`).join("")}</ul></article>`;}).join("");
     app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${esc(play.label)}${db.pro?" · Piano 90":""}</p>
       <h1 class="q" style="font-size:40px">Come stai, oggi</h1>
       <p class="lede">I numeri escono dalle tue 18 risposte. Poi tre versioni di te, scritte da lì.</p>
-      <div class="grid" style="grid-template-columns:minmax(0,18rem) 1fr;align-items:center">${radar(s.scores)}<div>${axisBars(s.scores)}</div></div>
+      <div class="scores-grid">${radar(s.scores)}<div>${axisBars(s.scores)}</div></div>
       ${diagnosisCard(s.answers)}
       <p class="meta" style="margin-top:48px">Tre strade</p>
       <h2 style="font-size:clamp(28px,4vw,40px);max-width:16ch;margin:12px 0 18px">Stessa vita. Tre direzioni.</h2>
@@ -337,6 +354,9 @@ function render(){
     if(db.habits.map(h=>h.name).join("|")!==prevNames) save(db);
     const pl=planItems(db.sim.answers); const day=dayN(); const phase=currentPhase(day); const t=today();
     const isSunday=new Date().getDay()===0; const done90=day>=90;
+    const yest=daysBack(1);
+    const missedYest=day>1 && db.habits.some(h=>!(db.habitLog[yest]&&db.habitLog[yest][h.id]));
+    const doneToday=db.habits.length>0 && db.habits.every(h=>db.habitLog[t]&&db.habitLog[t][h.id]);
     if(!db.habitLog[t]) db.habitLog[t]={};
     const list=db.habits.map(h=>{
       const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id); const w=weekDone(db.habitLog,h.id);
@@ -349,10 +369,12 @@ function render(){
       <div class="flex-head"><div><p class="meta">Giorno ${day} di 90 · ${esc(pl.label)}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${esc(pl.why)}</p><p class="lede">${esc(pl.weeks[phase][0])} — ${esc(pl.weeks[phase][1])}</p></div>${dayRing(day)}</div>
       ${done90?`<section class="diag-action" style="margin:28px 0;border-radius:24px;padding:24px"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:""}
       ${isSunday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Domenica</p><h3>Due minuti. Cosa hai tenuto questa settimana?</h3><p>Non una biografia. Quanti giorni su 7, e una riga su cosa l'ha resa facile o difficile.</p></section>`:""}
+      ${missedYest&&!doneToday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Ieri</p><h3>Non l'hai spuntata. Va bene.</h3><p>Oggi conta di più di ieri. Una volta, adesso.</p></section>`:""}
+      ${doneToday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Oggi</p><h3>Tenuto.</h3><p>A stasera le due righe. Poi basta.</p></section>`:""}
       <h2 style="margin:36px 0 12px">Le tue abitudini</h2>
       <div class="grid">${list}</div>
       <div class="row"><input id="newHabit" maxlength="60" placeholder="Aggiungi un'abitudine" style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px"/><button class="btn" id="addH">Aggiungi</button></div>
-      <div class="grid" style="grid-template-columns:1.2fr .8fr;margin-top:36px">
+      <div class="oggi-split">
         <div><h2>Due righe, stasera</h2><label class="field"><textarea id="note" rows="4" placeholder="${esc(pl.prompt)}"></textarea></label><button class="cta" id="saveN">Salva nota</button>${notes}</div>
         <div><h2>Le 12 settimane</h2>${pl.weeks.map(([t,d],i)=>`<article class="card" style="margin-top:10px;${i===phase?"outline:1px solid var(--border-strong)":""}"><h3>${t}</h3><p>${d}</p></article>`).join("")}${tasks.map(([id,label])=>`<label class="check"><input type="checkbox" data-c="${id}" ${db.checks[id]?"checked":""}/> ${label}</label>`).join("")}<div class="row"><button class="ghost" data-go="futuri">Rivedi i futuri</button></div></div>
       </div>
@@ -362,6 +384,8 @@ function render(){
     document.getElementById("saveN").onclick=()=>{const text=document.getElementById("note").value.trim(); if(!text) return; db.journal.unshift({at:new Date().toISOString(),text}); db.journal=db.journal.slice(0,60); save(db); render();};
     document.getElementById("addH").onclick=()=>{const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Massimo 6 abitudini."); db.habits.push({id:"h"+Date.now(),name}); save(db); render();};
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+    if(keepNote){ const n=document.getElementById("note"); if(n) n.value=keepNote; }
   }
 }
 render();
+

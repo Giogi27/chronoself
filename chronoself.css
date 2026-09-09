@@ -181,6 +181,13 @@ footer { display: flex; justify-content: space-between; align-items: center; col
 .diag-action .meta, .diag-action p, .diag-action .ok li { color: rgb(243 238 228 / 0.75); }
 .diag-action h3 { font-size: 26px; max-width: 18ch; margin: 12px 0 16px; color: var(--primary-fg); }
 .flex-head { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+.scores-grid { display: grid; gap: 24px; align-items: center; padding: 12px 0 8px; }
+@media (min-width: 800px) { .scores-grid { grid-template-columns: minmax(0,18rem) 1fr; } }
+.weights { margin-top: 8px; }
+.weight { display: grid; grid-template-columns: 90px 1fr 36px; gap: 8px; align-items: center; margin: 8px 0; font-size: 13px; color: var(--muted); }
+.future-open { color: var(--fg); font-size: 16px; margin-top: 12px; }
+.oggi-split { display: grid; gap: 16px; margin-top: 36px; }
+@media (min-width: 800px) { .oggi-split { grid-template-columns: 1.2fr 0.8fr; } }
 @keyframes orbit { to { transform: rotate(360deg); } }
 @keyframes ken { from { transform: scale(1); } to { transform: scale(1.07); } }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
