@@ -49,18 +49,18 @@ function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); i
 function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim&&!db.habits.length) db.habits=seedHabits(db.sim.weak); save(db);}
 async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview||!res.ok){unlockPro(); go("oggi"); return;} alert(data.error||"Stripe non configurato.");}catch(e){unlockPro(); go("oggi");}}
 function axisBars(scores){return AXES.map(a=>`<div class="axisbar"><span>${AXIS_LABEL[a]}</span><div class="bar ${tone(scores[a])}"><span style="width:${scores[a]}%"></span></div><span class="num">${scores[a]}</span></div>`).join("");}
-function radar(scores){const SIZE=280,CX=140,CY=140,R=104; const pt=(i,r)=>{const ang=-Math.PI/2+(i*2*Math.PI)/5; return [CX+r*Math.cos(ang),CY+r*Math.sin(ang)];}; const ring=f=>AXES.map((_,i)=>pt(i,R*f).join(",")).join(" "); const poly=AXES.map((a,i)=>pt(i,(scores[a]/100)*R).join(",")).join(" "); const labels=AXES.map((a,i)=>{const [x,y]=pt(i,R+22); return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" fill="#9a958c" font-size="11" font-family="Outfit,sans-serif">${AXIS_LABEL[a]}</text>`;}).join(""); return `<svg class="radar-wrap" viewBox="0 0 ${SIZE} ${SIZE}" role="img">${[0.25,0.5,0.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="#f2efe8" stroke-opacity=".12"/>`).join("")}${AXES.map((_,i)=>{const [x,y]=pt(i,R); return `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="#f2efe8" stroke-opacity=".12"/>`;}).join("")}<polygon points="${poly}" fill="#f2efe8" fill-opacity=".12" stroke="#f2efe8" stroke-opacity=".7" stroke-width="1.5"/>${labels}</svg>`;}
-function dayRing(day){const r=42,c=2*Math.PI*r,pct=day/90; return `<div class="dayring"><svg viewBox="0 0 108 108"><circle cx="54" cy="54" r="${r}" fill="none" stroke="#1c1c1f" stroke-width="6"/><circle cx="54" cy="54" r="${r}" fill="none" stroke="#ece7dc" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c*pct} ${c}"/></svg><div class="n"><div><div class="q" style="font-size:28px">${day}</div><div class="meta">di 90</div></div></div></div>`;}
-const MARK=`<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 7.2v5.1l3.2 1.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+function radar(scores){const SIZE=280,CX=140,CY=140,R=104; const pt=(i,r)=>{const ang=-Math.PI/2+(i*2*Math.PI)/5; return [CX+r*Math.cos(ang),CY+r*Math.sin(ang)];}; const ring=f=>AXES.map((_,i)=>pt(i,R*f).join(",")).join(" "); const poly=AXES.map((a,i)=>pt(i,(scores[a]/100)*R).join(",")).join(" "); const labels=AXES.map((a,i)=>{const [x,y]=pt(i,R+22); return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" fill="#6a6358" font-size="11" font-family="Outfit,sans-serif">${AXIS_LABEL[a]}</text>`;}).join(""); return `<svg class="radar-wrap" viewBox="0 0 ${SIZE} ${SIZE}" role="img">${[0.25,0.5,0.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="#1b1914" stroke-opacity=".12"/>`).join("")}${AXES.map((_,i)=>{const [x,y]=pt(i,R); return `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="#1b1914" stroke-opacity=".12"/>`;}).join("")}<polygon points="${poly}" fill="#2a332e" fill-opacity=".12" stroke="#2a332e" stroke-opacity=".75" stroke-width="1.5"/>${labels}</svg>`;}
+function dayRing(day){const r=42,c=2*Math.PI*r,pct=day/90; return `<div class="dayring"><svg viewBox="0 0 108 108"><circle cx="54" cy="54" r="${r}" fill="none" stroke="#e7dfd0" stroke-width="6"/><circle cx="54" cy="54" r="${r}" fill="none" stroke="#2a332e" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c*pct} ${c}"/></svg><div class="n"><div><div class="q" style="font-size:28px">${day}</div><div class="meta">di 90</div></div></div></div>`;}
+const MARK=`<span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".28"/><circle cx="16" cy="16" r="9.6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="46 16" transform="rotate(-28 16 16)"/><circle cx="16" cy="16" r="2.1" fill="currentColor"/></svg><span class="mark-sun"></span></span>`;
 const state={view:"home",i:0,h:1};
 const app=document.getElementById("app");
 function chrome(){
   const nav=document.getElementById("nav");
   const dock=document.getElementById("dock");
-  const links=db.pro?[["oggi","Oggi"],["futuri","Futuri"]]:(db.sim?[["futuri","I tuoi futuri"]]:[]);
+  const links=db.pro?[["oggi","Oggi"],["futuri","Futuri"]]:(db.sim?[["futuri","I tuoi futuri"]]:[["profilo","Simula"]]);
   const extra=db.pro?[]:[["prezzi","Piano 90"]];
-  const right=db.pro?`<button class="ghost" data-go="account">Account</button>`:`<button class="ghost" data-go="account">Accedi</button>${db.sim?"":`<button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Simula</button>`}`;
-  nav.innerHTML=`<button class="brand" data-go="home">${MARK} ChronoSelf</button><div class="navlinks">${[...links,...extra].map(([v,l])=>`<button class="ghost ${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("")}</div><div>${right}</div>`;
+  const right=db.pro?`<button class="ghost" data-go="account">Account</button>`:`<button class="ghost" data-go="account">Accedi</button>${db.sim?"":`<button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`}`;
+  nav.innerHTML=`<button class="brand" data-go="home">${MARK} Chrono<em>Self</em></button><div class="navlinks">${[...links,...extra].map(([v,l])=>`<button class="ghost ${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("")}</div><div>${right}</div>`;
   const dockItems=db.pro?[["oggi","Oggi"],["futuri","Futuri"],["account","Account"]]:[["home","Home"],[db.sim?"futuri":"profilo",db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
   dock.innerHTML=dockItems.map(([v,l])=>`<button class="${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("");
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -68,6 +68,7 @@ function chrome(){
   dock.style.display=state.view==="simula"?"none":"";
 }
 function go(v){
+  if(window.__csClock && v!=="home"){ clearInterval(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
   if(v==="piano"||v==="diario"||v==="habits"){ v=db.pro?"oggi":"prezzi"; }
   if((v==="futuri"||v==="oggi") && !db.sim){ v="profilo"; }
@@ -79,18 +80,84 @@ function paywall(title,lede,leverText){
 function render(){
   chrome();
   if(state.view==="home"){
-    app.innerHTML=`<section class="hero"><p class="meta">Simulatore di compounding personale</p><h1>Chi diventi se continui così.</h1><p class="lede">Non un oracolo. Un modello su salute, soldi, lavoro, relazioni e abitudini — poi un piano a 90 giorni che si paga solo se lo vuoi tenere.</p><div class="row"><button class="cta" id="start">${db.pro?"Apri oggi":db.sim?"Apri i tuoi futuri":"Fai la simulazione gratis"}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div></section>
-      <section class="grid three"><article class="card"><p class="k">01</p><h3>18 domande</h3><p>Slider onesti. Niente diagnosi, niente guru.</p></article><article class="card"><p class="k">02</p><h3>Tre futuri</h3><p>Deriva, inerzia, miglioramento — a 1, 5 e 10 anni.</p></article><article class="card"><p class="k">03</p><h3>Una leva</h3><p>Se tieni, il Piano 90 diventa il tuo giorno: abitudini e diario.</p></article></section>`;
-    document.getElementById("start").onclick=()=>go(db.pro?"oggi":db.sim?"futuri":"profilo");
+    const cta=db.pro?"Apri oggi":db.sim?"Apri i tuoi futuri":"Fai la simulazione gratis";
+    const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
+    const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
+    app.innerHTML=`<section class="hero-split">
+      <div>
+        <p class="meta">Simulatore di compounding personale</p>
+        <h1>Chi diventi se continui così.</h1>
+        <p class="lede">Non un oracolo. Un modello su cinque assi — poi un piano a 90 giorni che si paga solo se lo vuoi tenere.</p>
+        <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
+        <dl class="stats"><div><dt>18</dt><dd>domande</dd></div><div><dt>5</dt><dd>assi</dd></div><div><dt>90</dt><dd>giorni</dd></div></dl>
+      </div>
+      <div class="hero-photo">
+        <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
+        <svg class="orbit-svg" id="orbit" viewBox="0 0 320 320" aria-hidden="true">
+          <circle cx="160" cy="160" r="142" fill="none" stroke="currentColor" stroke-opacity=".35"/>
+          <circle cx="160" cy="160" r="118" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-dasharray="3 9"/>
+          ${Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;const r=n=>Math.round(n*10)/10; const x1=r(160+Math.cos(a)*132),y1=r(160+Math.sin(a)*132),x2=r(160+Math.cos(a)*142),y2=r(160+Math.sin(a)*142); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-opacity=".45"/>`;}).join("")}
+          <g id="sun"><circle cx="160" cy="18" r="6" fill="currentColor"/></g>
+        </svg>
+        <div class="clock-chip" id="clock"></div>
+      </div>
+    </section>
+    <div class="bleed marquee"><div class="marquee-track">${marquee}${marquee}</div></div>
+    <section class="grid three" style="padding-top:64px">
+      <article class="photo-card"><img src="./brand/notebook.jpg" alt="Taccuino aperto sulla tavola"/><p class="k" style="margin-top:18px">01</p><h3>18 domande</h3><p>Slider onesti su salute, soldi, lavoro, relazioni e abitudini. Niente diagnosi, niente guru.</p></article>
+      <article class="photo-card"><img src="./brand/loggia.jpg" alt="Loggia mediterranea a tre archi"/><p class="k" style="margin-top:18px">02</p><h3>Tre futuri</h3><p>Deriva, inerzia, miglioramento — scritti a 1, 5 e 10 anni, con i numeri che ne seguono.</p></article>
+      <article class="photo-card"><img src="./brand/lever.jpg" alt="Scarpe da corsa accanto alla porta"/><p class="k" style="margin-top:18px">03</p><h3>Una leva</h3><p>Se tieni, il Piano 90 diventa il tuo giorno: una sola abitudine, un diario, novanta sere.</p></article>
+    </section>
+    <section class="thesis">
+      <img src="./brand/looking.jpg" alt="Una persona alla finestra, di spalle"/>
+      <div>
+        <p class="meta">La tesi</p>
+        <blockquote>Il futuro non è un oracolo. È la somma di quello che ripeti.</blockquote>
+        <p class="lede">ChronoSelf non predice. Compone. Prende le tue risposte di oggi e le lascia correre — per vedere chi incontri tra un anno, cinque, dieci.</p>
+      </div>
+    </section>
+    <section>
+      <p class="meta">I tre rami</p>
+      <h2 style="font-size:clamp(28px,4vw,44px);max-width:16ch;margin:12px 0 24px">Stessa vita. Tre direzioni.</h2>
+      <div class="grid three" style="padding-top:0">
+        <article class="card"><p class="k">01</p><h3>Deriva</h3><p>Se lasci scivolare quello che già sai essere il punto debole.</p></article>
+        <article class="card"><p class="k">02</p><h3>Inerzia</h3><p>Se resti esattamente così. Né peggio, né meglio — il tempo comunque passa.</p></article>
+        <article class="card"><p class="k">03</p><h3>Miglioramento</h3><p>Se muovi due leve e basta. Compounding piccolo, tenuto ogni giorno.</p></article>
+      </div>
+    </section>
+    <section class="cta-band">
+      <div>
+        <p class="meta">Pronto</p>
+        <h2>Diciotto minuti. Poi vedi chi stai diventando.</h2>
+        <p>Gratis per un anno di futuri. Il Piano 90 apre il giorno per giorno — e i cinque, i dieci anni.</p>
+        <div class="row"><button class="cta light" id="start2">${cta}</button>${db.pro?"":`<button class="cta ghosted" data-go="prezzi">Vedi i piani</button>`}</div>
+      </div>
+      <img src="./brand/loggia.jpg" alt="Tre archi, tre ore del giorno"/>
+    </section>`;
+    const goStart=()=>go(db.pro?"oggi":db.sim?"futuri":"profilo");
+    document.getElementById("start").onclick=goStart;
+    document.getElementById("start2").onclick=goStart;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+    function tick(){
+      const now=new Date();
+      const s=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+      const ang=Math.round((s/86400)*3600)/10;
+      const sun=document.getElementById("sun");
+      const chip=document.getElementById("clock");
+      if(sun) sun.setAttribute("transform",`rotate(${ang} 160 160)`);
+      if(chip) chip.textContent=now.toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})+" · ora locale";
+    }
+    tick();
+    if(window.__csClock) clearInterval(window.__csClock);
+    window.__csClock=setInterval(tick,1000);
     return;
   }
   if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy</p><h1 class="q" style="font-size:40px">I dati restano tuoi.</h1><p class="lede">Simulazione, diario e abitudini stanno nel browser. I pagamenti passano da Stripe. Non è terapia.</p></main>`; return; }
   if(state.view==="prezzi"){
     app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Due livelli. Basta.</h1><p class="lede">La simulazione è gratis. Il Piano 90 è il posto in cui tieni la leva — non un altro menu pieno di cose.</p>
       <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>Simulazione</h3><ul class="ok"><li>18 domande</li><li>I tuoi assi, oggi</li><li>Tre futuri a 1 anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
-      <article class="card" style="border-color:var(--border-strong)"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Futuri a 5 e 10 anni</li><li>Schermata Oggi: una leva</li><li>Abitudini e streak</li><li>Diario serale</li></ul><div class="row"><button class="cta" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
-      <article class="card"><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né consulenza finanziaria o medica. È un binario per 90 giorni.</p></article></section></main>`;
+      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Futuri a 5 e 10 anni</li><li>Schermata Oggi: una leva</li><li>Abitudini e streak</li><li>Diario serale</li></ul><div class="row"><button class="cta light" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
+      <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né consulenza finanziaria o medica. È un binario per 90 giorni.</p></article></section></main>`;
     document.getElementById("pay").onclick=()=> db.pro?go("oggi"):startCheckout();
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     return;
