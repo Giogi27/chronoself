@@ -7,17 +7,17 @@ module.exports = async function (req, res) {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return res.status(500).json({ error: "Missing STRIPE_SECRET_KEY" });
 
-  const origin = (req.headers.origin || "https://prime72.vercel.app").replace(/\/$/, "");
+  const origin = (req.headers.origin || "https://mychronoself.vercel.app").replace(/\/$/, "");
   const params = new URLSearchParams();
   params.append("mode", "subscription");
-  params.append("success_url", origin + "/#pro?paid=1");
-  params.append("cancel_url", origin + "/#pro?cancel=1");
+  params.append("success_url", origin + "/?paid=1");
+  params.append("cancel_url", origin + "/?cancel=1");
   params.append("line_items[0][quantity]", "1");
   params.append("line_items[0][price_data][currency]", "eur");
   params.append("line_items[0][price_data][unit_amount]", "499");
   params.append("line_items[0][price_data][recurring][interval]", "month");
-  params.append("line_items[0][price_data][product_data][name]", "PRIME 72");
-  params.append("line_items[0][price_data][product_data][description]", "Console, map pins, vault, race — monthly");
+  params.append("line_items[0][price_data][product_data][name]", "ChronoSelf Piano 90");
+  params.append("line_items[0][price_data][product_data][description]", "Piano 90 giorni, diario e orizzonti 5-10 anni");
 
   const r = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

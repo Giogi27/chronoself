@@ -4,22 +4,31 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ChronoSelf — i tuoi futuri possibili</title>
+  <meta name="description" content="Simula chi diventi tra 1, 5 e 10 anni. Poi tieni un piano a 90 giorni." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./chronoself.css" />
 </head>
 <body>
+  <div class="glow"></div>
   <div class="wrap">
     <nav class="nav">
       <button class="brand" data-go="home">ChronoSelf</button>
       <div class="navlinks">
         <button class="ghost" data-go="dash">Dashboard</button>
         <button class="ghost" data-go="piano">Piano 90</button>
+        <button class="ghost" data-go="diario">Diario</button>
         <button class="ghost" data-go="storico">Storico</button>
+        <button class="ghost" data-go="prezzi">Prezzi</button>
         <button class="ghost" data-go="account">Account</button>
-        <button class="ghost" data-go="privacy">Privacy</button>
       </div>
     </nav>
     <div id="app"></div>
-    <footer>I dati stanno nel browser e, se accedi, anche sul tuo account Supabase.</footer>
+    <footer>
+      <span>ChronoSelf · strumento di riflessione</span>
+      <button class="ghost" data-go="privacy">Privacy</button>
+    </footer>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./chronoself-cloud.js"></script>
