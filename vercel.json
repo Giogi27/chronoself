@@ -1,5 +1,8 @@
 {
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" }
+  ],
+  "crons": [
+    { "path": "/api/day7", "schedule": "0 8 * * *" }
   ]
 }
