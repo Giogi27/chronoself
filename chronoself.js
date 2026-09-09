@@ -100,6 +100,34 @@ function daysBack(n){const d=new Date(); d.setDate(d.getDate()-n); return d.toIS
 function tone(n){return n>=70?"good":n>=45?"mid":"low";}
 function streak(log,id){let n=0; for(let i=0;i<90;i++){const day=daysBack(i); if(log[day]&&log[day][id]) n++; else if(i===0) continue; else break;} return n;}
 function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); if(log[day]&&log[day][id]) c++;} return c;}
+const WEEK_LABELS=["Lu","Ma","Me","Gi","Ve","Sa","Do"];
+function weekKeys(){
+  const now=new Date(); const day=now.getDay(); const diff=day===0?-6:1-day;
+  return Array.from({length:7},(_,i)=>{ const d=new Date(now); d.setDate(now.getDate()+diff+i); return d.toISOString().slice(0,10); });
+}
+function planDayKey(i){ const d=new Date(db.planStart||Date.now()); d.setDate(d.getDate()+i); return d.toISOString().slice(0,10); }
+function heldDays(id,day){ let n=0; for(let i=0;i<day;i++){ const k=planDayKey(i); if(db.habitLog[k]&&db.habitLog[k][id]) n++; } return n; }
+function journalOn(key){ return (db.journal||[]).filter(j=>String(j.at).slice(0,10)===key); }
+function holdBtn(h,big){
+  const t=today(); const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id);
+  return `<button type="button" class="hold ${big?"hold-lg":""} ${on?"is-on":""}" data-h="${h.id}" aria-pressed="${on}">
+    <span class="hold-mark" aria-hidden="true"></span>
+    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?"Tenuto, oggi.":big?"Tocca quando l'hai fatta.":(st?st+" giorni di fila.":"Ancora no.")}</span></span>
+  </button>`;
+}
+function weekStrip(id){
+  const keys=weekKeys(); const t=today();
+  return `<div class="week-strip">${keys.map((k,i)=>{
+    const on=!!(db.habitLog[k]&&db.habitLog[k][id]); const isToday=k===t; const future=k>t;
+    return `<div class="week-cell${on?" on":""}${isToday?" today":""}${future?" future":""}"><b>${WEEK_LABELS[i]}</b></div>`;
+  }).join("")}</div>`;
+}
+function cal90(day,id){
+  return `<div class="cal90">${Array.from({length:90},(_,i)=>{
+    const k=planDayKey(i); const on=!!(db.habitLog[k]&&db.habitLog[k][id]);
+    return `<i class="${on?"on":""}${i===day-1?" now":""}${i>=day?" future":""}" title="Giorno ${i+1}"></i>`;
+  }).join("")}</div>`;
+}
 function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
 window.CS=window.CS||{};
 window.CS.applyFounder=function(){
@@ -207,7 +235,7 @@ function yearClock(day){
 }
 function dayRing(day){ return yearClock(day); }
 const MARK=`<span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".28"/><circle cx="16" cy="16" r="9.6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="46 16" transform="rotate(-28 16 16)"/><circle cx="16" cy="16" r="2.1" fill="currentColor"/></svg><span class="mark-sun"></span></span>`;
-const state={view:"home",i:0,h:1};
+const state={view:"home",i:0,h:1,tab:"oggi"};
 const app=document.getElementById("app");
 function chrome(){
   const nav=document.getElementById("nav");
@@ -433,37 +461,85 @@ function render(){
     db.habits=mergeHabits(db.habits, db.sim.answers);
     if(db.habits.map(h=>h.name).join("|")!==prevNames) save(db);
     const pl=planItems(db.sim.answers); const day=dayN(); const phase=currentPhase(day); const t=today();
-    const mode=dayMode(); const mood=dayModeLine(mode, diagnose(db.sim.answers).primary.id);
+    const focusId=diagnose(db.sim.answers).primary.id;
+    const mode=dayMode(); const mood=dayModeLine(mode, focusId);
     const isSunday=new Date().getDay()===0; const done90=day>=90;
-    const yest=daysBack(1);
-    const missedYest=day>1 && db.habits.some(h=>!(db.habitLog[yest]&&db.habitLog[yest][h.id]));
-    const doneToday=db.habits.length>0 && db.habits.every(h=>db.habitLog[t]&&db.habitLog[t][h.id]);
     if(!db.habitLog[t]) db.habitLog[t]={};
-    const list=db.habits.map(h=>{
-      const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id); const w=weekDone(db.habitLog,h.id);
-      const dots=Array.from({length:14},(_,i)=>{const dayK=daysBack(13-i); const ok=db.habitLog[dayK]&&db.habitLog[dayK][h.id]; return `<i class="${ok?"on":""}"></i>`;}).join("");
-      return `<article class="card"><label class="check"><input type="checkbox" data-h="${h.id}" ${on?"checked":""}/> <strong>${esc(h.name)}</strong> <span class="pill">${st} giorni di fila · ${w}/7</span></label><div class="dots">${dots}</div></article>`;
-    }).join("");
-    const notes=(db.journal||[]).slice(0,6).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora.</p>`;
-    const tasks=[["t1","Messa in calendario"],["t2","Fatta almeno 3 volte questa settimana"],["t3","Tolto uno spreco la sera"],["t4","Detto a qualcuno che la stai tenendo"]];
-    app.innerHTML=`<main class="step wide">
-      <div class="flex-head"><div><p class="meta">${esc(mood.kicker)} · Giorno ${day} di 90 · ${esc(pl.label)}</p><h1 class="q" style="font-size:36px;max-width:22ch">${esc(pl.focus)}</h1><p class="lede">${esc(mood.line)}</p><p class="lede">${esc(pl.why)}</p><p class="lede">${esc(pl.weeks[phase][0])} — ${esc(pl.weeks[phase][1])}</p></div>${yearClock(day)}</div>
-      ${done90?`<section class="diag-action" style="margin:28px 0;border-radius:24px;padding:24px"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:""}
-      ${isSunday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Domenica</p><h3>Due minuti. Cosa hai tenuto questa settimana?</h3><p>Non una biografia. Quanti giorni su 7, e una riga su cosa l'ha resa facile o difficile.</p></section>`:""}
-      ${missedYest&&!doneToday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Ieri</p><h3>Non l'hai spuntata. Va bene.</h3><p>Oggi conta di più di ieri. Una volta, adesso.</p></section>`:""}
-      ${doneToday&&!done90?`<section class="card" style="margin:24px 0"><p class="meta">Oggi</p><h3>Tenuto.</h3><p>A stasera le due righe. Poi basta.</p></section>`:""}
-      <h2 style="margin:36px 0 12px">Le tue abitudini</h2>
-      <div class="grid">${list}</div>
-      <div class="row"><input id="newHabit" maxlength="60" placeholder="Aggiungi un'abitudine" style="flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px"/><button class="btn" id="addH">Aggiungi</button></div>
-      <div class="oggi-split">
-        <div><h2>Due righe, stasera</h2><label class="field"><textarea id="note" rows="4" placeholder="${esc(pl.prompt)}"></textarea></label><button class="cta" id="saveN">Salva nota</button>${notes}</div>
-        <div><h2>Le 12 settimane</h2>${pl.weeks.map(([t,d],i)=>`<article class="card" style="margin-top:10px;${i===phase?"outline:1px solid var(--border-strong)":""}"><h3>${t}</h3><p>${d}</p></article>`).join("")}${tasks.map(([id,label])=>`<label class="check"><input type="checkbox" data-c="${id}" ${db.checks[id]?"checked":""}/> ${label}</label>`).join("")}<div class="row"><button class="ghost" data-go="futuri">Rivedi i futuri</button></div></div>
-      </div>
+    const primary=db.habits[0]; const extra=db.habits.slice(1);
+    const pid=primary?primary.id:"";
+    const onPrimary=!!(primary&&db.habitLog[t][pid]);
+    const held=primary?heldDays(pid,day):0;
+    const missed=Math.max(0,day-held-(onPrimary?0:0));
+    const missedPast=Math.max(0,(day-(onPrimary?1:0))-held);
+    const st=primary?streak(db.habitLog,pid):0;
+    const w=primary?weekKeys().filter(k=>db.habitLog[k]&&db.habitLog[k][pid]).length:0;
+    const yest=daysBack(1);
+    const missedYest=day>1 && primary && !(db.habitLog[yest]&&db.habitLog[yest][pid]);
+    const notesToday=journalOn(t);
+    const evening=mode==="sera"||mode==="notte";
+    if(!state.tab) state.tab="oggi";
+    const pills=[["oggi","Oggi"],["percorso","Percorso"],["diario","Diario"]].map(([id,l])=>`<button type="button" class="${state.tab===id?"on":""}" data-tab="${id}">${l}</button>`).join("");
+    const banner90=done90?`<section class="dash-banner dark"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:"";
+    const composer=`<section class="dash-note">
+        <p class="meta">Due righe</p>
+        <h2>${evening?"Ora. Poi chiudi.":"A stasera."}</h2>
+        <label class="field"><textarea id="note" rows="4" placeholder="${esc(pl.prompt)}"></textarea></label>
+        <button class="cta" id="saveN">Salva nota</button>
+        ${notesToday.length?`<p class="lede">Scritto oggi. Va bene così.</p>${notesToday.map(j=>`<div class="hist"><p>${esc(j.text)}</p></div>`).join("")}`:""}
+      </section>`;
+    let body="";
+    if(state.tab==="percorso"){
+      body=`<header class="dash-head">
+        <div><p class="meta">Percorso · ${esc(pl.label)}</p><h1>Novanta giorni. Uno alla volta.</h1>
+          <p class="lede">${held} tenuti · ${missedPast} persi · giorno ${day}. I persi non si recuperano. Si continua.</p></div>
+        ${yearClock(day)}
+      </header>
+      ${banner90}
+      <p class="meta" style="margin-top:8px">I 90 giorni</p>
+      ${cal90(day,pid)}
+      <section class="phase-now"><p class="meta">Questa fase</p><h2>${esc(pl.weeks[phase][0])}</h2><p>${esc(pl.weeks[phase][1])}</p></section>
+      <ol class="phase-list">${pl.weeks.map(([title,d],i)=>`<li class="${i===phase?"now":""}"><strong>${esc(title)}</strong><span>${esc(d)}</span></li>`).join("")}</ol>
+      <div class="row"><button class="cta" data-go="futuri">Rivedi le lettere</button></div>
+      <details class="dash-more"><summary>Aggiungi un'altra cosa</summary>
+        <div class="row" style="margin-top:12px"><input id="newHabit" maxlength="60" placeholder="Solo se serve davvero"/><button class="btn" id="addH">Aggiungi</button></div>
+        ${extra.map(h=>holdBtn(h,false)).join("")}
+      </details>`;
+    } else if(state.tab==="diario"){
+      const hist=(db.journal||[]).slice(0,20).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora. Una sera, due righe.</p>`;
+      body=`<header class="dash-head"><div><p class="meta">Diario</p><h1>Due righe. Basta così.</h1><p class="lede">${esc(pl.prompt)}</p></div></header>
+      ${isSunday?`<section class="phase-now"><p class="meta">Domenica</p><h2>${w} giorni su 7 questa settimana.</h2><p>Una riga su cosa l'ha resa facile o difficile. Poi chiudi.</p></section>`:""}
+      ${composer}
+      <div class="dash-hist">${hist}</div>`;
+    } else {
+      const status=onPrimary?"Tenuto.":missedYest?"Ieri no. Oggi sì.":mood.line;
+      body=`<header class="dash-head">
+        <div>
+          <p class="meta">${esc(mood.kicker)} · Giorno ${day} di 90 · ${esc(pl.label)}</p>
+          <h1>${esc(pl.focus)}</h1>
+          <p class="lede">${esc(status)}</p>
+          <p class="lede">${esc(pl.why)}</p>
+        </div>
+      </header>
+      ${banner90}
+      ${primary?holdBtn(primary,true):""}
+      ${primary?weekStrip(pid):""}
+      <p class="dash-stat">${st?st+" di fila · ":""}${w}/7 questa settimana · ${held} tenuti su ${day}</p>
+      ${extra.length?`<div class="dash-extra"><p class="meta">Anche questo</p>${extra.map(h=>holdBtn(h,false)).join("")}</div>`:""}
+      <section class="phase-now"><p class="meta">${esc(pl.weeks[phase][0])}</p><p>${esc(pl.weeks[phase][1])}</p></section>
+      ${evening||notesToday.length?composer:`<p class="dash-later">A stasera le due righe. Ora conta solo la cosa di oggi.</p>`}
+      ${!evening&&!notesToday.length?`<p class="dash-later"><button class="ghost" data-tab="diario">Apri il diario</button></p>`:""}
+      `;
+    }
+    app.innerHTML=`<main class="dash">
+      <nav class="oggi-pills">${pills}</nav>
+      ${body}
     </main>`;
-    app.querySelectorAll("[data-h]").forEach(el=>el.onchange=()=>{if(!db.habitLog[t]) db.habitLog[t]={}; db.habitLog[t][el.dataset.h]=el.checked; save(db); render();});
-    app.querySelectorAll("[data-c]").forEach(c=>c.onchange=()=>{db.checks[c.dataset.c]=c.checked;save(db);});
-    document.getElementById("saveN").onclick=()=>{const text=document.getElementById("note").value.trim(); if(!text) return; db.journal.unshift({at:new Date().toISOString(),text}); db.journal=db.journal.slice(0,60); save(db); render();};
-    document.getElementById("addH").onclick=()=>{const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Massimo 6 abitudini."); db.habits.push({id:"h"+Date.now(),name}); save(db); render();};
+    app.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab; render();});
+    app.querySelectorAll("[data-h]").forEach(el=>el.onclick=()=>{ if(!db.habitLog[t]) db.habitLog[t]={}; db.habitLog[t][el.dataset.h]=!db.habitLog[t][el.dataset.h]; save(db); render(); });
+    const saveN=document.getElementById("saveN");
+    if(saveN) saveN.onclick=()=>{ const text=(document.getElementById("note").value||"").trim(); if(!text) return; const prefix=isSunday&&state.tab==="diario"?`Settimana: ${w}/7. `:""; db.journal.unshift({at:new Date().toISOString(),text:prefix+text}); db.journal=db.journal.slice(0,60); save(db); render(); };
+    const addH=document.getElementById("addH");
+    if(addH) addH.onclick=()=>{ const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Massimo 6 cose."); db.habits.push({id:"h"+Date.now(),name}); save(db); render(); };
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     if(keepNote){ const n=document.getElementById("note"); if(n) n.value=keepNote; }
   }
