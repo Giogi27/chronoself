@@ -1,6 +1,7 @@
 const CS_SB_URL = "https://soskkfqeudtqfarzjlal.supabase.co";
 const CS_SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvc2trZnFldWR0cWZhcnpqbGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1ODg5NzIsImV4cCI6MjEwNDE2NDk3Mn0.zxvsRI0_PHU5-xCvpgJlWySnBbCemxbPuI6Zpx7HQLw";
 const CS_KEY = "chronoself.v2";
+const CS_SITE = "https://mychronoself.vercel.app";
 window.CS = window.CS || {};
 window.CS.sb = window.supabase ? window.supabase.createClient(CS_SB_URL, CS_SB_KEY) : null;
 window.CS.user = null;
@@ -38,7 +39,7 @@ window.CS.renderAccount = function () {
   app.innerHTML = `<main class="step">
     <p class="meta">Account</p>
     <h1 class="q">${CS.user ? "Sei dentro." : "Entra per salvare nel cloud."}</h1>
-    <p class="lede">${CS.user ? mail : "Stesso progetto Supabase di Prime72. Email + password."}</p>
+    <p class="lede">${CS.user ? mail : "Email + password. Dopo la conferma torni su questo sito."}</p>
     ${CS.user ? "" : `<label class="field">Email<input id="csEmail" type="email" /></label>
     <label class="field">Password (min 6)<input id="csPass" type="password" /></label>`}
     <p class="meta" id="csMsg">${CS.status || ""}</p>
@@ -56,14 +57,18 @@ window.CS.renderAccount = function () {
       const password = document.getElementById("csPass").value;
       const { error } = await CS.sb.auth.signInWithPassword({ email, password });
       if (error) return set(error.message);
-      await csRefresh(); await csPull(); location.reload();
+      await csRefresh(); await csPull(); location.href = CS_SITE + "/";
     };
     document.getElementById("csUp").onclick = async () => {
       const email = document.getElementById("csEmail").value.trim();
       const password = document.getElementById("csPass").value;
-      const { error } = await CS.sb.auth.signUp({ email, password });
+      const { error } = await CS.sb.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: CS_SITE + "/" }
+      });
       if (error) return set(error.message);
-      set("Account creato. Se chiede conferma, apri la mail. Poi accedi.");
+      set("Account creato. Apri la mail e clicca conferma. Poi torna qui e accedi.");
     };
   } else {
     document.getElementById("csPush").onclick = async () => { await csPush(); set(CS.status); };
@@ -75,10 +80,13 @@ window.CS.renderAccount = function () {
 (async function bootCloud() {
   await csRefresh();
   if (CS.user) await csPull();
+  if (location.hash && location.hash.includes("access_token")) {
+    CS.status = "Email confermata. Ora puoi accedere.";
+    history.replaceState(null, "", location.pathname);
+  }
   document.querySelectorAll('[data-go="account"]').forEach((b) => {
     b.addEventListener("click", (e) => {
       e.stopImmediatePropagation();
-      if (typeof window.go === "function") {}
       CS.renderAccount();
     }, true);
   });
