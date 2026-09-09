@@ -292,17 +292,20 @@ function dayRing(day){ return yearClock(day); }
 const MARK=`<span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14.2" fill="none" stroke="currentColor" stroke-width="1" opacity=".28"/><circle cx="16" cy="16" r="9.6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="46 16" transform="rotate(-28 16 16)"/><circle cx="16" cy="16" r="2.1" fill="currentColor"/></svg><span class="mark-sun"></span></span>`;
 const state={view:"home",i:0,h:1,tab:"oggi"};
 const app=document.getElementById("app");
+function signedIn(){ return !!(window.CS&&CS.user); }
+function inPlan(){ return signedIn()&&!!db.pro; }
 function chrome(){
   const nav=document.getElementById("nav");
   const dock=document.getElementById("dock");
-  const logged=!!(window.CS&&CS.user);
-  const links=db.pro?[["oggi","Oggi"],["futuri","Futuri"]]:(db.sim?[["futuri","I tuoi futuri"]]:[["profilo","Simula"]]);
-  const extra=db.pro?[]:[["prezzi","Piano 90"]];
+  const logged=signedIn();
+  const inside=inPlan();
+  const links=inside?[["oggi","Oggi"],["futuri","Futuri"]]:(logged&&db.sim?[["futuri","I tuoi futuri"]]:[["profilo","Simula"]]);
+  const extra=inside?[]:[["prezzi","Piano 90"]];
   const right=logged
     ?`<button class="ghost" data-go="account">Account</button>`
-    :`<button class="ghost" data-go="account">Accedi</button>${db.pro||db.sim?"":`<button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`}`;
+    :`<button class="ghost" data-go="account">Accedi</button><button class="cta" data-go="profilo" style="height:36px;padding:0 14px">Inizia</button>`;
   nav.innerHTML=`<button class="brand" data-go="home">${MARK} Chrono<em>Self</em></button><div class="navlinks">${[...links,...extra].map(([v,l])=>`<button class="ghost ${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("")}</div><div>${right}</div>`;
-  const dockItems=db.pro?[["oggi","Oggi"],["futuri","Futuri"],["account",logged?"Account":"Accedi"]]:[["home","Home"],[db.sim?"futuri":"profilo",db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
+  const dockItems=inside?[["oggi","Oggi"],["futuri","Futuri"],["account","Account"]]:[["home","Home"],[logged&&db.sim?"futuri":"profilo",logged&&db.sim?"Futuri":"Simula"],["prezzi","Piano 90"]];
   dock.innerHTML=dockItems.map(([v,l])=>`<button class="${state.view===v?"on":""}" data-go="${v}">${l}</button>`).join("");
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   document.querySelector("footer").style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
@@ -311,7 +314,8 @@ function chrome(){
 function go(v){
   if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
-  if(v==="piano"||v==="diario"||v==="habits"){ v=db.pro?"oggi":"prezzi"; }
+  if(!signedIn() && (v==="oggi"||v==="futuri")){ v="account"; }
+  if(v==="piano"||v==="diario"||v==="habits"){ v=inPlan()?"oggi":"prezzi"; }
   if((v==="futuri"||v==="oggi"||v==="soglia") && !db.sim){ v="profilo"; }
   state.view=v; render();
 }
@@ -379,7 +383,7 @@ function render(){
   document.onkeydown=null;
   chrome();
   if(state.view==="home"){
-    const cta=db.pro?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia";
+    const cta=inPlan()?"Vai a oggi":(signedIn()&&midQuiz())?`Riprendi (${db.quizI+1}/18)`:(signedIn()&&db.sim)?"Apri i tuoi futuri":"Inizia";
     const axes=["Salute","Soldi","Lavoro","Relazioni","Abitudini"];
     const marquee=[...axes,...axes,...axes,...axes].map(a=>`<span>${a}</span>`).join("");
     app.innerHTML=`<section class="hero-split">
@@ -388,7 +392,7 @@ function render(){
         <p class="hero-lede">Diciotto domande su come stai, davvero. Sonno, soldi, lavoro, persone, abitudini.</p>
         <p class="hero-lede">Da lì tre lettere, scritte da chi sarai: se lasci andare, se resti così, se cambi un po'.</p>
         <p class="hero-lede">Se vorrai, un percorso di novanta giorni, guidato: ogni giorno sai cosa fare.</p>
-        <div class="row"><button class="cta" id="start">${cta}</button>${db.pro?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
+        <div class="row"><button class="cta" id="start">${cta}</button>${inPlan()?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
       </div>
       <div class="hero-photo">
         <img src="./brand/hero.jpg" alt="Poltrona di lino di fronte a una finestra, luce del mattino" />
@@ -423,11 +427,11 @@ function render(){
         <p class="meta">Inizia</p>
         <h2>Diciotto minuti. Poi vedi dove stai andando.</h2>
         <p>Gratis vedi i prossimi 12 mesi. Il Piano 90 apre 5 e 10 anni, e il giorno per giorno.</p>
-        <div class="row"><button class="cta light" id="start2">${cta}</button>${db.pro?"":`<button class="cta ghosted" data-go="prezzi">Vedi i piani</button>`}</div>
+        <div class="row"><button class="cta light" id="start2">${cta}</button>${inPlan()?"":`<button class="cta ghosted" data-go="prezzi">Vedi i piani</button>`}</div>
       </div>
       <img src="./brand/loggia.jpg" alt="Tre archi, tre ore del giorno"/>
     </section>`;
-    const goStart=()=>{ if(db.pro) return go("oggi"); if(midQuiz()){ state.i=db.quizI; return go("simula"); } go(db.sim?"futuri":"profilo"); };
+    const goStart=()=>{ if(inPlan()) return go("oggi"); if(signedIn()&&midQuiz()){ state.i=db.quizI; return go("simula"); } go(signedIn()&&db.sim?"futuri":"profilo"); };
     document.getElementById("start").onclick=goStart;
     document.getElementById("start2").onclick=goStart;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -438,9 +442,9 @@ function render(){
   if(state.view==="prezzi"){
     app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Gratis per vedere. Pago per tenere.</h1><p class="lede">La simulazione è gratis. Il Piano 90 è per chi vuole un'abitudine, un diario, e 90 giorni di seguito.</p>
       <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>La simulazione</h3><ul class="ok"><li>18 domande</li><li>Come stai oggi, in 5 aree</li><li>Tre versioni di te, a 1 anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
-      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Anche 5 e 10 anni</li><li>Una cosa da tenere, per 90 giorni</li><li>Diario la sera</li><li>Calendario di 90 giorni</li></ul><div class="row"><button class="cta light" id="pay">${db.pro?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
+      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Anche 5 e 10 anni</li><li>Una cosa da tenere, per 90 giorni</li><li>Diario la sera</li><li>Calendario di 90 giorni</li></ul><div class="row"><button class="cta light" id="pay">${inPlan()?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
       <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né un medico, né un consulente. È un posto dove tieni una cosa per 90 giorni.</p></article></section></main>`;
-    document.getElementById("pay").onclick=()=> db.pro?go("oggi"):startCheckout();
+    document.getElementById("pay").onclick=()=> inPlan()?go("oggi"):startCheckout();
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     return;
   }
@@ -491,19 +495,19 @@ function render(){
     const who=s.profile.nome||"Tu";
     const d=diagnose(s.answers);
     const play=playFor(d.primary.id);
-    const locked=!db.pro && state.h>1;
+    const locked=!inPlan() && state.h>1;
     const pack=s.horizons[locked?1:state.h];
     const cols=["deriva","inerzia","miglioramento"].map(id=>letterCard(id,pack[id],state.h,s.profile)).join("");
-    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${esc(play.label)}${db.pro?" · Piano 90":""}</p>
+    app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)} · da lavorare: ${esc(play.label)}${inPlan()?" · Piano 90":""}</p>
       <h1 class="q" style="font-size:40px">Come stai, oggi</h1>
       <p class="lede">I numeri escono dalle tue 18 risposte. Poi tre lettere, scritte da te futuro.</p>
       <div class="scores-grid">${radar(s.scores,d.weak)}<div>${axisBars(s.scores)}</div></div>
       ${diagnosisCard(s.answers)}
       <p class="meta" style="margin-top:48px">Tre lettere</p>
       <h2 style="font-size:clamp(28px,4vw,40px);max-width:16ch;margin:12px 0 18px">Stessa vita. Tre direzioni.</h2>
-      <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!db.pro&&y>1)?" · chiuse":""}</button>`).join("")}</div>
+      <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!inPlan()&&y>1)?" · chiuse":""}</button>`).join("")}</div>
       ${locked?sealedLetter(state.h): `<div class="cols">${cols}</div>`}
-      <div class="row">${db.pro?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Attiva il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
+      <div class="row">${inPlan()?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Attiva il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
       ${db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${esc(h.focus?playFor(h.focus).label:AXIS_LABEL[h.weak])}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
     </main>`;
     app.querySelectorAll("[data-y]").forEach(b=>b.onclick=()=>{state.h=Number(b.dataset.y);render();});
@@ -513,7 +517,7 @@ function render(){
   }
   if(state.view==="oggi"){
     if(!db.sim){go("profilo");return;}
-    if(!db.pro){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Hai letto chi diventi. Ora tieni questa cosa, per 90 giorni. Diario e calendario si aprono qui.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
+    if(!inPlan()){ app.innerHTML=paywall("Un'abitudine. Novanta giorni.","Hai letto chi diventi. Ora tieni questa cosa, per 90 giorni. Diario e calendario si aprono qui.",leverFor(db.sim.answers)); document.getElementById("pay").onclick=startCheckout; document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)); return; }
     if(!db.planStart){db.planStart=new Date().toISOString();save(db);}
     const prevNames=db.habits.map(h=>h.name).join("|");
     db.habits=mergeHabits(db.habits, db.sim.answers);
