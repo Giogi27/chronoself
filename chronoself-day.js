@@ -94,9 +94,56 @@
   }, true);
 
   const _render=render;
+  function escT(s){
+    const d=document.createElement("div");
+    d.textContent=String(s);
+    return d.innerHTML;
+  }
+  function applyDayCard(){
+    if(!state || state.view!=="oggi" || !db.sim || typeof dayCard!=="function") return;
+    const focusId=diagnose(db.sim.answers).primary.id;
+    const play=playFor(focusId);
+    const day=dayN();
+    const card=dayCard(play, focusId, day, nowDate());
+    const tab=state.tab||"oggi";
+    const head=document.querySelector(".dash-head");
+    if(head && (tab==="oggi")){
+      const meta=head.querySelector(".meta");
+      const h1=head.querySelector("h1");
+      const lede=head.querySelector(".lede");
+      if(meta) meta.textContent=card.tag;
+      if(h1) h1.textContent=card.title;
+      if(lede){
+        const t=today();
+        const pid=db.habits[0]&&db.habits[0].id;
+        const on=!!(pid&&db.habitLog[t]&&db.habitLog[t][pid]);
+        const yest=daysBack(1);
+        const missed=day>1 && pid && !(db.habitLog[yest]&&db.habitLog[yest][pid]);
+        lede.textContent=on?"Tenuto.":(missed?"Ieri no. "+card.line:card.line);
+      }
+    }
+    const note=document.getElementById("note");
+    if(note && !note.value) note.placeholder=card.evening;
+    const phaseNow=document.querySelector(".phase-now");
+    if(phaseNow && tab==="percorso"){
+      phaseNow.innerHTML='<p class="meta">Oggi · settimana '+card.week+' di 12</p><h2>'+escT(card.title)+"</h2><p>"+escT(card.line)+"</p>";
+    }
+    if(phaseNow && tab==="oggi"){
+      const ph=play.weeks[card.phase]||play.weeks[0];
+      phaseNow.innerHTML='<p class="meta">Settimana '+card.week+' di 12 · '+escT(ph[0])+"</p><p>"+escT(ph[1])+"</p>";
+    }
+    const list=document.querySelector(".phase-list");
+    if(list && typeof weeksOfPlan==="function" && tab==="percorso"){
+      const wks=weeksOfPlan(play);
+      list.innerHTML=wks.map(function(wk){
+        return '<li class="'+(wk.week===card.week?"now":"")+'"><strong>'+escT(wk.title)+"</strong><span>"+escT(wk.span+". "+wk.job)+"</span></li>";
+      }).join("");
+    }
+  }
   render=function(){
     _render();
     armDayTick();
+    applyDayCard();
     if(!(window.CS&&CS.isFounder&&CS.isFounder())) return;
     if(!state || state.view!=="oggi") return;
     if(document.getElementById("simMidnight")) return;
