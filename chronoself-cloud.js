@@ -4,8 +4,21 @@ const CS_KEY = "chronoself.v2";
 const CS_SITE = "https://mychronoself.vercel.app";
 window.CS = window.CS || {};
 window.CS.sb = window.supabase ? window.supabase.createClient(CS_SB_URL, CS_SB_KEY) : null;
-window.CS.user = null;
-window.CS.status = "";
+const CS_FOUNDERS = ["giovannidiano27@libero.it"];
+window.CS.isFounder = function () {
+  const mail = (CS.user && CS.user.email ? CS.user.email : "").trim().toLowerCase();
+  return CS_FOUNDERS.indexOf(mail) !== -1;
+};
+function csGrant(payload) {
+  payload = payload && typeof payload === "object" ? payload : {};
+  if (!CS.isFounder()) return payload;
+  payload.pro = true;
+  payload.planStart = payload.planStart || new Date().toISOString();
+  if (!Array.isArray(payload.habits)) payload.habits = [];
+  if (!payload.habitLog) payload.habitLog = {};
+  if (!Array.isArray(payload.journal)) payload.journal = [];
+  return payload;
+}
 
 async function csRefresh() {
   if (!CS.sb) return;
@@ -17,14 +30,21 @@ async function csPull() {
   const { data, error } = await CS.sb.from("chronoself_saves").select("payload").eq("user_id", CS.user.id).maybeSingle();
   if (error) { CS.status = "Crea la tabella: incolla chronoself.sql in Supabase SQL Editor."; return; }
   if (data && data.payload) {
-    localStorage.setItem(CS_KEY, JSON.stringify(data.payload));
+    const payload = csGrant(data.payload);
+    localStorage.setItem(CS_KEY, JSON.stringify(payload));
     CS.status = "Dati scaricati dal cloud.";
+  } else if (CS.isFounder()) {
+    const payload = csGrant({});
+    try { Object.assign(payload, JSON.parse(localStorage.getItem(CS_KEY) || "{}")); } catch (e) {}
+    localStorage.setItem(CS_KEY, JSON.stringify(csGrant(payload)));
+    CS.status = "Piano 90 attivo.";
   }
 }
 async function csPush() {
   if (!CS.sb || !CS.user) return;
   let payload = {};
   try { payload = JSON.parse(localStorage.getItem(CS_KEY) || "{}"); } catch (e) {}
+  payload = csGrant(payload);
   const { error } = await CS.sb.from("chronoself_saves").upsert({ user_id: CS.user.id, payload, updated_at: new Date().toISOString() });
   CS.status = error ? "Crea la tabella chronoself_saves in Supabase (file chronoself.sql)." : "Salvato nel cloud.";
 }
@@ -80,6 +100,7 @@ window.CS.renderAccount = function () {
 (async function bootCloud() {
   await csRefresh();
   if (CS.user) await csPull();
+  if (typeof CS.applyFounder === "function") CS.applyFounder();
   if (location.hash && location.hash.includes("access_token")) {
     CS.status = "Email confermata. Ora puoi accedere.";
     history.replaceState(null, "", location.pathname);
@@ -90,5 +111,5 @@ window.CS.renderAccount = function () {
       CS.renderAccount();
     }, true);
   });
-  setInterval(() => { if (CS.user) csPush(); }, 20000);
+  setInterval(() => { if (CS.user) { if (typeof CS.applyFounder === "function") CS.applyFounder(); csPush(); } }, 20000);
 })();

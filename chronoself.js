@@ -101,6 +101,13 @@ function tone(n){return n>=70?"good":n>=45?"mid":"low";}
 function streak(log,id){let n=0; for(let i=0;i<90;i++){const day=daysBack(i); if(log[day]&&log[day][id]) n++; else if(i===0) continue; else break;} return n;}
 function weekDone(log,id){let c=0; for(let i=0;i<7;i++){const day=daysBack(i); if(log[day]&&log[day][id]) c++;} return c;}
 function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
+window.CS=window.CS||{};
+window.CS.applyFounder=function(){
+  if(!(window.CS.isFounder&&CS.isFounder())) return;
+  const was=!!db.pro;
+  unlockPro();
+  if(!was) render();
+};
 async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview||!res.ok){unlockPro(); go("oggi"); return;} alert(data.error||"Stripe non configurato.");}catch(e){unlockPro(); go("oggi");}}
 function splitStory(t){
   const i=String(t).indexOf(". ");
