@@ -1,20 +1,8 @@
--- Incolla in Supabase → SQL Editor, poi Run.
-create table if not exists chronoself_saves (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  payload jsonb not null default '{}'::jsonb,
-  updated_at timestamptz default now()
-);
-
-alter table chronoself_saves enable row level security;
-
-drop policy if exists cs_select on chronoself_saves;
-drop policy if exists cs_upsert on chronoself_saves;
-
-create policy cs_select on chronoself_saves
-  for select using (auth.uid() = user_id);
-
-create policy cs_insert on chronoself_saves
-  for insert with check (auth.uid() = user_id);
-
-create policy cs_update on chronoself_saves
-  for update using (auth.uid() = user_id);
+-- Schema già gestito in Supabase. Questo file è solo documentazione.
+-- Non eseguire le vecchie policy: il database esistente comprende:
+-- public.chronoself_saves (payload personale, RLS per user_id)
+-- public.chronoself_entitlements (lettura propria; scrittura solo server)
+-- public.chronoself_billing_events (event_id univoco)
+-- public.apply_chronoself_billing_event(...) (solo service_role)
+-- private.enforce_chronoself_entitlement() (pro derivato dal server)
+-- Nessuna migrazione o modifica ai dati è richiesta da questo aggiornamento.

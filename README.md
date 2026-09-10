@@ -1,12 +1,61 @@
 # ChronoSelf
 
-Simulatore di compounding personale: 18 domande, tre futuri, Piano 90.
+18 domande, tre futuri, un Piano 90. HTML, CSS e JavaScript senza framework, con funzioni Node su Vercel.
 
-- Gratis: simulazione e orizzonte a 1 anno
-- Piano 90: schermata Oggi (leva, abitudini, diario), futuri a 5 e 10 anni
+- Gratis: quiz e lettere a un anno.
+- Piano 90: Oggi / Percorso / Diario e orizzonti a cinque e dieci anni.
+- Le risposte vengono conservate localmente; un account Supabase permette salvataggio e recupero cloud. Il logout rimuove i dati personali locali.
+- L'accesso al piano dipende esclusivamente dall'entitlement letto dal server. Il payload del salvataggio non concede accesso.
 
-Abitudini e diario non stanno nel menu pubblico: si aprono solo dopo l'acquisto.
+## Configurazione Vercel
 
-I dati restano nel browser (`chronoself.v2`). Account opzionale via Supabase. Pagamenti Stripe.
+Impostare le variabili di `.env.example` tramite Vercel, senza commettere valori segreti:
 
-Dopo il push su `main`, Vercel pubblica in automatico.
+| Variabile | Uso |
+| --- | --- |
+| `SITE_URL` | Origine HTTPS del sito, per ritorni checkout e portale |
+| `SUPABASE_URL` | Progetto Supabase già esistente |
+| `SUPABASE_ANON_KEY` | Chiave pubblica del medesimo progetto, per verifica sessione server |
+| `SUPABASE_SERVICE_ROLE_KEY` | Solo server: lettura billing e RPC atomica |
+| `STRIPE_SECRET_KEY` | Solo server: API Stripe |
+| `STRIPE_WEBHOOK_SECRET` | Solo server: verifica HMAC del webhook |
+| `STRIPE_PRICE_ID` | Prezzo ricorrente del Piano 90; consigliato. Se assente: 4,99 EUR/mese |
+| `ADMIN_SECRET` | Facoltativa: senza di essa `/api/ops-subs` è disabilitato |
+
+Il client Supabase usa una chiave **anon pubblica**, protetta da RLS; non è una service role key. Il client CDN è fissato alla versione 2.116.0. In Supabase Auth aggiungere l'origine usata alle redirect URL consentite (anche per eventuali preview).
+
+In Stripe attivare il Customer Portal e registrare `/api/stripe-webhook` per:
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+- `invoice.paid`
+- `invoice.payment_failed`
+
+Il webhook verifica i byte originali, con tolleranza timestamp di cinque minuti. Recupera lo stato corrente dell'abbonamento da Stripe e chiama la RPC già presente `apply_chronoself_billing_event`. L'inserimento dell'evento e l'aggiornamento dell'entitlement avvengono nella stessa transazione; i duplicati non vengono riapplicati. Errori di Stripe/DB restituiscono un errore HTTP per consentire i retry.
+
+Non eseguire migrazioni: tabelle, RLS, trigger sui salvataggi e RPC esistono già. `chronoself.sql` è ora solo una nota descrittiva, senza istruzioni che cambiano policy.
+
+Gli abbonamenti preesistenti senza `metadata.user_id` e senza una corrispondenza per `stripe_subscription_id` richiedono riconciliazione amministrativa: il webhook non assegna acquisti basandosi su email arbitrarie.
+
+## Verifiche locali
+
+Node 22 o superiore:
+
+```sh
+npm test
+npm run check
+```
+
+Il test browser richiede Playwright disponibile nell'ambiente e Chromium (oppure `CHROME_PATH`). Non è una dipendenza di produzione:
+
+```sh
+npm run test:browser
+```
+
+I test browser avviano un server su localhost, simulano Supabase soltanto nel contesto del test e non scrivono nel database reale. Gli screenshot finiscono in `test-results/`, ignorato da Git.
+
+La configurazione PWA comprende manifest e icona; non viene introdotta una cache offline dei dati personali.
+
+`/api/day7` resta lo stub preesistente: non invia email. Non viene dichiarato un servizio email operativo.

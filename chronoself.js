@@ -27,12 +27,12 @@ const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relaz
 const KIND_TITLE={deriva:"Se lasci andare",inerzia:"Se resti così",miglioramento:"Se cambi un po'"};
 const KEY="chronoself.v2";
 const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
-const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); return d.innerHTML;};
+const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); return d.innerHTML.replace(/"/g,"&quot;").replace(/'/g,"&#39;");};
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
 function save(db){localStorage.setItem(KEY,JSON.stringify(db)); if(window.CS&&CS.user&&CS.push) CS.push();}
-const qstr=new URLSearchParams(location.search);
-const db=Object.assign({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),picked:{},focusOverride:null,sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null}, load());
-if(qstr.get("paid")==="1"){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); save(db); history.replaceState(null,"",location.pathname);}
+const defaults=()=>({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),picked:{},focusOverride:null,sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null});
+const db=Object.assign(defaults(), load());
+Object.defineProperty(db, "pro", {enumerable:false, configurable:false, get:()=>!!(window.CS&&CS.hasEntitlement&&CS.hasEntitlement())});
 function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTIONS.forEach(q=>{acc[q.axis].s+=(a[q.id]??50);acc[q.axis].n++;}); const out={}; AXES.forEach(x=>out[x]=Math.round(acc[x].s/acc[x].n)); return out;}
 function weakest(base){return [...AXES].sort((a,b)=>base[a]-base[b])[0];}
 function pickIndex(score){
@@ -143,7 +143,7 @@ function setClockKey(key){
   clockOverride=key?parseLocal(key):null;
   try{ if(key) sessionStorage.setItem("cs.clock",key); else sessionStorage.removeItem("cs.clock"); }catch(e){}
 }
-try{ const ck=sessionStorage.getItem("cs.clock"); if(ck) clockOverride=parseLocal(ck); }catch(e){}
+
 window.__csDayClock=true;
 function dayNFromKeys(startKey,todayKey){
   const diff=Math.round((parseLocal(todayKey).getTime()-parseLocal(startKey).getTime())/86400000);
@@ -207,21 +207,22 @@ function cal90(day,id,play,playId){
     return `<i class="${on?"on":""}${i===day-1?" now":""}${i>=day?" future":""}" title="${esc(tip)}"></i>`;
   }).join("")}</div>`;
 }
-function unlockPro(){db.pro=true; db.planStart=db.planStart||new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); save(db);}
 window.CS=window.CS||{};
 window.CS.applyPayload=function(p){
   if(!p||typeof p!=="object") return;
-  ["profile","answers","picked","focusOverride","sim","history","checks","journal","habits","habitLog","pro","planStart","quizI"].forEach(function(k){
-    if(k in p) db[k]=p[k];
-  });
+  ["profile","answers","picked","focusOverride","sim","history","checks","journal","habits","habitLog","planStart","quizI"].forEach(k=>{ if(k in p) db[k]=p[k]; });
 };
-window.CS.applyFounder=function(){
-  if(!(window.CS.isFounder&&CS.isFounder())) return;
-  const was=!!db.pro;
-  unlockPro();
-  if(!was && typeof render==="function") render();
+window.CS.resetLocal=function(){const fresh=defaults(); Object.keys(fresh).filter(k=>k!=="pro").forEach(k=>db[k]=fresh[k]); state.h=1;state.i=0;state.tab="oggi";};
+window.CS.syncEntitlement=function(){
+  if(db.pro&&!db.planStart){db.planStart=new Date().toISOString(); if(db.sim) db.habits=mergeHabits(db.habits,db.sim.answers); localStorage.setItem(KEY,JSON.stringify(db));}
 };
-async function startCheckout(){try{const res=await fetch("/api/create-checkout",{method:"POST"}); const data=await res.json(); if(data.url){location.href=data.url;return;} if(data.preview){unlockPro(); go("oggi"); return;} alert(data.error||"Pagamento non disponibile.");}catch(e){alert("Pagamento non disponibile. Riprova.");}}
+let checkoutBusy=false;
+async function startCheckout(){
+  if(!signedIn()){CS.status="Accedi per attivare il Piano 90.";go("account");return;}
+  if(checkoutBusy) return;
+  checkoutBusy=true;
+  try{await CS.billing("/api/create-checkout");}catch(e){alert(e.message||"Pagamento non disponibile. Riprova.");}finally{checkoutBusy=false;}
+}
 function splitStory(t){
   const i=String(t).indexOf(". ");
   if(i<12) return [t,""];
@@ -343,6 +344,7 @@ function chrome(){
   dock.style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
 }
 function go(v){
+  window.scrollTo({top:0,behavior:"instant"});
   if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
   if(v==="piano"||v==="diario"||v==="habits"){ v=inPlan()?"oggi":"prezzi"; }
@@ -412,6 +414,7 @@ function render(){
   const keepNote=(document.getElementById("note")||{}).value||"";
   document.onkeydown=null;
   chrome();
+  if(state.view==="account"){CS.renderAccount();return;}
   if(state.view==="home"){
     const cta=inPlan()?"Vai a oggi":midQuiz()?`Riprendi (${db.quizI+1}/18)`:db.sim?"Apri i tuoi futuri":"Inizia";
     app.innerHTML=`<section class="hero-split">
@@ -487,10 +490,10 @@ function render(){
     if(!db.picked) db.picked={};
     const chosen=db.picked[q.id];
     const hasPick=typeof chosen==="number";
-    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} di ${QUESTIONS.length}</p><div class="prog"><span style="width:${pct}%"></span></div>
+    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} di ${QUESTIONS.length}</p><div class="prog" role="progressbar" aria-label="Domande completate" aria-valuemin="0" aria-valuemax="18" aria-valuenow="${state.i+1}"><span style="width:${pct}%"></span></div>
       <h1 class="q" style="font-size:36px;margin-top:28px">${q.text}</h1>
       ${q.hint?`<p class="lede">${q.hint}</p>`:""}
-      <div class="choices">${q.choices.map((c,i)=>`<button type="button" class="choice ${chosen===i?"on":""}" data-pick="${i}">${esc(c)}</button>`).join("")}</div>
+      <div class="choices">${q.choices.map((c,i)=>`<button type="button" class="choice ${chosen===i?"on":""}" aria-pressed="${chosen===i}" data-pick="${i}">${esc(c)}</button>`).join("")}</div>
       <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" ${hasPick?"":"disabled"}>${state.i<QUESTIONS.length-1?"Avanti":"Vedi il resoconto"}</button></div></main>`;
     app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
       const i=Number(b.dataset.pick);
@@ -615,7 +618,6 @@ function render(){
       ${cal90(day,pid,playNow,focusId)}
       <ol class="phase-list">${weeks.map((wk,i)=>`<li class="${(card?card.week:phase+1)===wk.week?"now":""}"><strong>${esc(wk.title)}</strong><span>${esc((wk.span?wk.span+". ":"")+wk.job)}</span></li>`).join("")}</ol>
       <div class="row"><button class="cta" data-go="futuri">Rivedi le lettere</button></div>
-      ${(window.CS&&CS.isFounder&&CS.isFounder())?`<p class="dash-later">${clockOverride?`<strong>Prova.</strong> Stai vedendo il giorno ${day}, non il calendario vero. ` : ""}<button class="ghost" id="simMidnight">Simula mezzanotte → giorno ${Math.min(90,day+1)}</button>${clockOverride?` <button class="ghost" id="resetClock">Torna a oggi</button>`:""}</p>`:""}
       <details class="dash-more"><summary>Aggiungi un'altra cosa</summary>
         <div class="row" style="margin-top:12px"><input id="newHabit" maxlength="60" placeholder="Solo se serve davvero"/><button class="btn" id="addH">Aggiungi</button></div>
         ${extra.map(h=>holdBtn(h,false)).join("")}
@@ -662,10 +664,6 @@ function render(){
     if(saveN) saveN.onclick=()=>{ const text=(document.getElementById("note").value||"").trim(); if(!text) return; const prefix=isSunday&&state.tab==="diario"?(cadence==="weekly"?(w?"Settimana: sì. ":"Settimana: no. "):`Settimana: ${w}/7. `):""; db.journal.unshift({at:new Date().toISOString(),text:prefix+text}); db.journal=db.journal.slice(0,60); save(db); render(); };
     const addH=document.getElementById("addH");
     if(addH) addH.onclick=()=>{ const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Massimo 6 cose."); db.habits.push({id:"h"+Date.now(),name}); save(db); render(); };
-    const simM=document.getElementById("simMidnight");
-    if(simM) simM.onclick=()=>{ setClockKey(addLocalDays(localKey(),1)); lastSeenKey=localKey(); render(); };
-    const rst=document.getElementById("resetClock");
-    if(rst) rst.onclick=()=>{ setClockKey(null); lastSeenKey=localKey(); render(); };
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     if(keepNote){ const n=document.getElementById("note"); if(n) n.value=keepNote; }
     armDayTick();
