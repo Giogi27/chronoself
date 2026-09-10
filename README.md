@@ -1,4 +1,4 @@
-# ChronoSelf
+# ChronoSelf V4
 
 18 domande, tre futuri, un Piano 90. HTML, CSS e JavaScript senza framework, con funzioni Node su Vercel.
 
@@ -59,3 +59,15 @@ I test browser avviano un server su localhost, simulano Supabase soltanto nel co
 La configurazione PWA comprende manifest e icona; non viene introdotta una cache offline dei dati personali.
 
 `/api/day7` resta lo stub preesistente: non invia email. Non viene dichiarato un servizio email operativo.
+
+## V4 Product Rebuild
+
+La V4 aggiorna tutte le 18 domande (cinque risposte ciascuna), 54 testi di scenario, lettura delle cinque aree, priorità modificabili, Home, prezzi, account e Piano 90. Il calendario contiene 13 settimane: giorni 1–84 e una settimana finale di sei giorni. Gli scenari non sono previsioni o valutazioni cliniche.
+
+I nomi delle tabelle, gli ID delle risposte, la chiave locale `chronoself.v2` e gli endpoint di billing restano compatibili. Nessuna migrazione. I nuovi risultati hanno `version: 4`; quelli precedenti conservano i dati e mostrano un invito a ripetere il questionario aggiornato. Le risposte della simulazione sono una copia: modificare un questionario non altera il risultato precedente.
+
+Il recupero cloud unisce note, storico e abitudini, conserva le registrazioni mancanti e archivia il contenuto locale divergente in `recoveryCopies`, esportabile con i dati. Per valori conflittuali del registro prevale il cloud; la copia recuperabile conserva la versione locale. Le copie sono dati personali e vengono rimosse dal dispositivo al logout insieme al salvataggio. Non vengono eliminate note o voci dello storico in base al loro numero.
+
+L’account include esportazione JSON, recupero password e protezione del logout se il salvataggio fallisce. Le bozze del diario sopravvivono ai cambi di scheda nella stessa sessione. La navigazione supporta URL con frammento e il pulsante Indietro del browser. Il frontend non concede accesso al Piano 90 senza entitlement verificato.
+
+Verifica visiva ed end-to-end: `npm run test:browser`. Le fixture isolano Supabase e i servizi di pagamento; non eseguono acquisti, invii email o modifiche al database reale. I test includono 320, 390, 768 e 1440 px, password recovery, esportazione, errori cloud, conservazione dei dati divergenti, diario, 18 priorità con risposte basse/intermedie/alte e 13 settimane. La verifica sul dominio pubblico va eseguita dopo ogni rilascio.

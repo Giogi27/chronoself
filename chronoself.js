@@ -3,34 +3,34 @@ function Q(id,axis,text,choices,hint){
   return {id,axis,text,hint,choices,min:choices[0],max:choices[4]};
 }
 const QUESTIONS=[
-  Q("sonno","salute","Come finiscono le tue notti?",["Tardi, e mi alzo a pezzi","Dormo poco, spesso spezzato","A settimane sì, a settimane no","Di solito sto sulle sette","Dormo, e la mattina sono a posto"]),
-  Q("movimento","salute","Il corpo, in una settimana: quanto lo muovi per davvero?",["Quasi niente. Sto fermo","Un giorno, se va bene","Due o tre, quando capita","Quattro giorni, più o meno","Cinque o più, è un appuntamento"]),
-  Q("energia","salute","Quando ti alzi, com'è la giornata che ti aspetta?",["Sono già stanco","Spesso giù, senza un perché","Dipende dal giorno","Più su che giù","Stabile. Ce la faccio"]),
-  Q("cibo","salute","I pasti, da te: li fai, o capitano?",["Mangio in piedi, quello che capita","Qualche pasto lo faccio, molti no","Dipende dal giorno","Spesso cucino, non sempre","Mangio da seduto, quasi sempre"]),
-  Q("risparmio","soldi","A fine mese, i soldi che restano?",["Non resta niente. A volte sono in rosso","Qualche euro, se avanza","Qualcosa, non ogni mese","Quasi ogni mese metto da parte","Ogni mese, da solo, prima che li veda"],"Basta una stima. Non i decimali."),
-  Q("debiti","soldi","Rate, debiti, spese fisse: quanto spazio prendono in testa?",["Mi soffocano","Ci penso anche i giorni in cui non li pago","Ci sono, li pago, e basta","Li vedo. Non mi mangiano le sere","Pochi, o nessuno"]),
-  Q("cuscinetto","soldi","Se da lunedì non entra più uno stipendio, tu quanto tieni?",["Pochi giorni","Qualche settimana, poi sono in prestito","Un mese, forse due","Tre-cinque mesi","Sei mesi o più, senza drammi"]),
-  Q("spese","soldi","Sai dove sono andati i soldi, questo mese?",["No. Spariscono","A grandi linee, i buchi no","Le cose grosse sì, il resto no","Quasi tutto","Tutto. Lo scrivo"]),
-  Q("competenza","lavoro","Quello che sai fare: sta diventando di più, o è fermo?",["Fermo da anni","Qualche pezzo, a caso","Un po', quando capita","Quasi ogni mese imparo qualcosa","Ogni mese, di proposito, su una cosa sola"]),
-  Q("autonomia","lavoro","Orari, soldi, direzione: chi decide?",["Altri. Io eseguo","Poco io, molto altri","Qualche pezzo è mio","Abbastanza mio","Molto. Scelgo io"]),
-  Q("senso","lavoro","Quando chiudi il lavoro, ti resta qualcosa — o solo stanchezza?",["Solo stanchezza. Non vale","Raro che valga","A tratti ha senso","Spesso sì","Sì. Quasi sempre vale la fatica"]),
-  Q("retepro","lavoro","C'è qualcuno con cui puoi parlare di lavoro senza recitare?",["Nessuno","Uno, forse","Due o tre","Diverse persone","Sì. Una rete vera"]),
-  Q("legami","relazioni","Questa settimana, chi hai visto per davvero?",["Quasi nessuno","Uno, a volte","Due o tre","Un gruppetto che tengo","Gente che c'è, di rito"]),
-  Q("conflitti","relazioni","C'è qualcuno, o una chat, che ti svuota?",["Sì. Occupano tutto","Troppo spazio, ogni settimana","Ci sono, si tengono","Poco. Lo tengo a bada","Quasi niente"]),
-  Q("cura","relazioni","C'è almeno una persona che sa come stai, di questi tempi?",["No. Nessuno lo sa","Qualche volta, se chiedo","Sì, a tratti","Sì, di solito","Sì. Qualcuno c'è, stabile"]),
-  Q("schermo","abitudini","Il telefono: quante ore se ne va, senza che tu l'abbia deciso?",["Quattro ore o più, sparite","Un bel po'. Le sere soprattutto","A giorni. Quando sono stanco, sì","Poco","Poco, e lo scelgo io"]),
-  Q("routine","abitudini","La giornata ha un inizio e una fine, o parte da sola?",["Parte da sola. Sempre","Qualche volta ho un rito","A tratti","Spesso sì","Sì. Gli stessi gesti, quasi sempre"]),
-  Q("promesse","abitudini","Le cose che prometti a te: in un mese, quante ne tieni?",["Quasi nessuna","Poche. Il lunedì sì, il venerdì no","A metà","La maggior parte","Quasi tutte. Mi credo"])
+  Q("sonno","salute","Quanto spesso ti svegli dopo un sonno che senti sufficiente?",["Mai o quasi mai", "Raramente", "Circa metà delle mattine", "La maggior parte delle mattine", "Quasi tutte le mattine"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("movimento","salute","In una settimana abituale, quanti giorni dedichi al movimento?",["Nessun giorno", "Un giorno", "Due o tre giorni", "Quattro giorni", "Cinque o più giorni"],"Considera anche camminate e attività adattate alle tue possibilità."),
+  Q("energia","salute","Quanto spesso hai energia sufficiente per le attività quotidiane?",["Mai o quasi mai", "Raramente", "Circa metà dei giorni", "La maggior parte dei giorni", "Quasi ogni giorno"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("cibo","salute","Quanto spesso riesci a fare pasti regolari, adatti alle tue esigenze?",["Mai o quasi mai", "Uno o due giorni a settimana", "Tre o quattro giorni a settimana", "Cinque o sei giorni a settimana", "Ogni giorno o quasi"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("risparmio","soldi","Negli ultimi tre mesi, quanto spesso hai messo da parte del denaro?",["Mai, e ho usato risparmi o credito", "Mai, ma ho coperto le spese", "Solo in un mese", "In due mesi", "Ogni mese"],"È sufficiente una stima. Considera le risorse di cui puoi effettivamente disporre."),
+  Q("debiti","soldi","Quanto pesano rate e spese fisse sul tuo bilancio?",["Non riesco a coprirle tutte", "Le copro con grande difficoltà", "Le copro, ma resta poco margine", "Le copro con un margine adeguato", "Le copro senza difficoltà e con ampio margine"],"È sufficiente una stima. Considera le risorse di cui puoi effettivamente disporre."),
+  Q("cuscinetto","soldi","Per quanto tempo i tuoi risparmi coprirebbero le spese essenziali?",["Meno di una settimana", "Da una settimana a meno di un mese", "Da uno a meno di tre mesi", "Da tre a meno di sei mesi", "Sei mesi o più"],"È sufficiente una stima. Considera le risorse di cui puoi effettivamente disporre."),
+  Q("spese","soldi","Quanto conosci la distribuzione delle tue spese mensili?",["Non so quanto spendo", "Conosco solo alcune spese fisse", "Conosco il totale, ma non le categorie", "Conosco quasi tutte le categorie", "Ho una visione completa e aggiornata"],"È sufficiente una stima. Considera le risorse di cui puoi effettivamente disporre."),
+  Q("competenza","lavoro","Quanto spesso dedichi tempo a imparare qualcosa di utile per lavoro o studio?",["Mai o quasi mai", "Meno di una volta al mese", "Una o due volte al mese", "Ogni settimana, senza un programma", "Ogni settimana, con un obiettivo chiaro"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("autonomia","lavoro","Quanto puoi decidere come organizzare il tuo lavoro, studio o attività principale?",["Quasi per niente", "Poco", "In parte", "Molto", "Quasi completamente"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("senso","lavoro","Quanto spesso trovi un significato in quello che fai durante la giornata?",["Mai o quasi mai", "Raramente", "Circa metà delle volte", "Spesso", "Quasi sempre"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("retepro","lavoro","Quanto è facile trovare qualcuno con cui confrontarti su lavoro o studio?",["Non ho nessuno a cui rivolgermi", "È molto difficile", "A volte trovo un confronto utile", "Di solito trovo un confronto utile", "Ho contatti affidabili con cui confrontarmi"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("legami","relazioni","Quanto spesso dedichi tempo di qualità alle persone importanti per te?",["Meno di una volta al mese", "Una o due volte al mese", "Circa una volta a settimana", "Più volte a settimana", "Quasi ogni giorno"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("conflitti","relazioni","Quanto spesso le tensioni nelle relazioni ti lasciano senza energie?",["Quasi ogni giorno", "Più volte a settimana", "Circa una volta a settimana", "Raramente", "Mai o quasi mai"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("cura","relazioni","Quanto senti di poter parlare apertamente di come stai con qualcuno?",["Non sento di poterlo fare", "Solo in rare occasioni", "A volte", "Nella maggior parte dei momenti", "So di poter contare su qualcuno"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("schermo","abitudini","Quanto spesso il telefono occupa più tempo di quanto vorresti?",["Quasi ogni giorno", "Più volte a settimana", "Circa una volta a settimana", "Raramente", "Mai o quasi mai"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("routine","abitudini","Quanto spesso riesci a mantenere una piccola routine al mattino o alla sera?",["Mai o quasi mai", "Uno o due giorni a settimana", "Tre o quattro giorni a settimana", "Cinque o sei giorni a settimana", "Ogni giorno o quasi"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza."),
+  Q("promesse","abitudini","Quanti degli impegni realistici presi con te riesci a rispettare?",["Quasi nessuno", "Meno della metà", "Circa la metà", "La maggior parte", "Quasi tutti"],"Pensa alle ultime quattro settimane. Scegli la risposta più vicina alla tua esperienza.")
 ];
 const AXES=["salute","soldi","lavoro","relazioni","abitudini"];
-const AXIS_LABEL={salute:"Salute",soldi:"Soldi",lavoro:"Lavoro",relazioni:"Relazioni",abitudini:"Abitudini"};
-const KIND_TITLE={deriva:"Se lasci andare",inerzia:"Se resti così",miglioramento:"Se cambi un po'"};
+const AXIS_LABEL={salute:"Benessere",soldi:"Finanze",lavoro:"Lavoro e studio",relazioni:"Relazioni",abitudini:"Abitudini"};
+const KIND_TITLE={deriva:"Se riduci la cura",inerzia:"Se mantieni le abitudini",miglioramento:"Se introduci un cambiamento"};
 const KEY="chronoself.v2";
 const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
 const esc=s=>{const d=document.createElement("div"); d.textContent=String(s); return d.innerHTML.replace(/"/g,"&quot;").replace(/'/g,"&#39;");};
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
 function save(db){localStorage.setItem(KEY,JSON.stringify(db)); if(window.CS&&CS.user&&CS.push) CS.push();}
-const defaults=()=>({profile:{nome:"",eta:"",contesto:"citta"},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),picked:{},focusOverride:null,sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null});
+const defaults=()=>({recoveryCopies:[],profile:{nome:"",eta:"",contesto:""},answers:Object.fromEntries(QUESTIONS.map(q=>[q.id,50])),picked:{},focusOverride:null,sim:null,history:[],checks:{},journal:[],habits:[],habitLog:{},pro:false,planStart:null,quizI:null});
 const db=Object.assign(defaults(), load());
 Object.defineProperty(db, "pro", {enumerable:false, configurable:false, get:()=>!!(window.CS&&CS.hasEntitlement&&CS.hasEntitlement())});
 function scoresFrom(a){const acc={}; AXES.forEach(x=>acc[x]={s:0,n:0}); QUESTIONS.forEach(q=>{acc[q.axis].s+=(a[q.id]??50);acc[q.axis].n++;}); const out={}; AXES.forEach(x=>out[x]=Math.round(acc[x].s/acc[x].n)); return out;}
@@ -74,7 +74,7 @@ function alsoLine(d){
   if(!d.secondary) return null;
   const hole=playFor(d.secondary.id).hole;
   const echo=echoOf(d.secondary.id,d.secondary.score).replace(/\.$/,"");
-  return `E ${hole}: ${lowerFirst(echo)}.`;
+  return `Un altro tema da considerare è ${hole}: «${echo}».`;
 }
 function whenPhrase(y){ return y===1?"Tra un anno":y===5?"Tra cinque anni":"Tra dieci anni"; }
 function readLife(answers,picked,focusId){
@@ -83,9 +83,9 @@ function readLife(answers,picked,focusId){
   const voice=VOICE[d.primary.id];
   const alts=[d.primary,...d.cluster].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,4).map(s=>{ const p=playFor(s.id); return {id:s.id,label:p.label,hole:p.hole}; });
   return {d,play,reading:{
-    title:d.vague?"Hai lasciato troppe cose in mezzo.":said,
-    said:d.vague?"Senza risposte vere, non si può scrivere una vita.":(voice?voice.now:play.why),
-    why:d.vague?"Tocca le risposte che senti, e rifai.":play.action,
+    title:d.vague?"Completa il tuo punto di partenza":d.balanced?"Una base da coltivare":"Da qui puoi iniziare",
+    said:d.vague?"Servono più risposte per proporre una priorità utile.":`${play.label}: hai risposto «${said}». ${d.balanced?"Le tue risposte descrivono una buona base. Puoi scegliere cosa consolidare.":"È una delle risposte che segnala più margine di attenzione, non un giudizio su di te."}`,
+    why:d.vague?"Riprendi le domande e scegli le risposte più vicine alla tua esperienza.":play.action,
     also:d.vague?null:alsoLine(d),
     holds:null,
     action:play.action,vague:d.vague,alts
@@ -96,11 +96,9 @@ function leverFor(answers){return playFor(diagnose(answers).primary.id).action;}
 function opener(){ return ""; }
 function story(d,p,y,kind,profile){
   const play=playFor(d.primary.id);
-  const body=(VOICE[d.primary.id]||play.futures)[kind];
-  const lead=whenPhrase(y)+" "+lowerFirst(body);
-  const extra=d.secondary?(kind==="miglioramento"?`E ${playFor(d.secondary.id).hole} ha seguito, un po'.`:`E ${playFor(d.secondary.id).hole} è rimasto com'è.`):"";
-  const later=y>=5?(kind==="deriva"?"A questa distanza il conto si vede.":kind==="miglioramento"?"Gli anni tenuti si vedono. Non serve raccontarli.":"Il tempo è passato comunque."):"";
-  return [lead,extra,later].filter(Boolean).join(" ").replace(/\s+/g," ").trim();
+  const openings={deriva:"Se dedichi meno attenzione a quest’area, potresti trovare più difficile ritagliarle spazio.",inerzia:"Se mantieni le abitudini attuali, potresti ritrovare punti di forza e difficoltà simili a quelli che descrivi oggi.",miglioramento:"Se ripeti un cambiamento sostenibile, potresti rendere quest’area più gestibile."};
+  const horizons={1:"Un anno offre spazio per fare prove e capire cosa funziona nella tua situazione.",5:"In cinque anni possono cambiare priorità e circostanze: questo scenario va riletto e aggiornato nel tempo.",10:"Dieci anni sono un orizzonte aperto. Le scelte di oggi contano, ma non determinano da sole il tuo futuro."};
+  return `${play.futures[kind]} Il punto di partenza che hai scelto è ${play.hole}. ${kind==='miglioramento'?play.action:kind==='inerzia'?'Osserva cosa ti aiuta già e quali ostacoli si ripetono.':'Nota i primi ostacoli e valuta quale supporto potrebbe aiutarti.'} ${d.secondary?'Nelle tue risposte emerge anche un altro tema: '+playFor(d.secondary.id).label.toLowerCase()+'. Affronta una priorità alla volta. ':''}${horizons[y]}`;
 }
 function facts(){ return []; }
 function project(score,y,kind,axis,weak,focusAxis){
@@ -113,7 +111,7 @@ function simulate(answers,profile,picked,focusId){
   const d=diagnose(answers,picked,focusId); const horizons={};
   const focusAxis=(QUESTIONS.find(q=>q.id===d.primary.id)||{axis:d.weak}).axis;
   [1,5,10].forEach(y=>{ horizons[y]={}; ["deriva","inerzia","miglioramento"].forEach(k=>{ const p={}; AXES.forEach(a=>p[a]=project(d.scores[a],y,k,a,d.weak,focusAxis)); horizons[y][k]={title:KIND_TITLE[k],narrative:story(d,p,y,k,profile),facts:facts(p,d,k),scores:p}; }); });
-  return {at:new Date().toISOString(),profile,answers,scores:d.scores,weak:d.weak,focus:d.primary.id,secondary:d.secondary?d.secondary.id:null,horizons};
+  return {version:4,at:new Date().toISOString(),profile:{...profile},answers:{...answers},scores:d.scores,weak:d.weak,focus:d.primary.id,secondary:d.secondary?d.secondary.id:null,horizons};
 }
 function planItems(answers){
   const d=diagnose(answers); const play=playFor(d.primary.id);
@@ -124,7 +122,7 @@ function mergeHabits(habits,answers){
   if(d.secondary) wanted.push(playFor(d.secondary.id).habits[0]);
   const have=new Set(habits.map(h=>h.name)); const next=habits.slice();
   [...wanted].reverse().forEach((name,i)=>{ if(!have.has(name)){ next.unshift({id:"h"+Date.now().toString(36)+i,name}); have.add(name);} });
-  return next.slice(0,6);
+  return next.sort((a,b)=>{const rank=h=>wanted.includes(h.name)?wanted.indexOf(h.name):-1;return (rank(a)<0?999:rank(a))-(rank(b)<0?999:rank(b));});
 }
 function seedHabits(answers){return mergeHabits([],answers);}
 let clockOverride=null;
@@ -190,7 +188,7 @@ function holdBtn(h,big,hint,doneLine){
   const t=today(); const on=!!(db.habitLog[t]&&db.habitLog[t][h.id]); const st=streak(db.habitLog,h.id);
   return `<button type="button" class="hold ${big?"hold-lg":""} ${on?"is-on":""}" data-h="${h.id}" aria-pressed="${on}">
     <span class="hold-mark" aria-hidden="true"></span>
-    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?(doneLine||"Tenuto, oggi."):big?(hint||"Tocca quando l'hai fatta."):(st?st+" giorni di fila.":"Ancora no.")}</span></span>
+    <span class="hold-copy"><strong>${esc(h.name)}</strong><span>${on?(doneLine||"Completato oggi."):big?(hint||"Tocca quando l'hai fatta."):(st?st+" giorni di fila.":"Ancora no.")}</span></span>
   </button>`;
 }
 function weekStrip(id){
@@ -210,7 +208,7 @@ function cal90(day,id,play,playId){
 window.CS=window.CS||{};
 window.CS.applyPayload=function(p){
   if(!p||typeof p!=="object") return;
-  ["profile","answers","picked","focusOverride","sim","history","checks","journal","habits","habitLog","planStart","quizI"].forEach(k=>{ if(k in p) db[k]=p[k]; });
+  ["recoveryCopies","profile","answers","picked","focusOverride","sim","history","checks","journal","habits","habitLog","planStart","quizI"].forEach(k=>{ if(k in p) db[k]=p[k]; });
 };
 window.CS.resetLocal=function(){const fresh=defaults(); Object.keys(fresh).filter(k=>k!=="pro").forEach(k=>db[k]=fresh[k]); state.h=1;state.i=0;state.tab="oggi";};
 window.CS.syncEntitlement=function(){
@@ -224,7 +222,7 @@ async function startCheckout(){
   try{await CS.billing("/api/create-checkout");}catch(e){alert(e.message||"Pagamento non disponibile. Riprova.");}finally{checkoutBusy=false;}
 }
 function splitStory(t){
-  const i=String(t).indexOf(". ");
+  const i=String(t).indexOf(". ",12);
   if(i<12) return [t,""];
   return [t.slice(0,i+1), t.slice(i+2)];
 }
@@ -239,8 +237,8 @@ function dayMode(){
 function dayModeLine(mode,focusId){
   if(mode==="notte"&&focusId==="sonno") return {kicker:"Notte",line:"È tardi. Telefono in un'altra stanza. Domani conti."};
   if(mode==="mattina") return {kicker:"Mattina",line:"Prima questa cosa. Poi il resto della giornata."};
-  if(mode==="giorno") return {kicker:"Giorno",line:"Se non l'hai fatta, adesso. Prima che la sera la mangi."};
-  if(mode==="sera") return {kicker:"Sera",line:"Due righe, ora. Poi chiudi."};
+  if(mode==="giorno") return {kicker:"Giorno",line:"Scegli un momento realistico per il tuo piccolo passo."};
+  if(mode==="sera") return {kicker:"Sera",line:"Prenditi un momento per annotare come è andata."};
   return {kicker:"Notte",line:"Domani. Oggi è chiuso."};
 }
 function letterOf(kind,y,profile){
@@ -265,7 +263,7 @@ function letterCard(kind,pack,y,profile){
 }
 function sealedLetter(y){
   const span=y===1?"un anno":y+" anni";
-  return `<article class="letter sealed">${MARK}<p class="meta">Tra ${span}</p><h3>Lettera chiusa</h3><p>Scritta da te, tra ${span}. Tre versioni. Si apre con il Piano 90.</p><div class="row"><button class="cta light" id="pay">Apri le lettere</button></div></article>`;
+  return `<article class="letter sealed">${MARK}<p class="meta">Tra ${span}</p><h3>Lettera chiusa</h3><p>Tre scenari immaginati a partire dalle tue risposte. Questo orizzonte è incluso nel Piano 90.</p><div class="row"><button class="cta light" id="pay">Scopri il Piano 90</button></div></article>`;
 }
 function polarAt(deg,r,cx,cy){ const a=(deg-90)*Math.PI/180; return [+(cx+Math.cos(a)*r).toFixed(1), +(cy+Math.sin(a)*r).toFixed(1)]; }
 function arcPath(cx,cy,r,start,end){
@@ -290,7 +288,7 @@ function diagnosisCard(answers){
       <p class="lede">${esc(r.said)}</p>
       ${r.also?`<p class="lede">${esc(r.also)}</p>`:""}
       <div class="weights">
-        <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le risposte che pesano</p>
+        <p class="meta" style="letter-spacing:0.18em;margin-top:22px">Le risposte alla base del suggerimento</p>
         ${[d.primary,...d.lows].filter((s,i,arr)=>arr.findIndex(x=>x.id===s.id)===i).slice(0,3).map(row=>`<div class="weight"><span>${esc(playFor(row.id).label)}</span><div class="bar ${tone(row.score)}"><span style="width:${row.score}%"></span></div><span class="num" style="width:auto;max-width:40%;text-align:right;font-size:12px">${esc(echoOf(row.id,row.score))}</span></div>`).join("")}
       </div>
     </div>
@@ -298,11 +296,11 @@ function diagnosisCard(answers){
       <p class="meta">Cosa fare</p>
       <h3>${esc(play.action)}</h3>
       <ul class="ok">${play.habits.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
-      <p>Gratis vedi cosa succede tra un anno. Il Piano 90 è per tenere questa cosa, per 90 giorni.</p>
+      <p>Gli scenari a un anno sono gratuiti. Il Piano 90 ti accompagna nella pratica, con un diario e azioni da adattare alle tue possibilità.</p>
     </div>
   </section>`;
 }
-function axisBars(scores){return AXES.map(a=>`<div class="axisbar"><span>${AXIS_LABEL[a]}</span><div class="bar ${tone(scores[a])}"><span style="width:${scores[a]}%"></span></div><span class="num">${scores[a]}</span></div>`).join("");}
+function axisBars(scores){return AXES.map(a=>`<div class="axisbar"><span>${AXIS_LABEL[a]}</span><div class="bar ${tone(scores[a])}"><span style="width:${scores[a]}%"></span></div><span class="num" aria-label="${scores[a]} su 100, indice orientativo">${scores[a]}</span></div>`).join("");}
 function radar(scores,weak){ return lifeClock(scores, weak||weakest(scores)); }
 function yearClock(day){
   const CX=54,CY=54,R=40;
@@ -344,6 +342,7 @@ function chrome(){
   dock.style.display=(state.view==="simula"||state.view==="soglia")?"none":"";
 }
 function go(v){
+  document.onkeydown=null;
   window.scrollTo({top:0,behavior:"instant"});
   if(window.__csClock){ cancelAnimationFrame(window.__csClock); window.__csClock=null; }
   if(v==="account" && window.CS && CS.renderAccount){ state.view="account"; chrome(); CS.renderAccount(); return; }
@@ -420,7 +419,7 @@ function render(){
     app.innerHTML=`<section class="hero-split">
       <div class="hero-copy">
         <h1>Chi diventi<br>se continui così?</h1>
-        <p class="hero-lede">Diciotto domande su come stai. Tre lettere da chi sarai tra un anno — se lasci andare, se resti così, se cambi un po'. Se vuoi, novanta giorni per tenere una cosa.</p>
+        <p class="hero-lede">Dedica qualche minuto a capire le tue abitudini. Esplora tre futuri possibili e scegli un piccolo cambiamento da portare nei prossimi 90 giorni.</p>
         <div class="row"><button class="cta" id="start">${cta}</button>${inPlan()?"":`<button class="btn" data-go="prezzi">Piano 90 · 4,99 €</button>`}</div>
       </div>
       <div class="hero-photo">
@@ -432,17 +431,17 @@ function render(){
       <img src="./brand/looking.jpg" alt="Una persona alla finestra, di spalle"/>
       <div>
         <p class="meta">L'idea</p>
-        <blockquote>Il futuro non è magia. È la somma di quello che ripeti.</blockquote>
-        <p class="lede">ChronoSelf prende come stai oggi e lo porta avanti — a un anno, a cinque, a dieci.</p>
+        <blockquote>Il tuo futuro comincia dalle abitudini di oggi.</blockquote>
+        <p class="lede">Le tue risposte diventano un quadro delle cinque aree della vita, tre scenari di riflessione e un primo passo concreto.</p>
       </div>
     </section>
     <section>
       <p class="meta">Tre lettere</p>
       <h2 style="font-size:clamp(28px,4vw,44px);max-width:16ch;margin:12px 0 24px">Stessa vita. Tre direzioni.</h2>
       <div class="grid three" style="padding-top:0">
-        <article class="card"><p class="k">01</p><h3>Se lasci andare</h3><p>Il punto debole resta lì. Col tempo pesa di più.</p></article>
-        <article class="card"><p class="k">02</p><h3>Se resti così</h3><p>Niente crolla. Niente migliora. Il tempo passa lo stesso.</p></article>
-        <article class="card"><p class="k">03</p><h3>Se cambi un po'</h3><p>Una cosa tenuta, a lungo. Basta quello.</p></article>
+        <article class="card"><p class="k">01</p><h3>Se riduci la cura</h3><p>Osserva cosa potrebbe diventare più difficile se questa area ricevesse meno attenzione.</p></article>
+        <article class="card"><p class="k">02</p><h3>Se mantieni le abitudini</h3><p>Riconosci ciò che funziona e gli ostacoli che potrebbero ripetersi.</p></article>
+        <article class="card"><p class="k">03</p><h3>Se introduci un cambiamento</h3><p>Immagina il margine che potrebbe aprirsi con un passo piccolo e sostenibile.</p></article>
       </div>
     </section>
     <section class="cta-band">
@@ -461,11 +460,11 @@ function render(){
     startClock();
     return;
   }
-  if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy</p><h1 class="q" style="font-size:40px">I dati restano tuoi.</h1><p class="lede">Domande, diario e abitudini stanno sul tuo telefono. I pagamenti passano da Stripe. Non è un medico e non è terapia.</p></main>`; return; }
+  if(state.view==="privacy"){ app.innerHTML=`<main class="step"><p class="meta">Privacy e dati</p><h1 class="q">Il tuo spazio personale.</h1><section class="account-panel"><h2>Salvataggio sul dispositivo</h2><p>Risposte, profilo, diario e abitudini vengono salvati in questo browser. Cancellando i dati del browser potresti perdere le informazioni non sincronizzate. La navigazione privata può eliminarle alla chiusura.</p></section><section class="account-panel"><h2>Account e sincronizzazione</h2><p>Con un account, Supabase gestisce autenticazione e salvataggi associati al tuo utente. Quando recuperi i dati cloud, il contenuto salvato sull’account viene caricato sul dispositivo. Prima di sostituirlo puoi esportare una copia dall’account. Il logout rimuove i dati personali da questo browser.</p></section><section class="account-panel"><h2>Pagamenti</h2><p>Stripe gestisce pagamento e abbonamento. ChronoSelf usa lo stato dell’abbonamento per abilitare il Piano 90 e non salva i dati completi della carta. Puoi gestire rinnovo e disdetta dal tuo account.</p></section><section class="account-panel"><h2>Servizi esterni</h2><p>Il sito è ospitato su Vercel. I caratteri sono caricati da Google Fonts e il client di autenticazione da jsDelivr: questi servizi ricevono le informazioni tecniche necessarie alle richieste del browser.</p></section><section class="account-panel"><h2>Uno strumento di riflessione</h2><p>ChronoSelf non sostituisce assistenza sanitaria, psicologica o consulenza finanziaria. Gli scenari sono ipotesi narrative, non previsioni. Adatta ogni proposta alle tue circostanze.</p></section><div class="row"><button class="btn" data-go="account">Vai al tuo account</button></div></main>`;app.querySelector('[data-go]').onclick=()=>go('account');return; }
   if(state.view==="prezzi"){
-    app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Un anno è gratis. Il resto, se vuoi tenerlo.</h1><p class="lede">Le tre lettere a un anno sono libere. Il Piano 90 apre cinque e dieci anni, e il percorso giorno per giorno.</p>
+    app.innerHTML=`<main class="step wide"><p class="meta">Piani</p><h1 class="q" style="font-size:40px">Scegli come proseguire.</h1><p class="lede">Quiz e scenari a un anno sono gratuiti. Il Piano 90 aggiunge il percorso e gli orizzonti a cinque e dieci anni. Abbonamento mensile con rinnovo automatico: puoi disdire dall’account. Il percorso di 90 giorni non interrompe automaticamente l’abbonamento.</p>
       <section class="grid three"><article class="card"><p class="meta">Gratis</p><p class="price">0 €</p><h3>Le lettere</h3><ul class="ok"><li>18 domande</li><li>Tre lettere, a un anno</li></ul><div class="row"><button class="btn" data-go="profilo">Inizia</button></div></article>
-      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Il giorno per giorno</h3><ul class="ok"><li>Lettere a cinque e dieci anni</li><li>Novanta giorni, guidati</li><li>Diario la sera</li></ul><div class="row"><button class="cta light" id="pay">${inPlan()?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
+      <article class="card featured"><p class="meta">Piano 90</p><p class="price">4,99 € <span>/ mese</span></p><h3>Dalla riflessione alla pratica</h3><ul class="ok"><li>Lettere a cinque e dieci anni</li><li>90 giorni in 13 settimane</li><li>Diario personale e abitudini</li></ul><div class="row"><button class="cta light" id="pay">${inPlan()?"Già attivo — vai a oggi":"Attiva Piano 90"}</button></div></article>
       <article class="card"><img src="./brand/looking.jpg" alt="Persona alla finestra" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:-22px -22px 16px;width:calc(100% + 44px);max-width:none"/><p class="meta">Cosa non è</p><h3>Non è terapia</h3><p>Né un medico, né un consulente. Un posto per vedere dove stai andando.</p></article></section></main>`;
     document.getElementById("pay").onclick=()=> inPlan()?go("oggi"):startCheckout();
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -474,44 +473,44 @@ function render(){
   if(state.view==="profilo"){
     const p=db.profile;
     const resume=midQuiz() && db.quizI>0;
-    app.innerHTML=`<main class="step"><p class="meta">Prima delle domande</p><h1 class="q" style="font-size:40px">Come ti chiami?</h1><p class="lede">Nome ed età. Servono per firmare le lettere.</p>
-      <label class="field">Nome<input id="nome" value="${esc(p.nome||"")}" /></label>
-      <label class="field">Età<input id="eta" type="number" value="${esc(p.eta||"")}" /></label>
-      <label class="field">Dove vivi<select id="contesto"><option value="citta">In città</option><option value="paese">In un paese</option><option value="estero">All'estero</option></select></label>
+    app.innerHTML=`<main class="step"><p class="meta">Prima delle domande</p><h1 class="q" style="font-size:40px">Come ti chiami?</h1><p class="lede">Questi dettagli sono facoltativi e personalizzano le lettere. Puoi iniziare anche senza inserirli.</p>
+      <label class="field">Nome (facoltativo)<input maxlength="60" autocomplete="given-name" id="nome" value="${esc(p.nome||"")}" /></label>
+      <label class="field">Età (facoltativa)<input min="18" max="110" id="eta" type="number" value="${esc(p.eta||"")}" /></label>
+      <label class="field">Dove vivi (facoltativo)<select id="contesto"><option value="">Preferisco non indicarlo</option><option value="citta">In città</option><option value="paese">In un paese</option><option value="estero">All'estero</option></select></label>
       <div class="row"><button class="cta" id="next">${resume?`Riprendi da ${db.quizI+1} di 18`:"Vai alle domande"}</button>${resume?`<button class="btn" id="restart">Ricomincia</button>`:""}</div></main>`;
-    document.getElementById("contesto").value=p.contesto||"citta";
+    document.getElementById("contesto").value=p.contesto||"";
     const saveP=()=>{db.profile={nome:document.getElementById("nome").value.trim(),eta:document.getElementById("eta").value,contesto:document.getElementById("contesto").value};};
-    document.getElementById("next").onclick=()=>{saveP(); if(!resume) db.quizI=0; state.i=db.quizI||0; save(db); go("simula");};
+    document.getElementById("next").onclick=()=>{if(!document.getElementById("eta").reportValidity()) return; saveP(); if(!resume) db.quizI=0; state.i=db.quizI||0; save(db); go("simula");};
     const rst=document.getElementById("restart"); if(rst) rst.onclick=()=>{saveP(); db.quizI=0; state.i=0; save(db); go("simula");};
     return;
   }
   if(state.view==="simula"){
-    const q=QUESTIONS[state.i]; const pct=Math.round(((state.i+1)/QUESTIONS.length)*100);
+    const q=QUESTIONS[state.i]; const pct=Math.round((state.i/QUESTIONS.length)*100);
     if(!db.picked) db.picked={};
     const chosen=db.picked[q.id];
     const hasPick=typeof chosen==="number";
-    app.innerHTML=`<main class="step"><p class="meta">${state.i+1} di ${QUESTIONS.length}</p><div class="prog" role="progressbar" aria-label="Domande completate" aria-valuemin="0" aria-valuemax="18" aria-valuenow="${state.i+1}"><span style="width:${pct}%"></span></div>
+    app.innerHTML=`<main class="step"><p class="meta">${AXIS_LABEL[q.axis]} · ${state.i+1} di ${QUESTIONS.length}</p><div class="prog" role="progressbar" aria-label="Domande completate" aria-valuemin="0" aria-valuemax="18" aria-valuenow="${state.i}"><span style="width:${pct}%"></span></div>
       <h1 class="q" style="font-size:36px;margin-top:28px">${q.text}</h1>
       ${q.hint?`<p class="lede">${q.hint}</p>`:""}
       <div class="choices">${q.choices.map((c,i)=>`<button type="button" class="choice ${chosen===i?"on":""}" aria-pressed="${chosen===i}" data-pick="${i}">${esc(c)}</button>`).join("")}</div>
       <div class="row"><button class="btn" id="back" ${state.i===0?"disabled":""}>Indietro</button><button class="cta" id="next" ${hasPick?"":"disabled"}>${state.i<QUESTIONS.length-1?"Avanti":"Vedi il resoconto"}</button></div></main>`;
     app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
       const i=Number(b.dataset.pick);
-      db.picked[q.id]=i; db.answers[q.id]=PICK_SCORE[i]; save(db); render();
+      db.picked[q.id]=i; db.answers[q.id]=PICK_SCORE[i]; save(db); render(); document.querySelector(`[data-pick="${i}"]`).focus({preventScroll:true});
     });
     document.getElementById("back").onclick=()=>{if(state.i>0){state.i--; db.quizI=state.i; save(db); render();}};
     document.getElementById("next").onclick=()=>{
       if(!hasPick) return;
-      if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render();return;}
+      if(state.i<QUESTIONS.length-1){state.i++; db.quizI=state.i; save(db); render(); const heading=app.querySelector("h1");heading.tabIndex=-1;heading.focus({preventScroll:true});window.scrollTo({top:0,behavior:"instant"});return;}
       db.focusOverride=null;
       const sim=simulate(db.answers,db.profile,db.picked,null);
       db.sim=sim; db.quizI=null;
       db.history.unshift({at:sim.at,scores:sim.scores,weak:sim.weak,focus:sim.focus});
-      db.history=db.history.slice(0,12);
+
       db.habits=mergeHabits(db.habits,db.answers);
       save(db); go("soglia");
     };
-    document.onkeydown=e=>{ if(state.view!=="simula") return; if(e.key==="Enter"){ e.preventDefault(); document.getElementById("next").click(); } };
+    document.onkeydown=e=>{ if(state.view!=="simula") return; if(e.key==="Enter" && e.target===document.body){ e.preventDefault(); document.getElementById("next").click(); } };
     return;
   }
   if(state.view==="soglia"){
@@ -520,7 +519,7 @@ function render(){
     const who=(db.sim.profile||db.profile).nome||"Tu";
     const when=new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"});
     const current=db.focusOverride||d.primary.id;
-    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Se è un'altra cosa</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
+    const alts=r.alts.length>1?`<p class="meta" style="margin-top:28px">Scegli la priorità che ti rappresenta</p><div class="row" style="justify-content:center">${r.alts.map(a=>`<button class="btn ${a.id===current?"on-alt":""}" data-focus="${a.id}">${esc(a.label)}</button>`).join("")}</div>`:"";
     app.innerHTML=`<main class="soglia">${MARK}<p class="meta reveal">${esc(who)} · ${when}</p><h1 class="reveal" style="animation-delay:.2s">${esc(r.title)}</h1><p class="said reveal" style="animation-delay:.35s">${esc(r.said)}</p>${r.also?`<p class="lede reveal">${esc(r.also)}</p>`:""}${alts}<div class="row reveal" style="animation-delay:.55s;justify-content:center"><button class="cta" id="enter" data-go="futuri">Apri le tre lettere</button></div></main>`;
     app.querySelectorAll("[data-focus]").forEach(b=>b.onclick=()=>{
       db.focusOverride=b.dataset.focus;
@@ -531,7 +530,7 @@ function render(){
     const openLetters=()=>go("futuri");
     document.getElementById("enter").onclick=openLetters;
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-    document.onkeydown=e=>{ if(e.key==="Enter") openLetters(); };
+    document.onkeydown=null;
     return;
   }
   if(state.view==="futuri"){
@@ -545,19 +544,19 @@ function render(){
     const pack=s.horizons[locked?1:state.h];
     const cols=["deriva","inerzia","miglioramento"].map(id=>letterCard(id,pack[id],state.h,s.profile)).join("");
     app.innerHTML=`<main class="step wide"><p class="meta">${esc(who)}${inPlan()?" · Piano 90":""}</p>
-      <h1 class="q" style="font-size:40px">Tre lettere</h1>
-      <p class="lede">${esc(play.label)}. Tra un anno, tre direzioni. Stessa vita.</p>
+      <h1 class="q" style="font-size:40px">I tuoi futuri possibili</h1>${db.sim.version!==4?`<p class="result-method">Questo risultato usa risposte raccolte con una versione precedente. Le abbiamo conservate. Ripeti le domande aggiornate per ottenere una lettura V4 coerente.</p>`:""}
+      <p class="lede">${esc(play.label)}. Tre scenari a ${state.h===1?"un anno":state.h+" anni"}, a partire dalle tue risposte.</p>
       <div class="tabs">${[1,5,10].map(y=>`<button class="tab ${y===state.h?"on":""}" data-y="${y}">Tra ${y} ann${y===1?"o":"i"}${(!inPlan()&&y>1)?" · chiuse":""}</button>`).join("")}</div>
       ${locked?sealedLetter(state.h): `<div class="cols">${cols}</div>`}
       <div class="row">${inPlan()?`<button class="cta" data-go="oggi">Vai a oggi</button>`:`<button class="cta" data-go="prezzi">Apri il Piano 90</button>`}<button class="btn" data-go="profilo">Rifai le domande</button></div>
-      <details class="dash-more" style="margin-top:48px"><summary>Come è uscito, dalle domande</summary>
+      <details class="dash-more" style="margin-top:48px"><summary>Come leggere il risultato</summary>
         <div class="scores-grid" style="margin-top:20px">${radar(s.scores,d.weak)}<div>${axisBars(s.scores)}</div></div>
         ${diagnosisCard(s.answers)}
       </details>
       ${db.history.length>1?`<section style="margin-top:48px"><h2>Storico</h2>${db.history.slice(0,6).map(h=>`<div class="hist"><strong>${new Date(h.at).toLocaleDateString("it-IT")}</strong> · ${esc(h.focus?playFor(h.focus).label:AXIS_LABEL[h.weak])}${axisBars(h.scores)}</div>`).join("")}</section>`:""}
     </main>`;
     app.querySelectorAll("[data-y]").forEach(b=>b.onclick=()=>{state.h=Number(b.dataset.y);render();});
-    const pay=document.getElementById("pay"); if(pay) pay.onclick=startCheckout;
+    const pay=document.getElementById("pay"); if(pay) pay.onclick=()=>go("prezzi");
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
     return;
   }
@@ -599,7 +598,7 @@ function render(){
     const banner90=done90?`<section class="dash-banner dark"><p class="meta">Giorno 90</p><h3>Novanta giorni. Rifai le 18 domande.</h3><p>Vedi se ${esc(pl.hole)} si è mosso. I futuri si riscrivono da dove sei ora.</p><div class="row"><button class="cta light" data-go="profilo">Rifai le domande</button></div></section>`:"";
     const composer=`<section class="dash-note">
         <p class="meta">Due righe</p>
-        <h2>${evening?"Ora. Poi chiudi.":"A stasera."}</h2>
+        <h2>${evening?"Com’è andata oggi?":"Uno spazio per riflettere."}</h2>
         <label class="field"><textarea id="note" rows="4" placeholder="${esc(card?card.evening:pl.prompt)}"></textarea></label>
         <button class="cta" id="saveN">Salva nota</button>
         ${notesToday.length?`<p class="lede">Scritto oggi. Va bene così.</p>${notesToday.map(j=>`<div class="hist"><p>${esc(j.text)}</p></div>`).join("")}`:""}
@@ -609,11 +608,11 @@ function render(){
     if(state.tab==="percorso"){
       body=`<header class="dash-head">
         <div><p class="meta">Percorso · ${esc(pl.label)}${card?" · "+esc(card.pace):""}</p><h1>Giorno ${day} di 90.</h1>
-          <p class="lede">${esc(card?card.line+". ":"")}${held} tenuti · ${lost} persi. I persi non si recuperano. Si continua.</p></div>
+          <p class="lede">${esc(card?card.line+". ":"")}${held} giorni registrati. Puoi riprendere da oggi, anche dopo una pausa.</p></div>
         ${yearClock(day)}
       </header>
       ${banner90}
-      <section class="phase-now"><p class="meta">Oggi · settimana ${card?card.week:Math.ceil(day/7)} di 12</p><h2>${esc(card?card.title:pl.focus)}</h2><p>${esc(card?card.line:pl.weeks[phase][1])}</p></section>
+      <section class="phase-now"><p class="meta">Oggi · settimana ${card?card.week:Math.ceil(day/7)} di 13</p><h2>${esc(card?card.title:pl.focus)}</h2><p>${esc(card?card.line:pl.weeks[phase][1])}</p></section>
       <p class="meta" style="margin-top:8px">I 90 giorni</p>
       ${cal90(day,pid,playNow,focusId)}
       <ol class="phase-list">${weeks.map((wk,i)=>`<li class="${(card?card.week:phase+1)===wk.week?"now":""}"><strong>${esc(wk.title)}</strong><span>${esc((wk.span?wk.span+". ":"")+wk.job)}</span></li>`).join("")}</ol>
@@ -623,8 +622,8 @@ function render(){
         ${extra.map(h=>holdBtn(h,false)).join("")}
       </details>`;
     } else if(state.tab==="diario"){
-      const hist=(db.journal||[]).slice(0,20).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Nessuna nota ancora. Una sera, due righe.</p>`;
-      body=`<header class="dash-head"><div><p class="meta">Diario</p><h1>Due righe. Basta così.</h1><p class="lede">${esc(card?card.evening:pl.prompt)}</p></div></header>
+      const hist=(db.journal||[]).slice(0,20).map(j=>`<div class="hist"><p class="meta" style="letter-spacing:0">${new Date(j.at).toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</p><p>${esc(j.text)}</p></div>`).join("")||`<p class="lede">Il diario è ancora vuoto. Inizia da ciò che hai notato oggi.</p>`;
+      body=`<header class="dash-head"><div><p class="meta">Diario</p><h1>Il tuo diario.</h1><p class="lede">${esc(card?card.evening:pl.prompt)}</p></div></header>
       ${isSunday?`<section class="phase-now"><p class="meta">Domenica</p><h2>${esc(sun.title)}</h2><p>${esc(sun.line)}</p></section>`:""}
       ${composer}
       <div class="dash-hist">${hist}</div>`;
@@ -639,12 +638,12 @@ function render(){
       </header>
       ${whisper}
       ${banner90}
-      ${primary?holdBtn(primary,true,card?card.holdHint:"","Tenuto. "+fromYou.sign):""}
+      ${primary?holdBtn(primary,true,card?card.holdHint:"","Completato. "+fromYou.sign):""}
       ${primary?weekStrip(pid):""}
       <p class="dash-stat">${esc(stats)}</p>
       ${extra.length?`<div class="dash-extra"><p class="meta">Anche questo</p>${extra.map(h=>holdBtn(h,false)).join("")}</div>`:""}
-      <section class="phase-now"><p class="meta">Settimana ${card?card.week:Math.ceil(day/7)} di 12${card?" · "+esc(card.pace):""}</p><p>${esc(thisWeek?thisWeek.job:(pl.weeks[phase][1]))}</p></section>
-      ${evening||notesToday.length?composer:`<p class="dash-later">A stasera le due righe. Ora conta solo la cosa di oggi.</p>`}
+      <section class="phase-now"><p class="meta">Settimana ${card?card.week:Math.ceil(day/7)} di 13${card?" · "+esc(card.pace):""}</p><p>${esc(thisWeek?thisWeek.job:(pl.weeks[phase][1]))}</p></section>
+      ${evening||notesToday.length?composer:`<p class="dash-later">Puoi annotare nel diario ciò che noti, in qualsiasi momento della giornata.</p>`}
       ${!evening&&!notesToday.length?`<p class="dash-later"><button class="ghost" data-tab="diario">Apri il diario</button></p>`:""}
       `;
     }
@@ -661,11 +660,11 @@ function render(){
       save(db); render();
     });
     const saveN=document.getElementById("saveN");
-    if(saveN) saveN.onclick=()=>{ const text=(document.getElementById("note").value||"").trim(); if(!text) return; const prefix=isSunday&&state.tab==="diario"?(cadence==="weekly"?(w?"Settimana: sì. ":"Settimana: no. "):`Settimana: ${w}/7. `):""; db.journal.unshift({at:new Date().toISOString(),text:prefix+text}); db.journal=db.journal.slice(0,60); save(db); render(); };
+    if(saveN) saveN.onclick=()=>{ const text=(document.getElementById("note").value||"").trim(); if(!text) return; const prefix=isSunday&&state.tab==="diario"?(cadence==="weekly"?(w?"Settimana: sì. ":"Settimana: no. "):`Settimana: ${w}/7. `):""; db.journal.unshift({at:new Date().toISOString(),text:prefix+text}); sessionStorage.removeItem("cs.noteDraft");  save(db); render(); };
     const addH=document.getElementById("addH");
-    if(addH) addH.onclick=()=>{ const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Massimo 6 cose."); db.habits.push({id:"h"+Date.now(),name}); save(db); render(); };
+    if(addH) addH.onclick=()=>{ const name=(document.getElementById("newHabit").value||"").trim(); if(!name) return; if(db.habits.length>=6) return alert("Puoi aggiungere fino a 6 abitudini. Le abitudini dei percorsi precedenti restano conservate."); db.habits.push({id:"h"+Date.now(),name}); save(db); render(); };
     document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-    if(keepNote){ const n=document.getElementById("note"); if(n) n.value=keepNote; }
+    const noteField=document.getElementById("note"); if(noteField){noteField.value=sessionStorage.getItem("cs.noteDraft")||"";noteField.oninput=()=>sessionStorage.setItem("cs.noteDraft",noteField.value);}
     armDayTick();
   }
 }
