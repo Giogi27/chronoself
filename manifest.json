@@ -1,9 +1,18 @@
 {
-  "name": "PRIME 72 — GTA 6 Command",
-  "short_name": "PRIME 72",
-  "start_url": ".",
+  "name": "ChronoSelf — Chi diventi se continui così?",
+  "short_name": "ChronoSelf",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0612",
-  "theme_color": "#0a0612",
-  "lang": "it"
+  "background_color": "#f3eee4",
+  "theme_color": "#f3eee4",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }

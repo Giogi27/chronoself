@@ -1,4 +1,0 @@
-.dots{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
-.dot{width:10px;height:10px;border-radius:3px;background:#efe4d3;display:inline-block}
-.dot.on{background:#c24d1e}
-.habit-card{margin:12px 0}

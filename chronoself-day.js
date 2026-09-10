@@ -18,7 +18,7 @@
     clockOverride=key?parseLocal(key):null;
     try{ if(key) sessionStorage.setItem("cs.clock",key); else sessionStorage.removeItem("cs.clock"); }catch(e){}
   }
-  try{ const ck=sessionStorage.getItem("cs.clock"); if(ck) clockOverride=parseLocal(ck); }catch(e){}
+
   function dayNFromKeys(startKey,todayKey){
     const diff=Math.round((parseLocal(todayKey).getTime()-parseLocal(startKey).getTime())/86400000);
     return Math.min(90, Math.max(1, diff+1));
@@ -144,24 +144,7 @@
     _render();
     armDayTick();
     applyDayCard();
-    if(!(window.CS&&CS.isFounder&&CS.isFounder())) return;
-    if(!state || state.view!=="oggi") return;
-    if(document.getElementById("simMidnight")) return;
-    const main=document.querySelector("main.dash");
-    if(!main) return;
-    const day=dayN();
-    const p=document.createElement("p");
-    p.className="dash-later";
-    p.innerHTML=(clockOverride?"<strong>Prova.</strong> Stai vedendo il giorno "+day+", non il calendario vero. ":"")+
-      '<button class="ghost" id="simMidnight">Simula mezzanotte → giorno '+Math.min(90,day+1)+"</button>"+
-      (clockOverride?' <button class="ghost" id="resetClock">Torna a oggi</button>':"");
-    const details=main.querySelector(".dash-more");
-    if(details) main.insertBefore(p, details);
-    else main.appendChild(p);
-    const simM=document.getElementById("simMidnight");
-    if(simM) simM.onclick=function(){ setClockKey(addLocalDays(localKey(),1)); lastSeenKey=localKey(); render(); };
-    const rst=document.getElementById("resetClock");
-    if(rst) rst.onclick=function(){ setClockKey(null); lastSeenKey=localKey(); render(); };
+
   };
 
   if(state && state.view==="oggi") render();
