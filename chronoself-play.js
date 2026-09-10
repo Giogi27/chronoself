@@ -1,487 +1,709 @@
-/* ChronoSelf playbook */
-const W = (a,b,c,d) => [
-  ["Settimane 1–2", a],
-  ["Settimane 3–4", b],
-  ["Settimane 5–8", c],
-  ["Settimane 9–12", d],
-];
-
+/* V4: contenuti espliciti e adattabili. Gli ID storici restano invariati. */
 const PLAY = {
-  sonno: {
-    label: "Sonno",
-    hole: "il sonno",
-    why: "Se dormi poco, tutto il resto costa il doppio: umore, cibo, lavoro, pazienza.",
-    action: "A letto entro le 23:30. Telefono in un'altra stanza.",
-    habits: ["A letto entro le 23:30", "Telefono fuori dalla camera"],
-    prompt: "Ieri sei andato a letto all'ora? Cosa l'ha resa facile o difficile?",
-    weeks: W(
-      "Stessa ora ogni sera. Anche se non viene sonno, vai a letto.",
-      "Niente schermi 30 minuti prima. La stanza resta buia.",
-      "Se salti una notte, la sera dopo torni all'orario. Non 'recuperi' la mattina.",
-      "Conta le notti tenute. Poi rifai le domande sul sonno.",
-    ),
-    futures: {
-      deriva: "Notti corte diventano il default. Di giorno pazienza corta, fame strana, lavoro che costa di più.",
-      inerzia: "Dormi come ora. I giorni funzionano, ma non hai riserva quando arriva un periodo brutto.",
-      miglioramento: "Notti più lunghe, sempre alla stessa ora. Di giorno il resto costa meno.",
-    },
+  "sonno": {
+    "label": "Sonno",
+    "hole": "il riposo",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Scegli un orario realistico per iniziare a prepararti al riposo.",
+    "habits": [
+      "Preparare il riposo a un orario scelto"
+    ],
+    "prompt": "Quale dettaglio ha aiutato o ostacolato il tuo riposo?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Le serate potrebbero riempirsi di impegni, lasciando sempre meno spazio per prepararti al riposo.",
+      "inerzia": "Il riposo potrebbe restare legato agli imprevisti della giornata, con notti più semplici e altre più faticose.",
+      "miglioramento": "Un momento riconoscibile per rallentare potrebbe aiutarti a proteggere il tempo dedicato al riposo."
+    }
   },
-  movimento: {
-    label: "Movimento",
-    hole: "il movimento",
-    why: "Un corpo fermo perde energia, umore e sonno — anche se 'non hai tempo'.",
-    action: "30 minuti di camminata, 5 giorni su 7. Stesso orario, in agenda.",
-    habits: ["30 minuti di movimento", "Uscire, anche solo un giro intorno all'isolato"],
-    prompt: "Ti sei mosso almeno 30 minuti? Se no, cosa l'ha mangiato?",
-    weeks: W(
-      "Cinque camminate. Stesso orario. Non negozi con te stesso.",
-      "Aggiungi un po' di scale o un tratto più svelto. Niente palestra obbligatoria.",
-      "Tieni i 5 giorni. La settimana in cui ne fai 3 non è un fallimento: la prossima torni a 5.",
-      "Conta i giorni mossi. Vedi se l'energia, a parità di sonno, è diversa.",
-    ),
-    futures: {
-      deriva: "Il corpo si abitua a stare fermo. Le scale pesano, il sonno peggiora, l'umore si accorcia.",
-      inerzia: "Ti muovi a tratti. Basta a non crollare, non basta a stare meglio.",
-      miglioramento: "Il movimento è un appuntamento, non una virtù. Il corpo risponde in silenzio.",
-    },
+  "movimento": {
+    "label": "Movimento",
+    "hole": "il movimento",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Dedica dieci minuti a un movimento adatto alle tue possibilità.",
+    "habits": [
+      "Dieci minuti di movimento adatto a me"
+    ],
+    "prompt": "Come ti sei sentito prima e dopo il movimento?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Il movimento potrebbe trovare sempre meno posto tra i tuoi impegni quotidiani.",
+      "inerzia": "Potresti continuare a muoverti quando si presenta l’occasione, senza un ritmo su cui fare affidamento.",
+      "miglioramento": "Un appuntamento breve e adatto alle tue possibilità potrebbe diventare una parte naturale della settimana."
+    }
   },
-  energia: {
-    label: "Energia",
-    hole: "l'energia",
-    why: "L'energia bassa è quasi sempre sonno, cibo o telefono. Se quelli stanno, serve luce e movimento al mattino.",
-    action: "Dieci minuti fuori al mattino. Niente caffè dopo le 15.",
-    habits: ["10 minuti fuori, al mattino", "Niente caffè dopo le 15"],
-    prompt: "Com'era l'energia oggi, da 1 a 10? Cosa l'ha alzata o abbassata?",
-    weeks: W(
-      "Ogni mattina, dieci minuti all'aperto. Prima del telefono, se riesci.",
-      "Taglia il caffè dopo le 15. Nota se la notte cambia.",
-      "Tieni i due gesti. Se un giorno manca l'energia, non aggiungi cose: togli schermo.",
-      "Rifai le domande. Se l'energia è ancora il buco, il punto è altrove: sonno o cibo.",
-    ),
-    futures: {
-      deriva: "I giorni si accorciano. Fai il minimo. La sera sei cotto e la mattina anche.",
-      inerzia: "Alcuni giorni tieni, altri no. Non è un carattere. È un conto in rosso che non guardi.",
-      miglioramento: "L'energia non esplode. Torna. Basta per fare quello che avevi detto.",
-    },
+  "energia": {
+    "label": "Energia",
+    "hole": "la tua energia",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Osserva in quale momento della giornata hai più energia e programma una pausa.",
+    "habits": [
+      "Fare una pausa consapevole"
+    ],
+    "prompt": "Quando avevi più energia e cosa stavi facendo?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Potresti accorgerti della stanchezza soltanto quando hai già riempito tutta la giornata.",
+      "inerzia": "L’energia potrebbe continuare a variare, mentre gli impegni restano distribuiti nello stesso modo.",
+      "miglioramento": "Conoscere meglio i tuoi ritmi potrebbe aiutarti a distribuire gli impegni e a prevedere qualche pausa."
+    }
   },
-  cibo: {
-    label: "Cibo",
-    hole: "il cibo",
-    why: "Mangiare senza attenzione stanca, costa, e poi chiede altro cibo.",
-    action: "Un pasto vero al giorno, cucinato o preparato. Non sul divano col telefono.",
-    habits: ["Un pasto cucinato al giorno", "Niente cibo sul divano col telefono"],
-    prompt: "Oggi hai mangiato un pasto vero, da seduto? Cosa hai messo in bocca senza pensarci?",
-    weeks: W(
-      "Un pasto al giorno che hai deciso tu. Anche semplice.",
-      "Niente telefono mentre mangi. Il pasto dura il tempo del pasto.",
-      "Tieni il pasto. Taglia una sola abitudine cara (delivery, snack di ritorno).",
-      "Guarda se spendi meno e se l'energia dopo pranzo è diversa.",
-    ),
-    futures: {
-      deriva: "Si mangia in piedi, tardi, quello che capita. Il corpo e il conto se ne accorgono.",
-      inerzia: "Alcuni pasti sono attenti, molti no. Non basta a stare male. Non basta a stare bene.",
-      miglioramento: "Un pasto al giorno è una decisione. Il resto della giornata si allinea un po'.",
-    },
+  "cibo": {
+    "label": "Pasti",
+    "hole": "la regolarità dei pasti",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Prepara in anticipo ciò che serve per un pasto adatto alle tue esigenze.",
+    "habits": [
+      "Organizzare un pasto della giornata"
+    ],
+    "prompt": "Che cosa ti ha aiutato a dedicare tempo al pasto?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "I pasti potrebbero finire sempre più spesso tra una cosa e l’altra, senza il tempo che vorresti dedicargli.",
+      "inerzia": "Potresti alternare giornate organizzate e giornate in cui decidi tutto all’ultimo momento.",
+      "miglioramento": "Preparare un piccolo dettaglio in anticipo potrebbe rendere i pasti più facili da inserire nella giornata."
+    }
   },
-  risparmio: {
-    label: "Risparmio",
-    hole: "il risparmio",
-    why: "Quello che non togli appena arriva lo stipendio, sparisce. Sempre.",
-    action: "Bonifico automatico il giorno dello stipendio. Anche 50 euro.",
-    habits: ["Bonifico automatico, anche 50€", "24 ore prima di una spesa sopra 30€"],
-    prompt: "I soldi che avevi detto di mettere da parte, ci sono? Cosa li ha mangiati?",
-    weeks: W(
-      "Attiva il bonifico. Importo piccolo, intoccabile. Oggi, non 'da lunedì'.",
-      "Una regola: spese sopra 30€ aspettano 24 ore.",
-      "Non alzare l'importo. Tieni. Il muscolo è la ripetizione, non la cifra.",
-      "Guarda il conto a parte. Poi decidi se alzare di 20 euro, non di 200.",
-    ),
-    futures: {
-      deriva: "I mesi si chiudono in pari, o sotto. Un imprevisto diventa un prestito.",
-      inerzia: "Metti da parte a tratti. Basta a non fallire. Non basta a dormire sonni tranquilli.",
-      miglioramento: "Ogni stipendio toglie una fetta prima che tu la veda. Dopo un anno c'è un cuscino vero.",
-    },
+  "risparmio": {
+    "label": "Risparmio",
+    "hole": "il risparmio",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Controlla entrate e spese prima di scegliere se e quanto puoi accantonare.",
+    "habits": [
+      "Rivedere il margine del mio bilancio"
+    ],
+    "prompt": "C’è un margine sostenibile o serve prima ridurre una difficoltà?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Senza un momento per rivedere il bilancio, potresti accorgerti tardi di un margine che si riduce.",
+      "inerzia": "La possibilità di risparmiare potrebbe continuare a dipendere da quello che resta a fine mese.",
+      "miglioramento": "Un controllo regolare del bilancio potrebbe aiutarti a distinguere un margine reale da un obiettivo troppo impegnativo."
+    }
   },
-  debiti: {
-    label: "Debiti",
-    hole: "i debiti",
-    why: "I debiti occupano la testa anche nei giorni in cui non li paghi.",
-    action: "Elenca rate e debiti su un foglio. Ogni mese, una extra rata — la più piccola.",
-    habits: ["Una extra rata, la più piccola", "Niente nuove rate questo mese"],
-    prompt: "Hai toccato un debito oggi, o ne hai aperto un altro? Una riga onesta.",
-    weeks: W(
-      "Un foglio: quanto devi, a chi, quanto al mese. Guardalo. Basta questo, per ora.",
-      "Una extra rata sulla più piccola. Anche 20 euro. Niente nuove rate.",
-      "Ripeti l'extra. Non rinegoziare tutto. Una cosa alla volta.",
-      "Quanti debiti sono scesi. Quanti ne hai aperti. I numeri, non le intenzioni.",
-    ),
-    futures: {
-      deriva: "Le rate si mangiano il futuro. Ogni aumento di stipendio sparisce prima di arrivarti.",
-      inerzia: "Paghi il dovuto, niente extra. Il peso resta uguale, solo più vecchio.",
-      miglioramento: "Una extra rata, tenuta. I debiti piccoli muoiono. La testa si libera prima del conto.",
-    },
+  "debiti": {
+    "label": "Spese fisse",
+    "hole": "il peso delle spese fisse",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Elenca importi e scadenze delle spese fisse per avere un quadro chiaro.",
+    "habits": [
+      "Rivedere spese fisse e scadenze"
+    ],
+    "prompt": "Quale scadenza richiede attenzione o un confronto con qualcuno?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Le scadenze potrebbero accumularsi nella tua attenzione, rendendo più difficile capire quale affrontare per prima.",
+      "inerzia": "Potresti continuare a gestire le spese fisse una alla volta, con lo stesso margine che descrivi oggi.",
+      "miglioramento": "Un elenco aggiornato potrebbe rendere più chiaro quando intervenire e quando chiedere un confronto qualificato."
+    }
   },
-  cuscinetto: {
-    label: "Cuscino",
-    hole: "il cuscino di risparmi",
-    why: "Senza un cuscino, ogni imprevisto è un'emergenza. Anche uno piccolo.",
-    action: "Un conto a parte. Ogni stipendio, il 10% lì. Non si tocca.",
-    habits: ["10% dello stipendio da parte", "Quel conto non si tocca"],
-    prompt: "Il cuscino è cresciuto, fermo, o l'hai toccato?",
-    weeks: W(
-      "Apri il conto (o una voce a parte). Il primo bonifico, anche piccolo.",
-      "Il 10%, automatico. Se 10% è troppo, 5%. Automatico comunque.",
-      "Non toccarlo. Se serve soldi, taglia altrove per una settimana.",
-      "Quanti mesi di spese hai da parte. Scrivilo. Poi rifai le domande.",
-    ),
-    futures: {
-      deriva: "Basta una spesa medica o un mese senza stipendio e sei in prestito.",
-      inerzia: "Qualche settimana di margine. Dormi, ma non del tutto.",
-      miglioramento: "Mese dopo mese il cuscino diventa mesi, non giorni. Gli imprevisti smettono di essere drammi.",
-    },
+  "cuscinetto": {
+    "label": "Riserva",
+    "hole": "la riserva per gli imprevisti",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Stima le spese essenziali e le risorse disponibili per un imprevisto.",
+    "habits": [
+      "Aggiornare il quadro delle risorse disponibili"
+    ],
+    "prompt": "Quale imprevisto vorresti riuscire a gestire con più tranquillità?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Un imprevisto potrebbe trovarti senza un quadro aggiornato delle risorse a cui puoi accedere.",
+      "inerzia": "La gestione degli imprevisti potrebbe restare legata alle risorse attuali e alle decisioni del momento.",
+      "miglioramento": "Conoscere spese essenziali e risorse disponibili potrebbe aiutarti a preparare un piano più realistico per gli imprevisti."
+    }
   },
-  spese: {
-    label: "Spese",
-    hole: "il controllo delle spese",
-    why: "Non puoi tenere i soldi se non sai dove vanno.",
-    action: "Per 14 giorni annota ogni uscita. Poi taglia una sola voce inutile.",
-    habits: ["Annota ogni uscita", "Una voce in meno, scelta il sabato"],
-    prompt: "Hai scritto le uscite di oggi? Quale ti ha sorpreso?",
-    weeks: W(
-      "Due settimane, tutto scritto. Caffè, delivery, abbonamenti. Niente giudizi, solo lista.",
-      "Scegli UNA voce da tagliare. Solo una. Quella sparisce.",
-      "Tieni il taglio. Se torna, non è 'una volta': è la voce che hai scelto di non pagare.",
-      "Confronta il mese. Poi decidi se una seconda voce merita lo stesso trattamento.",
-    ),
-    futures: {
-      deriva: "I soldi escono e non sai dove. Alla fine del mese la sorpresa è sempre la stessa.",
-      inerzia: "Sai a grandi linee. I buchi restano i buchi.",
-      miglioramento: "Vedi le uscite. Una voce in meno, tenuta. Il mese smette di essere un mistero.",
-    },
+  "spese": {
+    "label": "Consapevolezza delle spese",
+    "hole": "la conoscenza delle tue spese",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Dedica cinque minuti a registrare e raggruppare le spese recenti.",
+    "habits": [
+      "Annotare le spese della giornata"
+    ],
+    "prompt": "Quale spesa ti ha sorpreso e perché?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Le piccole uscite potrebbero diventare meno visibili, rendendo il totale del mese più difficile da spiegare.",
+      "inerzia": "Potresti continuare a conoscere alcune spese e a ricostruire le altre soltanto a fine mese.",
+      "miglioramento": "Una registrazione semplice potrebbe aiutarti a riconoscere le categorie su cui hai davvero margine di scelta."
+    }
   },
-  competenza: {
-    label: "Competenze",
-    hole: "le competenze",
-    why: "Se non impari niente di nuovo, il lavoro futuro sceglie altri.",
-    action: "4 ore a settimana su una cosa che il lavoro di dopo ti chiederà. In agenda.",
-    habits: ["4 ore a imparare, in agenda", "Un blocco senza notifiche"],
-    prompt: "Hai fatto le ore sulla competenza? Se no, cosa le ha prese?",
-    weeks: W(
-      "Scegli UNA competenza. Metti 2 blocchi da 2 ore in agenda. Telefono in un'altra stanza.",
-      "I blocchi restano. Non 'quando ho tempo'. Se salti uno, lo ripeschi nella stessa settimana.",
-      "Tieni le 4 ore. Inizia a usarla in qualcosa di visibile, anche piccolo.",
-      "Cosa sai fare oggi che 90 giorni fa non sapevi. Scrivilo in tre righe.",
-    ),
-    futures: {
-      deriva: "Le competenze stanno ferme. I colleghi no. Tra qualche anno il ruolo pesa e non si muove.",
-      inerzia: "Impari a pezzi, quando capita. Basta a non restare indietro di un decennio. Non basta a scegliere tu.",
-      miglioramento: "Quattro ore a settimana, tenute. Dopo un anno hai un mestiere più largo. Dopo cinque, un'altra strada.",
-    },
+  "competenza": {
+    "label": "Apprendimento",
+    "hole": "il tempo per imparare",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Scegli una competenza utile e dedica venti minuti alla sua pratica.",
+    "habits": [
+      "Venti minuti su una competenza scelta"
+    ],
+    "prompt": "Che cosa sai fare o capire meglio dopo questa prova?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Imparare potrebbe restare sempre in fondo alla lista, anche quando ne senti il bisogno.",
+      "inerzia": "Potresti continuare a raccogliere spunti senza trovare un momento stabile per metterli in pratica.",
+      "miglioramento": "Una pratica breve e ripetuta potrebbe lasciarti esempi concreti di ciò che stai imparando."
+    }
   },
-  autonomia: {
-    label: "Autonomia",
-    hole: "l'autonomia",
-    why: "Se orari e reddito sono solo di altri, resti fermo anche lavorando tanto.",
-    action: "Due ore a settimana su un progetto tuo, fuori dall'orario che subisci.",
-    habits: ["2 ore su un progetto tuo", "Una cosa chiesta che ti dà più margine"],
-    prompt: "Hai toccato il progetto tuo, o solo il lavoro degli altri?",
-    weeks: W(
-      "Due ore, in agenda, su una cosa tua: un'offerta, un skill, un secondo filo.",
-      "Una richiesta concreta: un orario, un compito, un prezzo. Scritta, non pensata.",
-      "Tieni le due ore. La richiesta, se non ha risposta, si ripete o si cambia strada.",
-      "Quanto margine in più hai. Poco è già tanto, se prima era zero.",
-    ),
-    futures: {
-      deriva: "Dipendi da un ruolo che non controlli. Quando cambia, cambi tu — di colpo.",
-      inerzia: "Lavori, produci, la direzione la decidono altri. I giorni passano.",
-      miglioramento: "Un pezzo tuo, tenuto. Non è libertà totale. È un margine, e il margine cambia le decisioni.",
-    },
+  "autonomia": {
+    "label": "Autonomia",
+    "hole": "la tua autonomia",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Individua una decisione piccola su cui hai margine e prova a prenderla.",
+    "habits": [
+      "Fare un passo in una decisione che posso gestire"
+    ],
+    "prompt": "Che cosa dipendeva da te e che cosa richiede un accordo?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Potresti lasciare inesplorate anche alcune decisioni sulle quali avresti un piccolo margine.",
+      "inerzia": "Potresti continuare a organizzarti entro gli stessi vincoli, senza distinguere quelli modificabili dagli altri.",
+      "miglioramento": "Provare una decisione alla volta potrebbe aiutarti a riconoscere il tuo margine e gli accordi di cui hai bisogno."
+    }
   },
-  senso: {
-    label: "Senso",
-    hole: "il senso del lavoro",
-    why: "Un lavoro senza senso ti stanca più delle ore. Non è un lusso: è energia che esce.",
-    action: "Due ore a settimana su ciò che, del lavoro, ha ancora senso — o su una via d'uscita.",
-    habits: ["2 ore su ciò che ha senso", "Una conversazione onesta sul lavoro"],
-    prompt: "Oggi il lavoro ha avuto senso, o hai solo chiuso compiti?",
-    weeks: W(
-      "Dieci righe: cosa, di questo lavoro, ha ancora senso. Se la pagina è vuota, scrivi cosa faresti invece.",
-      "Due ore su quello. Oppure due ore su un'uscita concreta (curriculum, chiamata, corso).",
-      "Tieni le due ore. Una conversazione onesta con qualcuno che fa un lavoro che rispetti.",
-      "La pagina di 10 righe, riscritta. Se è uguale e vuota, il piano non è resistere: è muoversi.",
-    ),
-    futures: {
-      deriva: "I giorni si somigliano e non lasciano niente. Stanchi, senza una fatica che vale.",
-      inerzia: "Qualche pezzo ha senso, molti no. Si tiene. Si paga in energia.",
-      miglioramento: "Hai spostato ore verso ciò che vale, o verso l'uscita. Il lavoro smette di essere solo un buco.",
-    },
+  "senso": {
+    "label": "Direzione",
+    "hole": "il significato delle tue attività",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Ritaglia venti minuti per un’attività coerente con qualcosa che per te conta.",
+    "habits": [
+      "Dedicare tempo a un’attività significativa"
+    ],
+    "prompt": "Che cosa ha reso significativa questa attività?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Le attività importanti per te potrebbero trovare sempre meno spazio accanto a quelle urgenti.",
+      "inerzia": "Potresti continuare ad alternare momenti significativi e attività che senti lontane dalle tue priorità.",
+      "miglioramento": "Ritagliare uno spazio per ciò che conta potrebbe rendere più visibile il legame fra le tue giornate e le tue priorità."
+    }
   },
-  retepro: {
-    label: "Rete di lavoro",
-    hole: "le persone del mestiere",
-    why: "Da soli si resta fermi. Una conversazione vera sblocca più di un corso.",
-    action: "Una conversazione vera a settimana con qualcuno del mestiere. Una domanda onesta, non networking.",
-    habits: ["Una chiamata di lavoro vera", "Un messaggio a una persona che stimi"],
-    prompt: "Hai parlato con qualcuno del mestiere, o hai solo mandato email?",
-    weeks: W(
-      "Una lista di 8 persone. Questa settimana, una. Una domanda vera, non 'prendiamoci un caffè'.",
-      "Un'altra. Se uno non risponde, il prossimo. Non è un rifiuto della tua vita.",
-      "Tieni il ritmo di una a settimana. Annota cosa hai imparato, in una riga.",
-      "Quante persone adesso ti rispondono. Prima erano zero, o poche. Questo è il punto.",
-    ),
-    futures: {
-      deriva: "Il lavoro è un corridoio senza porte. Quando serve una mano, non c'è nessuno a cui chiedere.",
-      inerzia: "Qualche collega sì, una rete no. Le occasioni passano a chi ha a chi parlare.",
-      miglioramento: "Una conversazione a settimana, tenuta. Tra un anno hai gente a cui dire la verità sul lavoro.",
-    },
+  "retepro": {
+    "label": "Confronto professionale",
+    "hole": "il confronto su lavoro o studio",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Contatta una persona con una domanda concreta su lavoro o studio.",
+    "habits": [
+      "Cercare un confronto utile su lavoro o studio"
+    ],
+    "prompt": "Quale domanda o punto di vista ti è stato utile?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Le domande su lavoro o studio potrebbero restare senza confronto più a lungo di quanto vorresti.",
+      "inerzia": "Potresti continuare a cercare un parere solo quando una decisione diventa urgente.",
+      "miglioramento": "Qualche contatto coltivato nel tempo potrebbe offrirti più occasioni per confrontare idee e difficoltà."
+    }
   },
-  legami: {
-    label: "Legami",
-    hole: "le persone che vedi",
-    why: "I rapporti che non si vedono si spengono, senza un litigio. Solo silenzio.",
-    action: "Una chiamata o un caffè a settimana, in agenda, con qualcuno che ti importa.",
-    habits: ["Una chiamata vera a settimana", "Niente telefono a tavola"],
-    prompt: "Oggi hai sentito qualcuno per davvero, o solo scrollato le loro storie?",
-    weeks: W(
-      "Scegli 3 persone. Questa settimana, una la senti. In agenda, come un lavoro.",
-      "Niente telefono a tavola, se mangi con qualcuno. Se sei solo, una chiamata comunque.",
-      "Tieni il ritmo. Se uno non c'è, il secondo della lista. Non è un'ammissione di sconfitta.",
-      "Quante persone hai visto davvero in 90 giorni. Il numero è il rapporto.",
-    ),
-    futures: {
-      deriva: "I giorni pesanti li fai da solo. Le persone ci sono, da qualche parte, e non le chiami.",
-      inerzia: "Qualcuno c'è, quando capita. I rapporti vivono di inerzia, finché un giorno no.",
-      miglioramento: "Una chiamata a settimana, tenuta. Tra un anno hai gente a cui dire la verità.",
-    },
+  "legami": {
+    "label": "Legami",
+    "hole": "il tempo per i tuoi legami",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Proponi a una persona importante un momento per sentirvi o vedervi.",
+    "habits": [
+      "Dedicare un momento a una persona importante"
+    ],
+    "prompt": "Ti sei sentito presente durante questo incontro o conversazione?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "I contatti importanti potrebbero essere rimandati più spesso, anche senza volerlo.",
+      "inerzia": "Potresti continuare a sentirvi quando gli impegni lo permettono, con lo stesso ritmo di oggi.",
+      "miglioramento": "Un momento concordato potrebbe rendere più facile esserci e dare continuità a un legame importante."
+    }
   },
-  conflitti: {
-    label: "Conflitti",
-    hole: "i rapporti che fanno male",
-    why: "I rapporti che ti svuotano occupano lo spazio di quelli che tengono.",
-    action: "Dimezza il tempo con la persona o la chat che ti svuota. Una regola, non una discussione.",
-    habits: ["Meno tempo con chi ti svuota", "Una sera a settimana senza quella chat"],
-    prompt: "Quanto spazio ha occupato oggi chi ti fa male? L'hai ridotto, o no?",
-    weeks: W(
-      "Nomina, per te, chi o cosa ti svuota. Una sera questa settimana, quella chat resta chiusa.",
-      "Dimezza. Non è una rottura da romanzo. È un orario: dopo le 21, no.",
-      "Tieni la regola. Se torna il vecchio ritmo, la regola era giusta: ripartila lunedì.",
-      "Quanto spazio hai indietro. Mettici una chiamata a qualcuno che ti fa bene.",
-    ),
-    futures: {
-      deriva: "Litigi e chat che fanno male occupano le sere. Il resto della vita sta in disparte.",
-      inerzia: "Il rapporto tossico è 'gestito'. Gestito vuole dire che è ancora lì, ogni settimana.",
-      miglioramento: "Meno tempo là. Più tempo qui. I rapporti che tengono hanno di nuovo aria.",
-    },
+  "conflitti": {
+    "label": "Confini",
+    "hole": "le tensioni nelle relazioni",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Riconosci una situazione faticosa e scegli un confine che puoi esprimere in sicurezza.",
+    "habits": [
+      "Riconoscere e rispettare un mio limite"
+    ],
+    "prompt": "Quale limite ti aiuterebbe a proteggere le tue energie?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Le situazioni faticose potrebbero continuare a occupare spazio senza che i tuoi limiti siano espressi.",
+      "inerzia": "Potresti ritrovarti nelle stesse tensioni, usando le strategie con cui le gestisci oggi.",
+      "miglioramento": "Riconoscere ed esprimere un limite in sicurezza potrebbe aiutarti a capire quali relazioni e supporti ti fanno bene."
+    }
   },
-  cura: {
-    label: "Essere visti",
-    hole: "il sentirsi visti",
-    why: "Sentirsi invisibili non è un carattere. È un rapporto che non viene tenuto.",
-    action: "Di' a una persona, questa settimana, una cosa vera. Poi sentitela di nuovo.",
-    habits: ["Una cosa vera detta a qualcuno", "Rispondi a chi ti cerca, lo stesso giorno"],
-    prompt: "Oggi ti sei fatto vedere da qualcuno, o hai tenuto tutto dentro?",
-    weeks: W(
-      "Una persona. Una cosa vera. Non un saggio: una frase. Mandala, o dilla.",
-      "Rispondi a chi ti cerca, lo stesso giorno. Anche 'ti sento domani' è una risposta.",
-      "Tieni il ritmo di una cosa vera a settimana. La stessa persona va bene.",
-      "C'è almeno una persona che sa com'è andata questa stagione. Se no, il buco è ancora lì.",
-    ),
-    futures: {
-      deriva: "I giorni pesanti restano innominati. Nessuno lo sa, quindi nessuno può stare vicino.",
-      inerzia: "Qualcuno c'è, in teoria. In pratica resti solo con quello che conta.",
-      miglioramento: "Una persona sa. Poi due. Essere visti è un'abitudine, non un destino.",
-    },
+  "cura": {
+    "label": "Supporto",
+    "hole": "il supporto nelle relazioni",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Se ti senti a tuo agio, condividi come stai con una persona affidabile.",
+    "habits": [
+      "Condividere un pensiero con una persona fidata"
+    ],
+    "prompt": "Come ti sei sentito nel chiedere o ricevere ascolto?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Potresti tenere per te pensieri che avresti voluto condividere con qualcuno.",
+      "inerzia": "Potresti continuare ad aprirti solo in alcune occasioni, con il supporto che senti disponibile oggi.",
+      "miglioramento": "Una conversazione sincera, quando te la senti, potrebbe aprire più spazio all’ascolto reciproco."
+    }
   },
-  schermo: {
-    label: "Telefono",
-    hole: "il telefono",
-    why: "Lo schermo mangia sonno, persone e le promesse che fai a te. È il buco più comune.",
-    action: "Telefono in carica in un'altra stanza alle 22. Niente social i primi 20 minuti del mattino.",
-    habits: ["Telefono in un'altra stanza alle 22", "Niente social i primi 20 minuti"],
-    prompt: "Il telefono ha mangiato la sera, o l'hai lasciato in un'altra stanza?",
-    weeks: W(
-      "Alle 22 il telefono va in un'altra stanza. La sveglia, se serve, è una sveglia.",
-      "I primi 20 minuti del mattino senza social. Acqua, luce, una cosa sola.",
-      "Tieni i due orari. Se una sera cedi, la sera dopo l'ora resta 22. Non 'tanto ormai'.",
-      "Quante sere il telefono era fuori. Quante mattine senza scroll. I numeri, non il senso di colpa.",
-    ),
-    futures: {
-      deriva: "Le sere spariscono nel vetro. Il sonno arriva tardi. Le persone intorno sono una notifica.",
-      inerzia: "Alcune sere tieni, molte no. Il telefono resta il default quando sei stanco.",
-      miglioramento: "Due orari, tenuti. Tra le 22 e il mattino c'è di nuovo una vita. Piccola, tua.",
-    },
+  "schermo": {
+    "label": "Tempo digitale",
+    "hole": "l’uso del telefono",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Scegli un momento di dieci minuti senza telefono, compatibile con i tuoi impegni.",
+    "habits": [
+      "Dieci minuti senza telefono"
+    ],
+    "prompt": "Che cosa hai fatto o notato in questo tempo libero dallo schermo?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Il telefono potrebbe riempire automaticamente anche le pause che vorresti usare in un altro modo.",
+      "inerzia": "Potresti continuare ad alternare momenti scelti e tempo sullo schermo che supera le tue intenzioni.",
+      "miglioramento": "Una piccola pausa senza telefono potrebbe aiutarti a distinguere l’uso che scegli da quello automatico."
+    }
   },
-  routine: {
-    label: "Routine",
-    hole: "la routine",
-    why: "Senza un inizio e una fine, la giornata la decide altro: il telefono, gli altri, la fame.",
-    action: "Una routine di 15 minuti, sempre uguale, al mattino o alla sera. Tre gesti, non dieci.",
-    habits: ["15 minuti sempre uguali", "Tre gesti, non di più"],
-    prompt: "Hai fatto i tre gesti di sempre, o la giornata è partita da sola?",
-    weeks: W(
-      "Scegli mattina o sera. Tre gesti (es. acqua, luci, un foglio). 15 minuti. Ogni giorno.",
-      "Non aggiungere. Se salti, il giorno dopo fai i tre gesti, non sette per compensare.",
-      "Tieni. La routine è riuscita se è noiosa. Noiosa vuole dire che è tua.",
-      "I tre gesti sono ancora tre? Se sono diventati dieci, taglia. Poi rifai le domande.",
-    ),
-    futures: {
-      deriva: "Le giornate iniziano in ritardo e finiscono sullo schermo. Non ricordi le settimane.",
-      inerzia: "A tratti hai un rito. A tratti no. La vita resta un po' sfuggente.",
-      miglioramento: "Quindici minuti, sempre quelli. Il resto della giornata ha un bordo.",
-    },
+  "routine": {
+    "label": "Routine",
+    "hole": "la struttura della giornata",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Scegli due gesti semplici da ripetere al mattino o alla sera.",
+    "habits": [
+      "Ripetere i due gesti della mia routine"
+    ],
+    "prompt": "Quale gesto è stato più facile ripetere?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "L’inizio o la fine della giornata potrebbero essere decisi sempre più spesso dagli imprevisti.",
+      "inerzia": "Potresti continuare a ripetere alcuni gesti soltanto nelle giornate più semplici.",
+      "miglioramento": "Due gesti facili da ripetere potrebbero offrirti un riferimento anche quando la giornata cambia."
+    }
   },
-  promesse: {
-    label: "Promesse a te",
-    hole: "le promesse a te stesso",
-    why: "Le promesse rotte a te stesso insegnano a non crederti. Poi non tieni più niente.",
-    action: "Una sola promessa a settimana, scritta. Piccola abbastanza da tenerla.",
-    habits: ["Una promessa piccola, scritta", "La sera: sì o no, senza storie"],
-    prompt: "La promessa di questa settimana: tenuta, o no? Una riga, senza difesa.",
-    weeks: W(
-      "Una promessa, scritta da qualche parte visibile. Così piccola da sembrare stupida. Tienila.",
-      "La sera, un sì o un no. Se no, la settimana dopo la stessa, non una più grande.",
-      "Tieni il ritmo di una a settimana. Quando ne tieni 4 di fila, puoi alzarla di un grado.",
-      "Quante ne hai tenute su 12. Quel numero è quanto ti credi. Poi rifai le domande.",
-    ),
-    futures: {
-      deriva: "Dici cose il lunedì e il venerdì non le ricordi. La fiducia in te si assottiglia.",
-      inerzia: "Qualche promessa sì, molte no. Ti conosci come uno che 'vorrebbe'.",
-      miglioramento: "Una a settimana, tenuta. Tra un anno ti credi di più — e tieni cose più grandi.",
-    },
-  },
+  "promesse": {
+    "label": "Impegni personali",
+    "hole": "gli impegni con te",
+    "why": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "action": "Scrivi un piccolo impegno realizzabile entro questa settimana.",
+    "habits": [
+      "Completare il mio piccolo impegno settimanale"
+    ],
+    "prompt": "L’impegno era realistico? Che cosa cambieresti la prossima volta?",
+    "weeks": [
+      [
+        "Giorni 1–14",
+        "Scegli quando agire e prova una versione semplice."
+      ],
+      [
+        "Giorni 15–28",
+        "Osserva gli ostacoli e adatta l’impegno."
+      ],
+      [
+        "Giorni 29–56",
+        "Consolida il ritmo che funziona per te."
+      ],
+      [
+        "Giorni 57–90",
+        "Rivedi i progressi e scegli come proseguire."
+      ]
+    ],
+    "futures": {
+      "deriva": "Gli impegni con te potrebbero restare vaghi o troppo grandi per il tempo disponibile.",
+      "inerzia": "Potresti continuare a rispettare alcuni impegni e rimandarne altri, senza capire bene la differenza.",
+      "miglioramento": "Un impegno piccolo e verificabile potrebbe aiutarti a scoprire quali condizioni rendono più facile mantenerlo."
+    }
+  }
 };
-
-const ACTIONABLE = [
-  "schermo",
-  "sonno",
-  "routine",
-  "promesse",
-  "spese",
-  "legami",
-  "movimento",
-  "cibo",
-  "risparmio",
-  "retepro",
-  "competenza",
-  "cuscinetto",
-  "debiti",
-  "cura",
-  "conflitti",
-  "autonomia",
-  "senso",
-  "energia",
-];
-
-
-function playFor(id){ return PLAY[id] || PLAY.routine; }
-
+const ACTIONABLE = ["sonno", "movimento", "energia", "cibo", "risparmio", "debiti", "cuscinetto", "spese", "competenza", "autonomia", "senso", "retepro", "legami", "conflitti", "cura", "schermo", "routine", "promesse"];
+function playFor(id){return PLAY[id] || PLAY.sonno;}
 const VOICE = {
-  sonno: {
-    now: "La notte se ne va. Poi la giornata costa il doppio: umore, cibo, pazienza.",
-    deriva: "Dormi poco, e ormai è normale. Di giorno la pazienza è corta, la fame strana, il lavoro più faticoso. Non è una crisi. È una fila di notti corte.",
-    inerzia: "Dormi come dormi adesso. I giorni tengono. Quando arriva un periodo brutto, non c'è riserva.",
-    miglioramento: "Stessa ora, ogni sera. All'inizio niente sonno. Poi sì. Di giorno tutto costa un po' meno, e non sai spiegare perché.",
+  "sonno": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Le serate potrebbero riempirsi di impegni, lasciando sempre meno spazio per prepararti al riposo.",
+    "inerzia": "Il riposo potrebbe restare legato agli imprevisti della giornata, con notti più semplici e altre più faticose.",
+    "miglioramento": "Un momento riconoscibile per rallentare potrebbe aiutarti a proteggere il tempo dedicato al riposo."
   },
-  movimento: {
-    now: "Il corpo sta fermo. Lo senti sulle scale, sul sonno, sull'umore.",
-    deriva: "Ti sei abituato a non muoverti. Le scale pesano. Il sonno peggiora. L'umore si accorcia.",
-    inerzia: "Qualche camminata, quando capita. Basta a non crollare. Non basta a stare meglio.",
-    miglioramento: "Mezz'ora, lo stesso orario, cinque giorni. Non è virtù. È un appuntamento. Il corpo risponde senza fare rumore.",
+  "movimento": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Il movimento potrebbe trovare sempre meno posto tra i tuoi impegni quotidiani.",
+    "inerzia": "Potresti continuare a muoverti quando si presenta l’occasione, senza un ritmo su cui fare affidamento.",
+    "miglioramento": "Un appuntamento breve e adatto alle tue possibilità potrebbe diventare una parte naturale della settimana."
   },
-  energia: {
-    now: "Ti alzi già stanco. La giornata la fai comunque, ma a metà.",
-    deriva: "I giorni si sono accorciati. Fai il minimo. La sera sei cotto, la mattina anche.",
-    inerzia: "Alcuni giorni tieni, altri no. Non è carattere. È un conto in rosso che non guardi.",
-    miglioramento: "L'energia non è esplosa. È tornata. Basta per fare quello che avevi detto.",
+  "energia": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Potresti accorgerti della stanchezza soltanto quando hai già riempito tutta la giornata.",
+    "inerzia": "L’energia potrebbe continuare a variare, mentre gli impegni restano distribuiti nello stesso modo.",
+    "miglioramento": "Conoscere meglio i tuoi ritmi potrebbe aiutarti a distribuire gli impegni e a prevedere qualche pausa."
   },
-  cibo: {
-    now: "Il pasto non esiste. Capitano cose. Poi il corpo chiede altro, e il conto anche.",
-    deriva: "Si mangia ancora in piedi, tardi, quello che capita. Il corpo e il conto se ne sono accorti. Non è successo niente di grave. È successo niente, e basta.",
-    inerzia: "Qualche pasto vero, molti no. Come adesso. Non stai male. Non stai bene. Il divano e il telefono restano il modo in cui finisce la giornata.",
-    miglioramento: "Un pasto al giorno, tuo, da seduto. Sembrava poco. Dopo un po' è l'unica cosa della giornata che non ti sfugge.",
+  "cibo": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "I pasti potrebbero finire sempre più spesso tra una cosa e l’altra, senza il tempo che vorresti dedicargli.",
+    "inerzia": "Potresti alternare giornate organizzate e giornate in cui decidi tutto all’ultimo momento.",
+    "miglioramento": "Preparare un piccolo dettaglio in anticipo potrebbe rendere i pasti più facili da inserire nella giornata."
   },
-  risparmio: {
-    now: "A fine mese non resta niente, o resta poco, e sparisce.",
-    deriva: "I mesi si chiudono in pari, o sotto. Un imprevisto è un prestito. Ogni aumento sparisce prima di arrivarti.",
-    inerzia: "Metti da parte quando avanza. Avanza poco. Dormi, ma non del tutto.",
-    miglioramento: "Il giorno dello stipendio una fetta se ne va da sola. Piccola. Dopo un anno c'è un cuscino. Lo vedi, e dormi.",
+  "risparmio": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Senza un momento per rivedere il bilancio, potresti accorgerti tardi di un margine che si riduce.",
+    "inerzia": "La possibilità di risparmiare potrebbe continuare a dipendere da quello che resta a fine mese.",
+    "miglioramento": "Un controllo regolare del bilancio potrebbe aiutarti a distinguere un margine reale da un obiettivo troppo impegnativo."
   },
-  debiti: {
-    now: "Le rate occupano la testa anche i giorni in cui non le paghi.",
-    deriva: "Le rate si mangiano il futuro. Ogni aumento sparisce prima. La testa è sempre lì, sul foglio.",
-    inerzia: "Paghi il dovuto, niente extra. Il peso resta uguale, solo più vecchio.",
-    miglioramento: "Una extra rata, la più piccola, tenuta. I debiti piccoli muoiono. La testa si libera prima del conto.",
+  "debiti": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Le scadenze potrebbero accumularsi nella tua attenzione, rendendo più difficile capire quale affrontare per prima.",
+    "inerzia": "Potresti continuare a gestire le spese fisse una alla volta, con lo stesso margine che descrivi oggi.",
+    "miglioramento": "Un elenco aggiornato potrebbe rendere più chiaro quando intervenire e quando chiedere un confronto qualificato."
   },
-  cuscinetto: {
-    now: "Senza un cuscino, ogni imprevisto è un'emergenza. Anche uno piccolo.",
-    deriva: "Basta una spesa medica, o un mese senza stipendio, e sei in prestito. Lo sai già.",
-    inerzia: "Qualche settimana di margine. Dormi, ma non del tutto.",
-    miglioramento: "Mese dopo mese il cuscino diventa mesi, non giorni. Gli imprevisti smettono di essere drammi.",
+  "cuscinetto": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Un imprevisto potrebbe trovarti senza un quadro aggiornato delle risorse a cui puoi accedere.",
+    "inerzia": "La gestione degli imprevisti potrebbe restare legata alle risorse attuali e alle decisioni del momento.",
+    "miglioramento": "Conoscere spese essenziali e risorse disponibili potrebbe aiutarti a preparare un piano più realistico per gli imprevisti."
   },
-  spese: {
-    now: "I soldi escono e non sai dove. A fine mese la sorpresa è sempre la stessa.",
-    deriva: "Ancora non sai dove sono andati. La sorpresa, a fine mese, è identica. Solo più stanca.",
-    inerzia: "Sai a grandi linee. I buchi restano i buchi.",
-    miglioramento: "Due settimane a scrivere tutto. Poi una voce in meno, tenuta. Il mese smette di essere un mistero.",
+  "spese": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Le piccole uscite potrebbero diventare meno visibili, rendendo il totale del mese più difficile da spiegare.",
+    "inerzia": "Potresti continuare a conoscere alcune spese e a ricostruire le altre soltanto a fine mese.",
+    "miglioramento": "Una registrazione semplice potrebbe aiutarti a riconoscere le categorie su cui hai davvero margine di scelta."
   },
-  competenza: {
-    now: "Quello che sai fare è fermo. Il lavoro di dopo, intanto, sceglie altri.",
-    deriva: "Le competenze stanno ferme. I colleghi no. Il ruolo pesa e non si muove.",
-    inerzia: "Impari a pezzi, quando capita. Basta a non restare indietro di un decennio. Non basta a scegliere tu.",
-    miglioramento: "Quattro ore a settimana, tenute, su una cosa sola. Dopo un anno il mestiere è più largo. Dopo cinque, hai un'altra strada.",
+  "competenza": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Imparare potrebbe restare sempre in fondo alla lista, anche quando ne senti il bisogno.",
+    "inerzia": "Potresti continuare a raccogliere spunti senza trovare un momento stabile per metterli in pratica.",
+    "miglioramento": "Una pratica breve e ripetuta potrebbe lasciarti esempi concreti di ciò che stai imparando."
   },
-  autonomia: {
-    now: "Orari e direzione sono di altri. Tu produci. Loro decidono.",
-    deriva: "Dipendi da un ruolo che non controlli. Quando cambia, cambi tu — di colpo.",
-    inerzia: "Lavori, produci, la direzione la decidono altri. I giorni passano.",
-    miglioramento: "Due ore tue, tenute. Non è libertà totale. È un margine. Il margine cambia le decisioni.",
+  "autonomia": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Potresti lasciare inesplorate anche alcune decisioni sulle quali avresti un piccolo margine.",
+    "inerzia": "Potresti continuare a organizzarti entro gli stessi vincoli, senza distinguere quelli modificabili dagli altri.",
+    "miglioramento": "Provare una decisione alla volta potrebbe aiutarti a riconoscere il tuo margine e gli accordi di cui hai bisogno."
   },
-  senso: {
-    now: "Chiudi il lavoro e resta solo stanchezza. Non è un lusso: è energia che esce.",
-    deriva: "I giorni si somigliano e non lasciano niente. Stanchi, senza una fatica che vale.",
-    inerzia: "Qualche pezzo ha senso, molti no. Si tiene. Si paga in energia.",
-    miglioramento: "Hai spostato ore verso ciò che vale, o verso l'uscita. Il lavoro smette di essere solo un buco.",
+  "senso": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Le attività importanti per te potrebbero trovare sempre meno spazio accanto a quelle urgenti.",
+    "inerzia": "Potresti continuare ad alternare momenti significativi e attività che senti lontane dalle tue priorità.",
+    "miglioramento": "Ritagliare uno spazio per ciò che conta potrebbe rendere più visibile il legame fra le tue giornate e le tue priorità."
   },
-  retepro: {
-    now: "Da soli si resta fermi. Una conversazione vera sblocca più di un corso.",
-    deriva: "Il lavoro è un corridoio senza porte. Quando serve una mano, non c'è nessuno a cui chiedere.",
-    inerzia: "Qualche collega sì, una rete no. Le occasioni passano a chi ha a chi parlare.",
-    miglioramento: "Una conversazione a settimana, tenuta. Tra un anno hai gente a cui dire la verità sul lavoro.",
+  "retepro": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Le domande su lavoro o studio potrebbero restare senza confronto più a lungo di quanto vorresti.",
+    "inerzia": "Potresti continuare a cercare un parere solo quando una decisione diventa urgente.",
+    "miglioramento": "Qualche contatto coltivato nel tempo potrebbe offrirti più occasioni per confrontare idee e difficoltà."
   },
-  legami: {
-    now: "I rapporti che non si vedono si spengono senza un litigio. Solo silenzio.",
-    deriva: "I giorni pesanti li fai da solo. Le persone ci sono, da qualche parte, e non le chiami.",
-    inerzia: "Qualcuno c'è, quando capita. I rapporti vivono di inerzia, finché un giorno no.",
-    miglioramento: "Una chiamata a settimana, in agenda, come un lavoro. Tra un anno hai gente a cui dire la verità.",
+  "legami": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "I contatti importanti potrebbero essere rimandati più spesso, anche senza volerlo.",
+    "inerzia": "Potresti continuare a sentirvi quando gli impegni lo permettono, con lo stesso ritmo di oggi.",
+    "miglioramento": "Un momento concordato potrebbe rendere più facile esserci e dare continuità a un legame importante."
   },
-  conflitti: {
-    now: "C'è qualcuno, o una chat, che ti svuota. Occupano lo spazio di chi ti tiene.",
-    deriva: "Litigi e chat che fanno male occupano le sere. Il resto della vita sta in disparte.",
-    inerzia: "Il rapporto tossico è «gestito». Gestito vuole dire che è ancora lì, ogni settimana.",
-    miglioramento: "Meno tempo là. Più tempo qui. I rapporti che tengono hanno di nuovo aria.",
+  "conflitti": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Le situazioni faticose potrebbero continuare a occupare spazio senza che i tuoi limiti siano espressi.",
+    "inerzia": "Potresti ritrovarti nelle stesse tensioni, usando le strategie con cui le gestisci oggi.",
+    "miglioramento": "Riconoscere ed esprimere un limite in sicurezza potrebbe aiutarti a capire quali relazioni e supporti ti fanno bene."
   },
-  cura: {
-    now: "Nessuno sa come stai, di questi tempi. Quindi nessuno può stare vicino.",
-    deriva: "I giorni pesanti restano innominati. Nessuno lo sa.",
-    inerzia: "Qualcuno c'è, in teoria. In pratica resti solo con quello che conta.",
-    miglioramento: "Una persona sa. Poi due. Essere visti è un'abitudine, non un destino.",
+  "cura": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Potresti tenere per te pensieri che avresti voluto condividere con qualcuno.",
+    "inerzia": "Potresti continuare ad aprirti solo in alcune occasioni, con il supporto che senti disponibile oggi.",
+    "miglioramento": "Una conversazione sincera, quando te la senti, potrebbe aprire più spazio all’ascolto reciproco."
   },
-  schermo: {
-    now: "Il telefono si mangia le sere. Poi il sonno. Poi le persone davanti a te.",
-    deriva: "Le sere spariscono nel vetro. Il sonno arriva tardi. Le persone intorno sono una notifica.",
-    inerzia: "Alcune sere tieni, molte no. Il telefono resta il default quando sei stanco.",
-    miglioramento: "Alle 22 è in un'altra stanza. I primi venti minuti del mattino sono tuoi. Tra le 22 e il mattino c'è di nuovo una vita. Piccola, tua.",
+  "schermo": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Il telefono potrebbe riempire automaticamente anche le pause che vorresti usare in un altro modo.",
+    "inerzia": "Potresti continuare ad alternare momenti scelti e tempo sullo schermo che supera le tue intenzioni.",
+    "miglioramento": "Una piccola pausa senza telefono potrebbe aiutarti a distinguere l’uso che scegli da quello automatico."
   },
-  routine: {
-    now: "La giornata parte da sola. La decide il telefono, gli altri, la fame.",
-    deriva: "Le giornate iniziano in ritardo e finiscono sullo schermo. Non ricordi le settimane.",
-    inerzia: "A tratti hai un rito. A tratti no. La vita resta un po' sfuggente.",
-    miglioramento: "Quindici minuti, sempre quelli, tre gesti. Il resto della giornata ha un bordo.",
+  "routine": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "L’inizio o la fine della giornata potrebbero essere decisi sempre più spesso dagli imprevisti.",
+    "inerzia": "Potresti continuare a ripetere alcuni gesti soltanto nelle giornate più semplici.",
+    "miglioramento": "Due gesti facili da ripetere potrebbero offrirti un riferimento anche quando la giornata cambia."
   },
-  promesse: {
-    now: "Dici cose il lunedì. Il venerdì non le ricordi. Poi non ti credi più.",
-    deriva: "Le promesse a te stesso si sono assottigliate. Ti conosci come uno che «vorrebbe».",
-    inerzia: "Qualche promessa sì, molte no. La fiducia in te resta lì, piccola.",
-    miglioramento: "Una a settimana, scritta, così piccola da sembrare stupida. Tenuta. Tra un anno ti credi di più — e tieni cose più grandi.",
-  },
+  "promesse": {
+    "now": "Questo suggerimento parte dalle tue risposte. Adattalo al tempo, alle risorse e alle possibilità che hai oggi.",
+    "deriva": "Gli impegni con te potrebbero restare vaghi o troppo grandi per il tempo disponibile.",
+    "inerzia": "Potresti continuare a rispettare alcuni impegni e rimandarne altri, senza capire bene la differenza.",
+    "miglioramento": "Un impegno piccolo e verificabile potrebbe aiutarti a scoprire quali condizioni rendono più facile mantenerlo."
+  }
 };
